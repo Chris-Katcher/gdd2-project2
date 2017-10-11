@@ -22,14 +22,13 @@ using Game.UI;
 /// C# scripts for Unity must inherit the <see cref="MonoBehavior"/> class.
 /// </summary>
 public class SystemController : MonoBehaviour {
-
-
+    
     #region Data Members 
 
     /////////////////////
     // Class members.
     /////////////////////
-
+    
     // Create references to the UIManager, GameManager, and InputManager. //
     
     /// <summary>
@@ -116,8 +115,5 @@ public class SystemController : MonoBehaviour {
 
 
     #endregion
-
-
-
-
+    
 }
