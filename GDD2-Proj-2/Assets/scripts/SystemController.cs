@@ -10,7 +10,7 @@
 /////////////////////
 using UnityEngine;
 using Game;
-using Game.Input;
+using Game.InputManagement;
 using Game.UI;
 
 /////////////////////
@@ -72,7 +72,8 @@ public class SystemController : MonoBehaviour {
     /// </summary>
 	void Update () 
     {
-	    
+        float translation = m_inputManager.getPlayer1Translation();
+        print(translation);
         // TODO: Stub code.
 
 	}

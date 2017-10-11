@@ -8,19 +8,27 @@
 // Using statements.
 /////////////////////
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
-namespace Game.Input
+namespace Game.InputManagement
 {
     /// <summary>
     /// Handles input functionality.
     /// </summary>
-    public class InputManager
+    public class InputManager: MonoBehaviour
     {
 
         // TODO: Stub.
+        public float getPlayer1Translation()
+        {
+            float translation = Input.GetAxis("Horizontal");
 
+            return translation;
+        }
     }
+
+    
 }
