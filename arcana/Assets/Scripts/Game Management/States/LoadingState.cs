@@ -23,7 +23,7 @@ namespace Game.States
     /// <para>Implements the state run whenever something is loading.</para>
     /// It will display a screen object called "LoadingScreen" and update frames as needed.
     /// </summary>
-    class LoadingState : IState
+    public class LoadingState : IState
     {
         #region Data Members
 

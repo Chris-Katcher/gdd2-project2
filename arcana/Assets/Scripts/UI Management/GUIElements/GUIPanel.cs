@@ -57,5 +57,6 @@ namespace Game.UI.Elements
         private List<IGUIElement> m_elements;
 
         #endregion
+
     }
 }

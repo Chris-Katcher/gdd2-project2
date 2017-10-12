@@ -18,7 +18,7 @@ namespace Game.UI.Elements
     /// <summary>
     /// Loading bar that is displayed on the loading screen.
     /// </summary>
-    class GUIProgressBar : IGUIElement
+    public class GUIProgressBar : IGUIElement
     {
 
         #region Data Members

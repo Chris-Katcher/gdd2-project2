@@ -18,7 +18,7 @@ namespace Game.UI.Elements
     /// <summary>
     /// IGUIElement that displays text.
     /// </summary>
-    class GUILabel : IGUIElement
+    public class GUILabel : IGUIElement
     {
 
         #region Data Members
