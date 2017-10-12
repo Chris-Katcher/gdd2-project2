@@ -1,12 +1,12 @@
-# Project 2 - Untitled (WIP) #
+# Project 2 - Arcana #
 IGME 320.03 - Game Design and Development 2
 *****
 
-## Project: [Name]
+## Project: Arcana
 Project #2 for the Game Design and Development 2 course. A more detailed version of this document will be updated as progress is made.
 
 ### Description
-The description for the project will come here.
+Arcana is a 2D magical brawler in which at least two players will be duking it out on the grand wizarding stage.
 
 ### Developers
 - Ian Effendi {@[rimij405](https://github.com/rimij405)}
