@@ -35,20 +35,25 @@ public class ProjectileMotion : MonoBehaviour
 // Use this for initialization
 void Start ()
 	{
-		initalVelocity = new Vector3(m_initialSpeed, 0, 0);
+
+		initalVelocity = new Vector3(m_initialSpeed, 0);
 		ApplyForce(initalVelocity);
+
 	}
 	
 	// Update is called once per frame
 	void Update ()
 	{
+
 		UpdatePostition();
 		SetTransform();
+
 	}
 
 	// properly updates position of object
 	void UpdatePostition()
 	{
+
 		m_position = gameObject.transform.position;
 
 		m_velocity += m_acceleration * Time.deltaTime;
@@ -61,14 +66,34 @@ void Start ()
 
 	}
 
+    Vector3 VectorAngle(float angle)
+    {
+
+        float radianAngle = (float)(angle * Math.PI / 180.0);
+
+        Vector3 dirVector = new Vector3((float)Math.Cos(radianAngle), (float)Math.Sin(radianAngle), 0.0f);
+
+        dirVector.Normalize();
+
+        return dirVector;
+
+    }
+
 	void SetTransform()
 	{
-		GetComponent<Transform>().position += (m_velocity * Time.deltaTime);
 
-	}
+        GetComponent<Transform>().position += (m_velocity * Time.deltaTime);
+        /*float posX = GetComponent<Transform>().position.x + (m_velocity.x * Time.deltaTime);
+        float posY = GetComponent<Transform>().position.y + (m_velocity.y * Time.deltaTime);
+
+        gameObject.transform.position.Set(posX, posY,0);*/
+
+    }
 
 	public void ApplyForce(Vector3 p_force)
 	{
+
 		m_acceleration += (p_force / m_mass);
+
 	}
 }
