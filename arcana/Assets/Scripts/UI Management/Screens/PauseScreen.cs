@@ -12,14 +12,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Game.Resources;
+using Arcana.Resources;
 
-namespace Game.UI.Screens
+namespace Arcana.UI.Screens
 {
     /// <summary>
     /// IScreen displayed when the game presses the pause button.
     /// </summary>
-    class PauseScreen : IScreen
+    public class PauseScreen : IScreen
     {
 
         #region Data Members

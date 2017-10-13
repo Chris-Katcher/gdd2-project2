@@ -13,12 +13,12 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Game.UI.Elements
+namespace Arcana.UI.Elements
 {
     /// <summary>
     /// Stores other IGUIElements within its space.
     /// </summary>
-    class GUIPanel : IGUIElement
+    public class GUIPanel : IGUIElement
     {
 
         #region Data Members

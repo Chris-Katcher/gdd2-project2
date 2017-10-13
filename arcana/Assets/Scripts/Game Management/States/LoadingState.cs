@@ -11,9 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Game.UI.Screens;
+using Arcana.UI.Screens;
 
-namespace Game.States
+namespace Arcana.States
 {
     /////////////////////
     // Class declaration.
@@ -23,7 +23,7 @@ namespace Game.States
     /// <para>Implements the state run whenever something is loading.</para>
     /// It will display a screen object called "LoadingScreen" and update frames as needed.
     /// </summary>
-    class LoadingState : IState
+    public class LoadingState : IState
     {
         #region Data Members
 

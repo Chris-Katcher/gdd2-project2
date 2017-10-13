@@ -13,12 +13,12 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Game.UI.Elements
+namespace Arcana.UI.Elements
 {
     /// <summary>
     /// Interface of the GUI objects that screens will be creating during gameplay.
     /// </summary>
-    interface IGUIElement
+    public interface IGUIElement
     {
 
         #region Data Members

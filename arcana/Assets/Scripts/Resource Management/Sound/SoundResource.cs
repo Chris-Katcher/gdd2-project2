@@ -11,8 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Arcana.Resources;
 
-namespace Game.Resources.Sound
+namespace Arcana.Resources.Sound
 {
     /// <summary>
     /// Represents an audio-based asset.

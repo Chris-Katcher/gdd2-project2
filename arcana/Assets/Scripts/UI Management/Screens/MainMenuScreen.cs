@@ -12,14 +12,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Game.Resources;
+using Arcana.Resources;
 
-namespace Game.UI.Screens
+namespace Arcana.UI.Screens
 {
     /// <summary>
     /// IScreen displayed as the main menu. It should have options for Play, Options, and Exit. Displayed after splash screen.
     /// </summary>
-    class HomeScreen : IScreen
+    public class HomeScreen : IScreen
     {
 
         #region Data Members

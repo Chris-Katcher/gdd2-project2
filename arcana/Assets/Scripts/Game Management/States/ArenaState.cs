@@ -11,9 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Game.UI.Screens;
+using Arcana.UI.Screens;
 
-namespace Game.States
+namespace Arcana.States
 {
     /////////////////////
     // Class declaration.
