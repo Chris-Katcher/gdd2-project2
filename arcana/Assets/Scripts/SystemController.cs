@@ -9,7 +9,7 @@
 // Using statements.
 /////////////////////
 using UnityEngine;
-using Game;
+using Arcana;
 using Game.InputManagement;
 using Game.UI;
 
@@ -74,7 +74,10 @@ public class SystemController : MonoBehaviour {
 	void Update () 
     {
         float translation = m_inputManager.getPlayer1Translation();
-        
+        bool jump_pressed = m_inputManager.getPlayer1Jump();
+        m_gameManager.UpdatePosWizzard1(translation);
+        m_gameManager.UpdateJumpStatus(jump_pressed);
+
         // TODO: Stub code.
 
 	}
