@@ -9,7 +9,8 @@
 // Using statements.
 /////////////////////
 using UnityEngine;
-using Game;
+using Arcana;
+using Game.InputManagement;
 using Game.UI;
 
 /////////////////////
@@ -63,6 +64,7 @@ public class SystemController : MonoBehaviour {
     {
 
         this.Initialize();
+        print("System Conrtoller Init");
 
 	}
 	
@@ -72,7 +74,10 @@ public class SystemController : MonoBehaviour {
 	void Update () 
     {
         float translation = m_inputManager.getPlayer1Translation();
-        print(translation);
+        bool jump_pressed = m_inputManager.getPlayer1Jump();
+        m_gameManager.UpdatePosWizzard1(translation);
+        m_gameManager.UpdateJumpStatus(jump_pressed);
+
         // TODO: Stub code.
 
 	}
@@ -91,6 +96,8 @@ public class SystemController : MonoBehaviour {
         m_uiManager = new UIManager();
         m_gameManager = new GameManager();
         m_inputManager = new InputManager();
+
+        m_gameManager.Initialize();
 
         // Set initialized.
         m_init = true;

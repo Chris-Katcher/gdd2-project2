@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Game
+namespace Game.InputManagement
 {
     /// <summary>
     /// Handles input functionality.
@@ -24,10 +24,14 @@ namespace Game
         // TODO: Stub.
         public float getPlayer1Translation()
         {
-            // Declare UnityEngine references directly; this will help us know where code is coming from.
             float translation = Input.GetAxis("Horizontal");
 
             return translation;
+        }
+
+        public bool getPlayer1Jump()
+        {
+            return (bool)Input.GetButtonDown("Jump");
         }
     }
 

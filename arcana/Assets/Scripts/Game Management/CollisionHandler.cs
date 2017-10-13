@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Game.Physics
+namespace Arcana.Physics
 {
     /// <summary>
     /// Resolves collisions between entities.
