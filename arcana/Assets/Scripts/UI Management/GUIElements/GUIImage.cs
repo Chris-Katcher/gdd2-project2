@@ -18,7 +18,7 @@ namespace Game.UI.Elements
     /// <summary>
     /// Stores information about an image in a GUI element.
     /// </summary>
-    public class GUIImage : IGUIElement
+    class GUIImage : IGUIElement
     {
         #region Data Members
 
