@@ -28,7 +28,11 @@ namespace Arcana
         private bool grounded = true;
         private Rigidbody2D wizzard1_rb;
 
-        private float jumpForce = 1000f;
+        private float jumpForce = 300f;
+        private float moveForce = 365f;
+
+        public bool fly_mode = false;
+
         // TODO: Stub.
 
         public void UpdatePosWizzard1(float translation)
@@ -36,12 +40,22 @@ namespace Arcana
             float translate = translation * max_speed;
             translate *= Time.deltaTime;
 
-            wizzard1.transform.Translate(translate, 0, 0);
+            //wizzard1.transform.Translate(translate, 0, 0);
 
+            if(translation * wizzard1_rb.velocity.x < max_speed)
+            {
+                wizzard1_rb.AddForce(Vector2.right * translation * moveForce);
+            }
+
+            if(Mathf.Abs(wizzard1_rb.velocity.x) > max_speed)
+            {
+                wizzard1_rb.velocity = new Vector2(Mathf.Sign(wizzard1_rb.velocity.x) * max_speed, wizzard1_rb.velocity.y);
+            }
             
             if(!grounded)
             {
                 wizzard1_rb.AddForce(new Vector2(0f, jumpForce));
+                grounded = true;
             }
         }
 
@@ -49,7 +63,7 @@ namespace Arcana
         {
             if(this.grounded && jump)
             {
-                this.grounded = jump;
+                this.grounded = !jump;
             }
         }
 
