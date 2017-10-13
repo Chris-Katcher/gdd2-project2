@@ -28,6 +28,11 @@ namespace Game.InputManagement
 
             return translation;
         }
+
+        public bool getPlayer1Jump()
+        {
+            return (bool)Input.GetButtonDown("Jump");
+        }
     }
 
     

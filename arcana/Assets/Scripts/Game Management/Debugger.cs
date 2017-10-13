@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Game
+namespace Arcana
 {    
     /////////////////////
     // Class declaration.
