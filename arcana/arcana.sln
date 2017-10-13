@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2017
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "arcana", "arcana.csproj", "{FD3BE032-CD68-24B6-7074-E6CE32D3E7E4}"
+# Visual Studio 2015
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "arcana.CSharp", "arcana.CSharp.csproj", "{9F4A8C59-E66F-0B4C-09FC-0555D1F68B0D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +9,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FD3BE032-CD68-24B6-7074-E6CE32D3E7E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FD3BE032-CD68-24B6-7074-E6CE32D3E7E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FD3BE032-CD68-24B6-7074-E6CE32D3E7E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FD3BE032-CD68-24B6-7074-E6CE32D3E7E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F4A8C59-E66F-0B4C-09FC-0555D1F68B0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F4A8C59-E66F-0B4C-09FC-0555D1F68B0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F4A8C59-E66F-0B4C-09FC-0555D1F68B0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F4A8C59-E66F-0B4C-09FC-0555D1F68B0D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
