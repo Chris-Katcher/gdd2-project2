@@ -52,7 +52,7 @@ namespace Arcana
                 wizzard1_rb.velocity = new Vector2(Mathf.Sign(wizzard1_rb.velocity.x) * max_speed, wizzard1_rb.velocity.y);
             }
             
-            if(!grounded && wizzard1_rb.velocity.y == 0.0f)
+            if(!grounded )
             {
                 wizzard1_rb.AddForce(new Vector2(0f, jumpForce));
                 grounded = true;
