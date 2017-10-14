@@ -14,7 +14,7 @@ using System.Text;
 using UnityEngine;
 using System.Collections;
 
-namespace Arcana
+namespace Game
 {
     /// <summary>
     /// Handles the main game loop.
@@ -52,7 +52,7 @@ namespace Arcana
                 wizzard1_rb.velocity = new Vector2(Mathf.Sign(wizzard1_rb.velocity.x) * max_speed, wizzard1_rb.velocity.y);
             }
             
-            if(!grounded )
+            if(!grounded && wizzard1_rb.velocity.y == 0.0f)
             {
                 wizzard1_rb.AddForce(new Vector2(0f, jumpForce));
                 grounded = true;
@@ -69,7 +69,7 @@ namespace Arcana
 
         public void Initialize()
         {
-            wizzard1 = UnityEngine.Resources.Load("Wizzard") as GameObject;
+            wizzard1 = Resources.Load("Wizzard") as GameObject;
             wizzard1 = Instantiate(wizzard1);
 
             wizzard1_rb = wizzard1.GetComponent<Rigidbody2D>();
