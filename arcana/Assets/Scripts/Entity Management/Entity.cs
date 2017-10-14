@@ -53,6 +53,17 @@ namespace Arcana.Entities
 
         }
 
+        private float health;
+
+        public float Health
+        {
+
+            get { return health; }
+
+            set { this.health = value; }
+
+        }
+
 
         // Use this for initialization
         void Start()
