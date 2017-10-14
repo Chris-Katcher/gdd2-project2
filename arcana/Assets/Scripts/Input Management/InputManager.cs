@@ -31,7 +31,7 @@ namespace Arcana.InputManagement
 
         public bool getPlayer1Jump()
         {
-            return (bool)Input.GetButtonDown("Jump");
+            return (bool)Input.GetButtonDown("AButton");
         }
     }
 
