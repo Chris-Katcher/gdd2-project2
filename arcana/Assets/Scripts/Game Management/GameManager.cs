@@ -69,7 +69,7 @@ namespace Arcana
 
         public void Initialize()
         {
-            wizzard1 = Resources.Load("Wizzard") as GameObject;
+            wizzard1 = UnityEngine.Resources.Load("Wizzard") as GameObject;
             wizzard1 = Instantiate(wizzard1);
 
             wizzard1_rb = wizzard1.GetComponent<Rigidbody2D>();
