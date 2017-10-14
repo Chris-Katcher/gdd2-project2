@@ -10,8 +10,8 @@
 /////////////////////
 using UnityEngine;
 using Arcana;
-using Game.InputManagement;
-using Game.UI;
+using Arcana.InputManagement;
+using Arcana.UI;
 
 /////////////////////
 // Class declaration.

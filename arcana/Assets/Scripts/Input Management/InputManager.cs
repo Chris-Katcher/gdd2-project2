@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Game.InputManagement
+namespace Arcana.InputManagement
 {
     /// <summary>
     /// Handles input functionality.

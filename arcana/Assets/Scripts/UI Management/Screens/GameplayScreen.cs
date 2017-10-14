@@ -12,14 +12,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Game.Resources;
+using Arcana.Resources;
 
-namespace Game.UI.Screens
+namespace Arcana.UI.Screens
 {
     /// <summary>
     /// IScreen displayed during the main game, with the stage, obstacles, and player entities.
     /// </summary>
-    class GameplayScreen : IScreen
+    public class GameplayScreen : IScreen
     {
         #region Data Members
 

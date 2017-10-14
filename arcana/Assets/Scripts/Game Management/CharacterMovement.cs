@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Arcana.Physics
 {
-    class CharacterMovement : MonoBehaviour
+    public class CharacterMovement : MonoBehaviour
     {
 
         void update_position(float translation)
