@@ -61,7 +61,7 @@ namespace Arcana
 
         public void UpdateJumpStatus(bool jump)
         {
-            if(this.grounded && jump)
+            if(this.grounded && jump && wizzard1_rb.velocity.y < 0.1f)
             {
                 this.grounded = !jump;
             }

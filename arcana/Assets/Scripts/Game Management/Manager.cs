@@ -30,8 +30,8 @@ namespace Arcana
         // Initialization methods.
         /////////////////////
 
-        void Initialize();
-        abstract void IsInitialized();
+        public abstract void Initialize();
+        public abstract void IsInitialized();
 
         #endregion
 
