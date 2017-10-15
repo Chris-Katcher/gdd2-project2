@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using System.Collections;
+using Arcana.Physics;
 
 namespace Arcana
 {
@@ -28,10 +29,12 @@ namespace Arcana
         private bool grounded = true;
         private Rigidbody2D wizzard1_rb;
 
-        private float jumpForce = 500f;
-        private float moveForce = 50f;
+        private float jumpForce = 7000f;
+        private float moveForce = 500f;
 
         public bool fly_mode = false;
+
+        private CharacterMovement charMovement;
 
         // TODO: Stub.
 
@@ -44,7 +47,9 @@ namespace Arcana
 
             if(translation * wizzard1_rb.velocity.x < max_speed)
             {
+            
                 wizzard1_rb.AddForce(Vector2.right * translation * moveForce);
+                
             }
 
             if(Mathf.Abs(wizzard1_rb.velocity.x) > max_speed)
@@ -52,25 +57,34 @@ namespace Arcana
                 wizzard1_rb.velocity = new Vector2(Mathf.Sign(wizzard1_rb.velocity.x) * max_speed, wizzard1_rb.velocity.y);
             }
             
-            if(!grounded && wizzard1_rb.velocity.y == 0.0f)
+            if(!grounded )
             {
                 wizzard1_rb.AddForce(new Vector2(0f, jumpForce));
                 grounded = true;
+                charMovement.jump_enabled = false;
             }
+
+            wizzard1.transform.rotation = Quaternion.identity;
         }
 
         public void UpdateJumpStatus(bool jump)
         {
-            if(this.grounded && jump && wizzard1_rb.velocity.y < 0.1f)
+            //this.grounded && jump && 
+            if (charMovement.jump_enabled && jump)
             {
                 this.grounded = !jump;
+                charMovement.jump_enabled = false;
             }
         }
 
         public void Initialize()
         {
             wizzard1 = UnityEngine.Resources.Load("Wizzard") as GameObject;
-            wizzard1 = Instantiate(wizzard1);
+            wizzard1 = Instantiate(wizzard1, new Vector3( 1, 0, 0), Quaternion.identity );
+
+            charMovement = wizzard1.GetComponent<CharacterMovement>();
+
+            Instantiate(wizzard1, new Vector3(1, 0, 0), Quaternion.identity);
 
             wizzard1_rb = wizzard1.GetComponent<Rigidbody2D>();
             m_init = true;
