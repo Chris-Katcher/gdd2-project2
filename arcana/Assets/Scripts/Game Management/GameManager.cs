@@ -29,7 +29,7 @@ namespace Arcana
         private bool grounded = true;
         private Rigidbody2D wizzard1_rb;
 
-        private float jumpForce = 7000f;
+        private float jumpForce = 6000f;
         private float moveForce = 500f;
 
         public bool fly_mode = false;
@@ -57,7 +57,7 @@ namespace Arcana
                 wizzard1_rb.velocity = new Vector2(Mathf.Sign(wizzard1_rb.velocity.x) * max_speed, wizzard1_rb.velocity.y);
             }
             
-            if(!grounded )
+            if(!grounded)
             {
                 wizzard1_rb.AddForce(new Vector2(0f, jumpForce));
                 grounded = true;
