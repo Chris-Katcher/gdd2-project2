@@ -29,6 +29,23 @@ namespace Arcana.InputManagement
             return translation;
         }
 
+        /// <summary>
+        /// Return a vector2 of the current facing direction of the right joystick
+        /// </summary>
+        /// <returns></returns>
+        public Vector2 getVectorInput()
+        {
+
+            //create and set input||Vector2
+            Vector2 input = new Vector2();
+            input.x = Input.GetAxis("RightJoystickHorizontal");
+            input.y = Input.GetAxis("RightJoystickVerticle");
+
+            //return
+            return input;
+
+        }
+
         public bool getPlayer1Jump()
         {
             return (bool)Input.GetButtonDown("AButton");

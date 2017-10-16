@@ -70,7 +70,7 @@ namespace Arcana.Entities
         }
 
         /// <summary>
-        /// Returns the Vector2 direction of a passed in angle
+        /// Returns the Vector2 direction of a passed in angle || Can be placed into a helper script
         /// </summary>
         /// <param name="angle"></param>
         /// <returns></returns>
@@ -86,6 +86,20 @@ namespace Arcana.Entities
             dirVector.Normalize();
 
             return dirVector;
+
+        }
+
+        /// <summary>
+        /// Normalizes a passed in Vector2 || Can be placed into a helper script
+        /// </summary>
+        /// <param name="vect"></param>
+        /// <returns></returns>
+        Vector2 normalizeVector(Vector2 vect)
+        {
+
+            vect.Normalize();
+
+            return vect;
 
         }
 
