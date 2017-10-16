@@ -11,9 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Game.UI.Screens;
+using Arcana.UI.Screens;
 
-namespace Game.States
+namespace Arcana.States
 {
     /////////////////////
     // Class declaration.
@@ -23,7 +23,7 @@ namespace Game.States
     /// <para>Implements the state run at the start of the game.</para>
     /// It will display a screen object called "MainMenuScreen" and update frames as needed. When inputs are triggered to change the state of the StageManager this screen will stop being displayed.
     /// </summary>
-    class MainMenuState : IState
+    public class MainMenuState : IState
     {
         #region Data Members
 

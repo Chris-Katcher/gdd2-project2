@@ -10,8 +10,8 @@
 /////////////////////
 using UnityEngine;
 using Arcana;
-using Game.InputManagement;
-using Game.UI;
+using Arcana.InputManagement;
+using Arcana.UI;
 
 /////////////////////
 // Class declaration.
@@ -91,8 +91,10 @@ public class SystemController : MonoBehaviour {
     /// </summary>
     private void Initialize()
     {
+        // Create and initialize managers.
+        gameObject.AddComponent<InputManager>();
 
-        // Create and initialize the UI, Game, and Input managers.
+        // Set references to managers.
         m_uiManager = new UIManager();
         m_gameManager = new GameManager();
         m_inputManager = new InputManager();

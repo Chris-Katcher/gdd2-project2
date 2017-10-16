@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Game.InputManagement
+namespace Arcana.InputManagement
 {
     /// <summary>
     /// Handles input functionality.
@@ -31,7 +31,7 @@ namespace Game.InputManagement
 
         public bool getPlayer1Jump()
         {
-            return (bool)Input.GetButtonDown("Jump");
+            return (bool)Input.GetButtonDown("AButton");
         }
     }
 

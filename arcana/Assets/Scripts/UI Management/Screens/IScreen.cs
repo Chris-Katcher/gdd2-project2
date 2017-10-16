@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Game.UI.Screens
+namespace Arcana.UI.Screens
 {
 
     /// <summary>

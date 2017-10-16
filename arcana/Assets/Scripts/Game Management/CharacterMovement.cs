@@ -6,12 +6,21 @@ using UnityEngine;
 
 namespace Arcana.Physics
 {
-    class CharacterMovement : MonoBehaviour
+    public class CharacterMovement : MonoBehaviour
     {
 
-        void update_position(float translation)
-        {
+        public bool jump_enabled = true;
 
+        void OnCollisionStay2D(Collision2D coll)
+        {
+            if(coll.transform.name == "Cube")
+            {
+                jump_enabled = true;
+            } else
+            {
+                jump_enabled = false;
+            }
+            
         }
     }
 }

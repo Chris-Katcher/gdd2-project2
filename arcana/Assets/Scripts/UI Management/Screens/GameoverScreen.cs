@@ -12,15 +12,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Game.Resources;
+using Arcana.Resources;
 
-namespace Game.UI.Screens
+namespace Arcana.UI.Screens
 {
 
     /// <summary>
     /// IScreen displayed when the game is over.
     /// </summary>
-    class GameoverScreen : IScreen
+    public class GameoverScreen : IScreen
     {
 
         #region Data Members

@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Game.UI.Elements
+namespace Arcana.UI.Elements
 {
     /// <summary>
     /// Button that can be interacted with by players.

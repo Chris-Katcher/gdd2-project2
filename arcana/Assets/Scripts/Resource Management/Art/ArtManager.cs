@@ -11,9 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Game.Resources;
+using Arcana.Resources;
 
-namespace Game.Resources.Art
+namespace Arcana.Resources.Art
 {
     /// <summary>
     /// Handles all art assets.

@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Game.Camera
+namespace Arcana.Camera
 {
 
     /// <summary>
@@ -20,8 +20,51 @@ namespace Game.Camera
     /// </summary>
     public class CameraManager
     {
+        #region Data Members
+
+        /////////////////////
+        // Data members.
+        /////////////////////
+
         
-        // TODO: Stub.
+
+
+        #endregion
+
+        #region Constructor
+
+        /////////////////////
+        // Constructor methods.
+        /////////////////////
+
+
+
+
+        #endregion
+
+        #region Service Methods
+
+        /////////////////////
+        // Service methods.
+        /////////////////////
+
+        #endregion
+
+        #region Accessor Methods
+
+        /////////////////////
+        // Accessor methods.
+        /////////////////////
+
+        #endregion
+
+        #region Mutator Methods
+
+        /////////////////////
+        // Mutator methods.
+        /////////////////////
+
+        #endregion
 
     }
 }

@@ -12,14 +12,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Game.Resources;
+using Arcana.Resources;
 
-namespace Game.UI.Screens
+namespace Arcana.UI.Screens
 {
     /// <summary>
     /// IScreen displayed when a player selects to go to the options screen.
     /// </summary>
-    class OptionsScreen : IScreen
+    public class OptionsScreen : IScreen
     {
 
         #region Data Members

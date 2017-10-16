@@ -12,14 +12,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Game.Resources;
+using Arcana.Resources;
 
-namespace Game.UI.Screens
+namespace Arcana.UI.Screens
 {
     /// <summary>
     /// IScreen displayed whenever there are resources that need loading.
     /// </summary>
-    class LoadingScreen : IScreen
+    public class LoadingScreen : IScreen
     {
 
         #region Data Members

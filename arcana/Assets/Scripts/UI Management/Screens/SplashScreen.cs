@@ -12,14 +12,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Game.Resources;
+using Arcana.Resources;
 
-namespace Game.UI.Screens
+namespace Arcana.UI.Screens
 {
     /// <summary>
     /// IScreen displayed at game start up. It will say, "Press any key to continue," and display a logo.
     /// </summary>
-    class SplashScreen : IScreen
+    public class SplashScreen : IScreen
     {
 
         #region Data Members

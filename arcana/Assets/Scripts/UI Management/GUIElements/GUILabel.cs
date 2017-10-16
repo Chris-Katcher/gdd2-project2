@@ -13,12 +13,12 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Game.UI.Elements
+namespace Arcana.UI.Elements
 {
     /// <summary>
     /// IGUIElement that displays text.
     /// </summary>
-    class GUILabel : IGUIElement
+    public class GUILabel : IGUIElement
     {
 
         #region Data Members

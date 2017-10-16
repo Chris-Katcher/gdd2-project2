@@ -13,12 +13,12 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Game.UI.Elements
+namespace Arcana.UI.Elements
 {
     /// <summary>
     /// Stores information about an image in a GUI element.
     /// </summary>
-    class GUIImage : IGUIElement
+    public class GUIImage : IGUIElement
     {
         #region Data Members
 

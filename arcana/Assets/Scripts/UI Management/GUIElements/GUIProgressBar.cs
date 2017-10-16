@@ -13,12 +13,12 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Game.UI.Elements
+namespace Arcana.UI.Elements
 {
     /// <summary>
     /// Loading bar that is displayed on the loading screen.
     /// </summary>
-    class GUIProgressBar : IGUIElement
+    public class GUIProgressBar : IGUIElement
     {
 
         #region Data Members

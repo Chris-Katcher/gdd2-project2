@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 
 // The UI namespace contains the visual layer for all of the user-facing information.
-namespace Game.UI
+namespace Arcana.UI
 {
     /////////////////////
     // Class declaration.
