@@ -26,11 +26,16 @@ namespace Arcana.Entities
         public Vector3 m_acceleration;
         public Vector3 m_velocity;
 
+        /// <summary>
+        /// test location for projectile creation
+        /// </summary>
+        public List<Projectile> projectiles = new List<Projectile>();
+
         public float m_mass;
         public float m_maxSpeed;
-        public float m_initialSpeed;
+        public float m_initialSpeed = 1.0f;
 
-        Vector3 initalVelocity;
+        Vector3 initalVelocity = new Vector3(0.0f, -1.0f, 0.0f);
 
         // Reference to projectile Launcher
         public GameObject Parent;
@@ -48,6 +53,19 @@ namespace Arcana.Entities
         void Update()
         {
 
+            if (Event.current.Equals(Event.KeyboardEvent(KeyCode.Space.ToString()))){
+
+                createProjectile();
+
+            }
+
+            for(int i = 0; i < projectiles.Count(); i++)
+            {
+
+                projectiles[i].UpdatePostition();
+                projectiles[i].SetTransform();
+
+            }
             UpdatePostition();
             SetTransform();
 
@@ -66,6 +84,17 @@ namespace Arcana.Entities
             m_direction = m_velocity.normalized;
 
             m_acceleration = Vector3.zero;
+
+        }
+
+        void createProjectile()
+        {
+
+            Projectile proj = new Projectile();
+            proj.m_position = new Vector3(Screen.width / 2, Screen.height / 2, 0);
+            proj.m_mass = 10.0f;
+
+            projectiles.Add(proj);
 
         }
 
