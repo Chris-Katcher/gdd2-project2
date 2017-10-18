@@ -50,6 +50,12 @@ namespace Arcana.InputManagement
         {
             return (bool)Input.GetButtonDown("AButton");
         }
+
+        public bool getProjectileFire()
+        {
+            print("test");
+            return (bool)Input.GetButtonDown("Fire1");
+        }
     }
 
     

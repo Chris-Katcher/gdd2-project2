@@ -12,6 +12,7 @@ using UnityEngine;
 using Arcana;
 using Arcana.InputManagement;
 using Arcana.UI;
+using Arcana.Entities;
 
 /////////////////////
 // Class declaration.
@@ -45,6 +46,8 @@ public class SystemController : MonoBehaviour {
     /// SystemController access to the global InputManager.
     /// </summary>
     public InputManager m_inputManager;
+
+    public Projectile m_projectile;
     
     // Flags. //
 
@@ -75,8 +78,11 @@ public class SystemController : MonoBehaviour {
     {
         float translation = m_inputManager.getPlayer1Translation();
         bool jump_pressed = m_inputManager.getPlayer1Jump();
+        bool fire1_pressed = m_inputManager.getProjectileFire();
         m_gameManager.UpdatePosWizzard1(translation);
         m_gameManager.UpdateJumpStatus(jump_pressed);
+
+        m_projectile.fireProjectile(fire1_pressed);
 
         // TODO: Stub code.
 
@@ -98,7 +104,7 @@ public class SystemController : MonoBehaviour {
         m_uiManager = new UIManager();
         m_gameManager = new GameManager();
         m_inputManager = new InputManager();
-
+        m_projectile = new Projectile();
         m_gameManager.Initialize();
 
         // Set initialized.

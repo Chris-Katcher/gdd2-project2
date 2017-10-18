@@ -38,13 +38,23 @@ namespace Arcana.Entities
         Vector3 initalVelocity = new Vector3(0.0f, -1.0f, 0.0f);
 
         // Reference to projectile Launcher
-        public GameObject Parent;
+        public GameObject projectile_go;
+
+        private bool fire1 = false;
+
+
+        public Projectile(float x, float y, float force)
+        {
+
+            GameObject projectile_go = UnityEngine.Resources.Load("LightningBolt") as GameObject;
+            Instantiate(projectile_go, new Vector3(1, 0, 0), Quaternion.identity);
+        }
 
         // Use this for initialization
         void Start()
         {
 
-            initalVelocity = new Vector3(m_initialSpeed, 0);
+            //initalVelocity = new Vector3(m_initialSpeed, 0);
             ApplyForce(initalVelocity);
 
         }
@@ -53,29 +63,15 @@ namespace Arcana.Entities
         void Update()
         {
 
-            if (Event.current.Equals(Event.KeyboardEvent(KeyCode.Space.ToString()))){
-
-                createProjectile();
-
-            }
-
-            for(int i = 0; i < projectiles.Count(); i++)
-            {
-
-                projectiles[i].UpdatePostition();
-                projectiles[i].SetTransform();
-
-            }
-            UpdatePostition();
-            SetTransform();
-
+            this.UpdatePostition();
+            this.SetTransform();
         }
 
         // properly updates position of object
         void UpdatePostition()
         {
 
-            m_position = gameObject.transform.position;
+            m_position = projectile_go.transform.position;
 
             m_velocity += m_acceleration * Time.deltaTime;
 
@@ -87,16 +83,7 @@ namespace Arcana.Entities
 
         }
 
-        void createProjectile()
-        {
-
-            Projectile proj = new Projectile();
-            proj.m_position = new Vector3(Screen.width / 2, Screen.height / 2, 0);
-            proj.m_mass = 10.0f;
-
-            projectiles.Add(proj);
-
-        }
+        
 
         /// <summary>
         /// Returns the Vector2 direction of a passed in angle || Can be placed into a helper script
@@ -149,6 +136,8 @@ namespace Arcana.Entities
             m_acceleration += (p_force / m_mass);
 
         }
+
+        
     }
 
 }
