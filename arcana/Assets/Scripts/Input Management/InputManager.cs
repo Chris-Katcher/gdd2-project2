@@ -53,7 +53,6 @@ namespace Arcana.InputManagement
 
         public bool getProjectileFire()
         {
-            print("test");
             return (bool)Input.GetButtonDown("Fire1");
         }
     }
