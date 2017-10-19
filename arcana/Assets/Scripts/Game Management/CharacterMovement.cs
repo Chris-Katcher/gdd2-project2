@@ -13,7 +13,7 @@ namespace Arcana.Physics
 
         void OnCollisionStay2D(Collision2D coll)
         {
-            if(coll.transform.name == "Cube")
+            if(coll.transform.name != "Wizzard1(Clone)" && coll.transform.name != "Ceiling")
             {
                 jump_enabled = true;
             } else

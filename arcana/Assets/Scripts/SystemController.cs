@@ -47,7 +47,9 @@ public class SystemController : MonoBehaviour {
     /// </summary>
     public InputManager m_inputManager;
 
-    public Projectile m_projectile;
+    private ProjectileManager m_projectile;
+
+    public Player m_player;
     
     // Flags. //
 
@@ -76,13 +78,20 @@ public class SystemController : MonoBehaviour {
     /// </summary>
 	void Update () 
     {
+
+        //gets translation of player one
         float translation = m_inputManager.getPlayer1Translation();
+        //gets bool of whether plyaer1 has jumped
         bool jump_pressed = m_inputManager.getPlayer1Jump();
+        //gets bool of whether fire button has been pressed
         bool fire1_pressed = m_inputManager.getProjectileFire();
+
+        //updates the wizard position and jump
         m_gameManager.UpdatePosWizzard1(translation);
         m_gameManager.UpdateJumpStatus(jump_pressed);
 
-        m_projectile.fireProjectile(fire1_pressed);
+        //fires a projectile
+        m_player.fireProjPlayer(fire1_pressed);
 
         // TODO: Stub code.
 
@@ -99,12 +108,15 @@ public class SystemController : MonoBehaviour {
     {
         // Create and initialize managers.
         gameObject.AddComponent<InputManager>();
+        gameObject.AddComponent<Player>();
+        gameObject.AddComponent<GameManager>();
+        gameObject.AddComponent<InputManager>();
 
         // Set references to managers.
         m_uiManager = new UIManager();
-        m_gameManager = new GameManager();
-        m_inputManager = new InputManager();
-        m_projectile = new Projectile();
+        m_gameManager = gameObject.GetComponent<GameManager>();
+        m_inputManager = gameObject.GetComponent<InputManager>();
+        m_player = gameObject.GetComponent<Player>();
         m_gameManager.Initialize();
 
         // Set initialized.

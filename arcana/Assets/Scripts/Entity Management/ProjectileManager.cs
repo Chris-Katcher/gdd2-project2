@@ -9,33 +9,40 @@ namespace Arcana.Entities
     class ProjectileManager : MonoBehaviour
     {
 
-        private bool fire1 = false;
-
-
         public List<Projectile> projectiles = new List<Projectile>();
 
-
-        private void createProjectile()
+        /// <summary>
+        /// Creates a new projectile
+        /// </summary>
+        /// <param name="x">x position</param>
+        /// <param name="y">y position</param>
+        /// <param name="force">the force to be exerted on the projectile||its travel direction</param>
+        /// <param name="position">the starting position of the projectile</param>
+        private void createProjectile(float x, float y, Vector3 force)
         {
 
-            Projectile proj = new Projectile(0, 0, 0);
-            //proj.m_position = new Vector3(Screen.width / 2, Screen.height / 2, 0);
-            proj.m_mass = 10.0f;
+            //creates the projectile proj
+            Projectile proj = new Projectile(x, y, force);   
 
-           
-
+            //adds it to list of projectiles
             this.projectiles.Add(proj);
 
         }
 
-        public void fireProjectile(bool fire1)
+        /// <summary>
+        /// Fires a projectile
+        /// </summary>
+        /// <param name="fire1">Bool == Whether or no the fire button has been pressed</param>
+        /// <param name="position">Position to be created at</param>
+        public void fireProjectile(bool fire1, Vector3 position)
         {
-            this.fire1 = fire1;
 
-            if (fire1)
+            //if fire has been pressed, create a projectile
+            if (fire1 == true)
             {
 
-                createProjectile();
+                //creates a projectile
+                createProjectile(position.x,position.y,new Vector3(4.0f,0.0f,0));
 
             }
 

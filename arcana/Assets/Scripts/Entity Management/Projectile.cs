@@ -21,64 +21,90 @@ namespace Arcana.Entities
     public class Projectile : MonoBehaviour
     {
         // Members for motion
-        public Vector3 m_position;
-        public Vector3 m_direction;
-        public Vector3 m_acceleration;
-        public Vector3 m_velocity;
 
-        /// <summary>
-        /// test location for projectile creation
-        /// </summary>
-        public List<Projectile> projectiles = new List<Projectile>();
+        //Vectors
+        public Vector3 m_position;//position
+        public Vector3 m_direction;//direction to travel in
+        public Vector3 m_acceleration;//proj acceleration
+        public Vector3 m_velocity;//proj velocity
 
+        //floats
         public float m_mass;
         public float m_maxSpeed;
         public float m_initialSpeed = 1.0f;
 
-        Vector3 initalVelocity = new Vector3(0.0f, -1.0f, 0.0f);
+        //initial velocity to be used in testing
+        private Vector3 initalVelocity = new Vector3(0.0f, -1.0f, 0.0f);
 
         // Reference to projectile Launcher
         public GameObject projectile_go;
 
-        private bool fire1 = false;
-
-
-        public Projectile(float x, float y, float force)
+        /// <summary>
+        /// Projectile Constructor
+        /// </summary>
+        /// <param name="x">X position</param>
+        /// <param name="y">Y position</param>
+        /// <param name="force">Force to be applied to the projectil||Direction of travel</param>
+        /// <param name="position"></param>
+        public Projectile(float x, float y, Vector3 force)
         {
 
-            GameObject projectile_go = UnityEngine.Resources.Load("LightningBolt") as GameObject;
-            Instantiate(projectile_go, new Vector3(1, 0, 0), Quaternion.identity);
+            //instantiates the projectile_go and adds it to the scene
+            projectile_go = UnityEngine.Resources.Load("LightningBolt") as GameObject;
+            Instantiate(projectile_go, new Vector3(x,y,0), Quaternion.identity);
+
+            //sets force for now UNUSED
+            m_direction += force;
+
         }
 
-        // Use this for initialization
+        /// <summary>
+        /// Base Constructor
+        /// Use to set specific ammounts
+        /// </summary>
         void Start()
         {
 
-            //initalVelocity = new Vector3(m_initialSpeed, 0);
-            ApplyForce(initalVelocity);
+            //sets velocity
+            m_velocity = new Vector3(m_direction.x, m_direction.y, m_direction.z);
+
+            //sets mass
+            m_mass = 1.0f;
+            
+            //ApplyForce(initalVelocity);
 
         }
 
-        // Update is called once per frame
+        /// <summary>
+        /// Update the projectile. Called once per frame
+        /// </summary>
         void Update()
         {
 
+            //Updates the velocity
             this.UpdatePostition();
+
+            //Updates the position
             this.SetTransform();
+
         }
 
-        // properly updates position of object
+        /// <summary>
+        /// Updates the velocity of the projectile
+        /// </summary>
         void UpdatePostition()
         {
 
-            m_position = projectile_go.transform.position;
+            //applys a force to get acceleration
+            ApplyForce(new Vector3(1.0f,1.0f,0.0f));
 
-            m_velocity += m_acceleration * Time.deltaTime;
+            //divides final acceleration by mass
+            Vector3 scaleAcceleration = m_acceleration / m_mass;
 
-            m_position += m_velocity * Time.deltaTime;
+            //updates velocity based upon acceleration
+            m_velocity += scaleAcceleration * Time.deltaTime;
 
-            m_direction = m_velocity.normalized;
-
+            //resets acceleration to 0
             m_acceleration = Vector3.zero;
 
         }
@@ -88,7 +114,7 @@ namespace Arcana.Entities
         /// <summary>
         /// Returns the Vector2 direction of a passed in angle || Can be placed into a helper script
         /// </summary>
-        /// <param name="angle"></param>
+        /// <param name="angle">The degree angle passed into the function</param>
         /// <returns></returns>
         Vector2 AngleToHeading(float angle)
         {
@@ -108,32 +134,49 @@ namespace Arcana.Entities
         /// <summary>
         /// Normalizes a passed in Vector2 || Can be placed into a helper script
         /// </summary>
-        /// <param name="vect"></param>
+        /// <param name="vect">The vector to be normalized</param>
         /// <returns></returns>
-        Vector2 normalizeVector(Vector2 vect)
+        Vector2 normalizeVector(Vector3 vect)
         {
 
+            //normalizes the vector to be a unit length of one
             vect.Normalize();
 
             return vect;
 
         }
 
+        /// <summary>
+        /// Updates the position based upon the velocity
+        /// </summary>
         void SetTransform()
         {
 
-            GetComponent<Transform>().position += (m_velocity * Time.deltaTime);
-            /*float posX = GetComponent<Transform>().position.x + (m_velocity.x * Time.deltaTime);
-            float posY = GetComponent<Transform>().position.y + (m_velocity.y * Time.deltaTime);
-
-            gameObject.transform.position.Set(posX, posY,0);*/
+            transform.position += (m_velocity * Time.deltaTime);
 
         }
 
+        /// <summary>
+        /// Updates the acceleration
+        /// </summary>
+        /// <param name="p_force">The force to apply</param>
         public void ApplyForce(Vector3 p_force)
         {
 
-            m_acceleration += (p_force / m_mass);
+            //if acceleration == 0, then set equal to the force. Avoids nulls.
+            if(m_acceleration == Vector3.zero)
+            {
+
+                m_acceleration = p_force * 5;
+
+            }
+            //else, add the force to the acceleration
+            else
+            {
+
+                m_acceleration += p_force * 5;
+
+            }
 
         }
 

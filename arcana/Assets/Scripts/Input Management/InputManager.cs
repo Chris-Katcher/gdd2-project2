@@ -46,11 +46,13 @@ namespace Arcana.InputManagement
 
         }
 
+        //returns whether or not the player has pressed the jump button
         public bool getPlayer1Jump()
         {
-            return (bool)Input.GetButtonDown("AButton");
+            return (bool)Input.GetButtonDown("Jump");
         }
 
+        //returns whether or not the player has pressed the fire button
         public bool getProjectileFire()
         {
             return (bool)Input.GetButtonDown("Fire1");
