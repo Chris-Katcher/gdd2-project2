@@ -3,8 +3,7 @@
  * 
  * Debugger prints to the console for Unity.
  ************************************************/
-
-
+ 
 /////////////////////
 // Using statements.
 /////////////////////
