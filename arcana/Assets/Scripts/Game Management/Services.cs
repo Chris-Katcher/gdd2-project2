@@ -2,6 +2,7 @@
  * Services.cs
  * 
  * Services contain references to program-wide constants and has helper functions that can be called.
+ * Services offers program-wide reference to constants and helper functions.
  ************************************************/
 
 /////////////////////
@@ -12,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Arcana.Entities.Attributes;
 
 namespace Arcana
 {
@@ -20,7 +22,7 @@ namespace Arcana
     /////////////////////
 
     /// <summary>
-    /// Services offers program-wide reference to constants and helper functions.
+    /// Constants stored for use across the programs.
     /// </summary>
     public static class Constants
     {
@@ -31,7 +33,7 @@ namespace Arcana
         // Constants.
         /////////////////////
 
-        #region Vector References
+        #region // Vector References
         
         // Vector2 references.
 
@@ -89,17 +91,66 @@ namespace Arcana
 
         #endregion
 
-        #region Entity Constants
+        #region // Entity Constants
 
         /// <summary>
         /// Default width and height to use when it isn't specified.
         /// </summary>
-        public const float DEFAULT_DIMENSION = 100.0f; // in pixels.
+        public const int DEFAULT_DIMENSION = 100; // in pixels.
+
+        #endregion
+
+        #region // HealthTracker Constants
+
+        /// <summary>
+        /// Default time-based health.
+        /// </summary>
+        public const bool DEFAULT_TIMEBASED_HEALTH = false;
+
+        /// <summary>
+        /// Default time-based decay steps.
+        /// </summary>
+        public const int DEFAULT_DECAY_STEP = 1; // In units of health.
+
+        /// <summary>
+        /// Default time-based decay rate.
+        /// </summary>
+        public const int DEFAULT_DECAY_RATE = 1; // In seconds.
+
+        /// <summary>
+        /// If set to this value, entity is invulnerable.
+        /// </summary>
+        public const int INVULNERABLE_MODE = -1;
+
+        /// <summary>
+        /// Default invulnerability period.
+        /// </summary>
+        public const int DEFAULT_INVULNERABILITY_PERIOD = 10; // In seconds.
+
+        /// <summary>
+        /// Ignore the damage limit.
+        /// </summary>
+        public const int IGNORE_DAMAGE_LIMIT = -1;
+
+        /// <summary>
+        /// Default damage limit per frame.
+        /// </summary>
+        public const int DEFAULT_DAMAGE_LIMIT = -1; // Ignored when equal to -1.
 
         /// <summary>
         /// Default health value to assign when it isn't specified.
         /// </summary>
         public const int DEFAULT_HEALTH = -1; // When less than zero, we don't consider it to have a health state.
+
+        /// <summary>
+        /// Default maximum health value.
+        /// </summary>
+        public const int DEFAULT_MAX_HEALTH = 100; // Default maximum health value.
+
+        /// <summary>
+        /// Default minimum health value.
+        /// </summary>
+        public const int DEFAULT_MIN_HEALTH = 100; // Default minimum health value.
 
         #endregion
 
@@ -107,11 +158,72 @@ namespace Arcana
 
     }
 
+    /// <summary>
+    /// Services called to aid in comparisons and completions.
+    /// </summary>
     public static class Services
     {
 
         #region Math Functions.
-        
+
+        #region // Dimension math functions.
+
+        /// <summary>
+        /// Multiplies two to three products together.
+        /// </summary>
+        /// <param name="terms">Multiplies these terms.</param>
+        /// <returns>Returns product of terms.</returns>
+        public static float Product(params float[] terms)
+        {
+            if (terms.Length > 0)
+            {
+                float product = 1.0f;
+
+                for (int i = 0; i < terms.Length; i++)
+                {
+                    product *= terms[i];
+                }
+            }
+
+            return 0.0f;
+        }
+
+        /// <summary>
+        /// Get the area of the dimension.
+        /// </summary>
+        /// <param name="d">Dimension to get area of.</param>
+        /// <returns>Get the dimension's 2D area.</returns>
+        public static float Area(Dimension d)
+        {
+            float a = Abs(d.Width);
+            float b = Abs(d.Height);
+
+            if (a == 0.0f) { a = 1.0f; }
+            if(b == 0.0f) { b = 1.0f; }
+
+            return Product(a, b);
+        }
+
+        /// <summary>
+        /// Get the volume of the dimension. If depth is zero, it's treated as a '1'.
+        /// </summary>
+        /// <param name="d">Dimension to get volume of.</param>
+        /// <returns>Get the dimension's 3D volume.</returns>
+        public static float Volume(Dimension d)
+        {
+            float a = Abs(d.Width);
+            float b = Abs(d.Height);
+            float c = Abs(d.Depth);
+
+            if (a == 0.0f) { a = 1.0f; }
+            if (b == 0.0f) { b = 1.0f; }
+            if (c == 0.0f) { c = 1.0f; }
+
+            return Product(a, b, c);
+        }
+
+        #endregion
+
         #region // Vector Math Functions.
 
         /////////////////////

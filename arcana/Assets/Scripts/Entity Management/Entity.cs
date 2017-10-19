@@ -1,85 +1,172 @@
-﻿using System.Collections;
+﻿/************************************************
+ * Entity.cs
+ * 
+ * This file contains implementation for the Entity class.
+ ************************************************/
+
+/////////////////////
+// Using statements.
+/////////////////////
+using System.Collections;
 using System.Collections.Generic;
+using Arcana;
 using UnityEngine;
+using Arcana.Entities.Attributes;
 
 namespace Arcana.Entities
 {
-
+    
+    /// <summary>
+    /// Entity helps utilize the <see cref="GameObject"/> in ways that align with our program.
+    /// </summary>
     public class Entity : MonoBehaviour
     {
 
+        #region Data Members
+
+        /////////////////////
+        // Data members.
+        /////////////////////
+        
         /// <summary>
-        /// Universal Variables
+        /// Entity dimension manager. (Usually for calculations).
         /// </summary>
-        private float height;
-        public float Height
-        {
+        private Dimension m_dimensions;
 
-            get { return height; }
-
-            set { this.height = value; }
-
-        }
-
-        private float width;
+        /// <summary>
+        /// Entity's health tracker.
+        /// </summary>
+        private HealthTracker m_health;
+        
+        /////////////////////
+        // Properties.
+        /////////////////////
+        
+        /// <summary>
+        /// Reference to Entity width.
+        /// </summary>
         public float Width
         {
-
-            get { return width; }
-
-            set { this.width = value; }
-
+            get { return m_dimensions.Width; }
         }
-
-        private float x;
-
-        public float X
+        
+        /// <summary>
+        /// Reference to Entity width.
+        /// </summary>
+        public float Height
         {
-
-            get { return x; }
-
-            set { this.x = value; }
-
+            get { return m_dimensions.Height; }
         }
 
-        private float y;
-
-        public float Y
+        /// <summary>
+        /// Reference to Entity depth level.
+        /// </summary>
+        public float Depth
         {
-
-            get { return y; }
-
-            set { this.y = value; }
-
+            get { return m_dimensions.Depth; }
         }
 
-        private float health;
-
-        public float Health
+        /// <summary>
+        /// Property tracking whether or not the entity is alive.
+        /// </summary>
+        public bool IsAlive
         {
-
-            get { return health; }
-
-            set { this.health = value; }
-
+            get;
+            set;
         }
 
+        #endregion
 
-        // Use this for initialization
+        #region Service Methods
+
+        /// <summary>
+        /// Used for initialization of UnityEngine components.
+        /// </summary>
         void Start()
         {
-
-
-
+            this.Initialize();
         }
 
-        // Update is called once per frame
+        /// <summary>
+        /// Update UnityEngine components.
+        /// </summary>
         void Update()
         {
+            // Call update entity for inherited classes.
+            UpdateEntity();
 
-
-
+            if (this.IsAlive)
+            {
+                // Call update life for inherited classes.
+                UpdateLife();
+            }
+            else
+            {
+                // Call on death for inherited classes.
+                OnDeath();
+            }
         }
+
+        protected virtual void UpdateEntity()
+        {
+            if (m_health.IsVulnerable())
+            {
+                this.IsAlive = m_health.IsAlive();
+            }
+        }
+
+        protected virtual void UpdateLife()
+        {
+            // Stub.
+        }
+
+        protected virtual void OnDeath()
+        {
+            // Stub.
+        }
+
+        protected virtual void Initialize()
+        {
+            // Create objects.
+            this.m_dimensions = new Dimension(Constants.DEFAULT_DIMENSION, 0.0f);
+
+            // Get components.
+            this.m_health = HealthTrackerFactory.CreateComponent(gameObject);
+            
+        }
+
+        #endregion
+
+        #region Mutator Methods
+
+        /// <summary>
+        /// Set the vertical dimension of the Entity.
+        /// </summary>
+        /// <param name="height">Height of the Entity.</param>
+        public void SetHeight(float height)
+        {
+            this.m_dimensions.SetHeight(Services.Max(height, 0.1f));
+        }
+
+        /// <summary>
+        /// Set the horizontal dimension of the Entity.
+        /// </summary>
+        /// <param name="width">Width of the Entity.</param>
+        public void SetWidth(float width)
+        {
+            this.m_dimensions.SetWidth(Services.Max(width, 0.1f));
+        }
+
+        /// <summary>
+        /// Set the depth level of the Entity.
+        /// </summary>
+        /// <param name="depth">Depth level of the Entity.</param>
+        public void SetDepth(int depth)
+        {
+            this.m_dimensions.SetDepth(Services.Max(depth, 0.1f));
+        }
+
+        #endregion 
     }
 
 }
