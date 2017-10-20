@@ -36,6 +36,8 @@ namespace Arcana
 
         private CharacterMovement charMovement;
 
+        public Player m_player1;
+
         // TODO: Stub.
 
         public void UpdatePosWizzard1(float translation)
@@ -77,6 +79,11 @@ namespace Arcana
             }
         }
 
+        public void fireProjPlayer1(bool fire1_pressed)
+        {
+            m_player1.fireProjPlayer(fire1_pressed, wizzard1.transform.position);
+        }
+
         public void Initialize()
         {
             wizzard1 = UnityEngine.Resources.Load("Wizzard") as GameObject;
@@ -88,6 +95,8 @@ namespace Arcana
 
             wizzard1_rb = wizzard1.GetComponent<Rigidbody2D>();
             m_init = true;
+
+            this.m_player1 = gameObject.GetComponent<Player>();
         }
 
         private bool IsInitialized()

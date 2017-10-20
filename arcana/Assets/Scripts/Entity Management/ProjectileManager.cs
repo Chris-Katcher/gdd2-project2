@@ -10,7 +10,7 @@ namespace Arcana.Entities
     {
 
         public List<Projectile> projectiles = new List<Projectile>();
-
+        public Projectile proj;
         /// <summary>
         /// Creates a new projectile
         /// </summary>
@@ -22,8 +22,10 @@ namespace Arcana.Entities
         {
 
             //creates the projectile proj
-            Projectile proj = new Projectile(x, y, force);   
-
+            GameObject projectile_go = UnityEngine.Resources.Load("FireBall") as GameObject;
+            proj = projectile_go.GetComponent <Projectile>();
+            Instantiate(projectile_go, new Vector3(x + 1, y + 1, 0), Quaternion.identity);
+            proj.init_projectile(x, y, force);
             //adds it to list of projectiles
             this.projectiles.Add(proj);
 
@@ -47,6 +49,14 @@ namespace Arcana.Entities
             }
 
            
+        }
+
+        public void updateProjectiles()
+        {
+            foreach(Projectile p in projectiles)
+            {
+                p.updatePos();
+            }
         }
     }
 }

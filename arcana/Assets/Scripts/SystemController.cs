@@ -91,7 +91,7 @@ public class SystemController : MonoBehaviour {
         m_gameManager.UpdateJumpStatus(jump_pressed);
 
         //fires a projectile
-        m_player.fireProjPlayer(fire1_pressed);
+        m_gameManager.fireProjPlayer1(fire1_pressed);
 
         // TODO: Stub code.
 
@@ -116,7 +116,7 @@ public class SystemController : MonoBehaviour {
         m_uiManager = new UIManager();
         m_gameManager = gameObject.GetComponent<GameManager>();
         m_inputManager = gameObject.GetComponent<InputManager>();
-        m_player = gameObject.GetComponent<Player>();
+        //m_player = gameObject.GetComponent<Player>();
         m_gameManager.Initialize();
 
         // Set initialized.
