@@ -15,7 +15,11 @@ using Arcana.Entities.Attributes;
 
 namespace Arcana.Entities
 {
-    
+
+    /////////////////////
+    // Class Declaration.
+    /////////////////////
+
     /// <summary>
     /// Entity helps utilize the <see cref="GameObject"/> in ways that align with our program.
     /// </summary>
@@ -166,7 +170,8 @@ namespace Arcana.Entities
             this.m_dimensions.SetDepth(Services.Max(depth, 0.1f));
         }
 
-        #endregion 
+        #endregion
+
     }
 
 }

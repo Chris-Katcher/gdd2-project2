@@ -34,7 +34,7 @@ namespace Arcana
         /////////////////////
 
         #region // Vector References
-        
+
         // Vector2 references.
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Arcana
         public static readonly Vector2 Right = new Vector2(1.0f, 0.0f);
 
         // Vector3 references.
-        
+
         /// <summary>
         /// Returns a <see cref="Vector3"/> with +1 on the z-axis.
         /// </summary>
@@ -90,13 +90,67 @@ namespace Arcana
         public static readonly Vector3 Right3 = Services.ToVector3(Right);
 
         #endregion
-
+        
         #region // Entity Constants
 
         /// <summary>
         /// Default width and height to use when it isn't specified.
         /// </summary>
         public const int DEFAULT_DIMENSION = 100; // in pixels.
+
+        #endregion
+
+        #region // Camera Constants.
+
+        /// <summary>
+        /// Default camera shake period of time in seconds.
+        /// </summary>
+        public const float DEFAULT_SHAKE_PERIOD = 1.0f; // in seconds.
+
+        /// <summary>
+        /// Default camera shake strength in float coordinate points.
+        /// </summary>
+        public const float DEFAULT_SHAKE_STRENGTH = 25.0f; // Change in value clamp.
+        
+        /// <summary>
+        /// Default camera shake strength decay factor.
+        /// </summary>
+        public const float DEFAULT_DECAY_FACTOR = 1.0f; // 100% = no decay value.
+
+        /// <summary>
+        /// Default aspect ratio is set to 16:9.
+        /// </summary>
+        public const float DEFAULT_ASPECT_RATIO = 1.7778f;
+
+        /// <summary>
+        /// 16:9 aspect ratio.
+        /// </summary>
+        public const float ASPECT_RATIO_16_9 = 1.7778f;
+
+        /// <summary>
+        /// 4:3 aspect ratio.
+        /// </summary>
+        public const float ASPECT_RATIO_4_3 = 1.333f;
+
+        /// <summary>
+        /// 1:1 aspect ratio (Square).
+        /// </summary>
+        public const float ASPECT_RATIO_SQAURE = 1;
+
+        /// <summary>
+        /// Default orthographic size for the <see cref="UnityEngine.Camera"/>.
+        /// </summary>
+        public const float DEFAULT_CAMERA_SIZE = 5.0f;
+
+        /// <summary>
+        /// Default distance away from the original position.
+        /// </summary>
+        public const float DEFAULT_CAMERA_DISTANCE = 1.0f;
+
+        /// <summary>
+        /// Color of the 
+        /// </summary>
+        public static readonly Color DEFAULT_CAMERA_BACKGROUND = Color.cyan;
 
         #endregion
 
@@ -164,6 +218,44 @@ namespace Arcana
     public static class Services
     {
 
+        #region UnityEngine Helpers
+
+        /// <summary>
+        /// Creates an empty <see cref="GameObject"/>, with input title, and returns it.
+        /// </summary>
+        /// <param name="title">Title of the <see cref="GameObject"/>.</param>
+        /// <returns>Returns created <see cref="GameObject"/>.</returns>
+        public static GameObject CreateEmptyObject(string title = "GameObject (Empty)")
+        {
+            return new GameObject(title);
+        }
+
+        /// <summary>
+        /// Add a child to the parent <see cref="GameObject"/>. Returns the child <see cref="GameObject"/>.
+        /// </summary>
+        /// <param name="parent">The object receiving the child.</param>
+        /// <param name="child">The object placed as the child.</param>
+        /// <returns>Returns the child object.</returns>
+        public static GameObject AddChild(GameObject parent, GameObject child)
+        {
+            child.transform.parent = parent.transform;
+            return child;
+        }
+
+        /// <summary>
+        /// Add a parent to the child <see cref="GameObject"/>. Returns the parent <see cref="GameObject"/>.
+        /// </summary>
+        /// <param name="child">The object receiving the parent.</param>
+        /// <param name="parent">The object placed as the parent.</param>
+        /// <returns>Returns the child object.</returns>
+        public static GameObject AddParent(GameObject child, GameObject parent)
+        {
+            child.transform.parent = parent.transform;
+            return parent;
+        }
+
+        #endregion
+
         #region Math Functions.
 
         #region // Dimension math functions.
@@ -229,6 +321,41 @@ namespace Arcana
         /////////////////////
         // Vector Math Functions.
         /////////////////////
+
+        /// <summary>
+        /// Check if a vector is null.
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <returns></returns>
+        public static bool IsEmpty(Vector2? vector)
+        {
+            if (vector.HasValue)
+            {
+                return (float.IsNaN(vector.Value.sqrMagnitude)
+                    || (vector.Value == Vector2.zero)
+                    || (vector.Value.magnitude == 0.0f));
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
+        /// Check if a vector is null.
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <returns></returns>
+        public static bool IsEmpty(Vector3? vector)
+        {
+            if (vector.HasValue)
+            {
+                return (float.IsNaN(vector.Value.sqrMagnitude)
+                    || (vector.Value == Vector3 .zero)
+                    || (vector.Value.magnitude == 0.0f));
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Get the magnitude of a given <see cref="Vector2"/>.
@@ -305,6 +432,134 @@ namespace Arcana
         {
             return Vector3.Dot(a, b);
         }
+        
+        /// <summary>
+        /// Calculates the sum of the input terms.
+        /// </summary>
+        /// <param name="vectors">Vectors to find sum of.</param>
+        /// <returns>Returns sum of all the terms as a <see cref="Vector2"/>.</returns>
+        public static Vector2 Sum(params Vector2[] vectors)
+        {
+            if (vectors == null || vectors.Length == 0) { return Vector2.zero; }
+            if (vectors.Length == 1) { return vectors[0]; }
+
+            Vector2 sum = Vector2.zero;
+
+            foreach (Vector2 vector in vectors)
+            {
+                sum += vector;
+            }
+
+            return sum;
+        }
+
+        /// <summary>
+        /// Calculates the sum of the input terms.
+        /// </summary>
+        /// <param name="vectors">Vectors to find sum of.</param>
+        /// <returns>Returns sum of all the terms as a <see cref="Vector2"/>.</returns>
+        public static Vector2 Sum(List<Vector2> vectors)
+        {
+            if (vectors == null || vectors.Count == 0) { return Vector2.zero; }
+            if (vectors.Count == 1) { return vectors[0]; }
+
+            Vector2 sum = Vector2.zero;
+
+            foreach (Vector2 vector in vectors)
+            {
+                sum += vector;
+            }
+
+            return sum;
+        }
+
+        /// <summary>
+        /// Calculates the sum of the input terms.
+        /// </summary>
+        /// <param name="vectors">Vectors to find sum of.</param>
+        /// <returns>Returns sum of all the terms as a <see cref="Vector3"/>.</returns>
+        public static Vector3 Sum(params Vector3[] vectors)
+        {
+            if (vectors == null || vectors.Length == 0) { return Vector3.zero; }
+            if (vectors.Length == 1) { return vectors[0]; }
+
+            Vector3 sum = Vector3.zero;
+
+            foreach (Vector3 vector in vectors)
+            {
+                sum += vector;
+            }
+
+            return sum;
+        }
+
+        /// <summary>
+        /// Calculates the sum of the input terms.
+        /// </summary>
+        /// <param name="vectors">Vectors to find sum of.</param>
+        /// <returns>Returns sum of all the terms as a <see cref="Vector3"/>.</returns>
+        public static Vector3 Sum(List<Vector3> vectors)
+        {
+            if (vectors == null || vectors.Count == 0) { return Vector3.zero; }
+            if (vectors.Count == 1) { return vectors[0]; }
+
+            Vector3 sum = Vector3.zero;
+
+            foreach (Vector3 vector in vectors)
+            {
+                sum += vector;
+            }
+
+            return sum;
+        }
+
+        /// <summary>
+        /// Calculate the center (or average) of all the input vectors.
+        /// </summary>
+        /// <param name="vectors">Vectors to find average of.</param>
+        /// <returns>Returns average as <see cref="Vector2"/>.</returns>
+        public static Vector2 Average(params Vector2[] vectors)
+        {
+            if (vectors == null || vectors.Length == 0) { return Vector2.zero; }
+            if (vectors.Length == 1) { return vectors[0]; }
+            return Sum(vectors) / vectors.Length;
+        }
+
+        /// <summary>
+        /// Calculate the center (or average) of all the input vectors.
+        /// </summary>
+        /// <param name="vectors">Vectors to find average of.</param>
+        /// <returns>Returns average as <see cref="Vector2"/>.</returns>
+        public static Vector2 Average(List<Vector2> vectors)
+        {
+            if (vectors == null || vectors.Count == 0) { return Vector2.zero; }
+            if (vectors.Count == 1) { return vectors[0]; }
+            return Sum(vectors) / vectors.Count;
+        }
+
+        /// <summary>
+        /// Calculate the center (or average) of all the input vectors.
+        /// </summary>
+        /// <param name="vectors">Vectors to find average of.</param>
+        /// <returns>Returns average as <see cref="Vector3"/>.</returns>
+        public static Vector3 Average(params Vector3[] vectors)
+        {
+            if (vectors == null || vectors.Length == 0) { return Vector3.zero; }
+            if (vectors.Length == 1) { return vectors[0]; }
+            return Sum(vectors) / vectors.Length;
+        }
+
+        /// <summary>
+        /// Calculate the center (or average) of all the input vectors.
+        /// </summary>
+        /// <param name="vectors">Vectors to find average of.</param>
+        /// <returns>Returns average as <see cref="Vector3"/>.</returns>
+        public static Vector3 Average(List<Vector3> vectors)
+        {
+            if (vectors == null || vectors.Count == 0) { return Vector3.zero; }
+            if (vectors.Count == 1) { return vectors[0]; }
+            return Sum(vectors) / vectors.Count;
+        }
 
         /////////////////////
         // Vector Wrappers.
@@ -373,7 +628,7 @@ namespace Arcana
         {
             return new Vector3(x, y, z);
         }
-
+        
         #endregion
 
         #region // Random Functions.
@@ -661,6 +916,27 @@ namespace Arcana
             // float testB = Min(value, min);
 
             return (Max(value, max) == max && Min(value, min) == min);
+        }
+
+        /// <summary>
+        /// Determine if a value of a <see cref="IComparable{T}"/> generic type is within an inclusive range.
+        /// </summary>
+        /// <typeparam name="T">Comparable type.</typeparam>
+        /// <param name="value">Value to check.</param>
+        /// <param name="min">Lower bound of range.</param>
+        /// <param name="max">Upper bound of range.</param>
+        /// <returns>Returns true if values are within the range.</returns>
+        public static bool InRange<T>(T value, T min, T max) where T : IComparable<T>
+        {
+            // Swap range values if need be.
+            if (min.CompareTo(max) > 0)
+            {
+                T temp = max;
+                max = min;
+                min = temp;
+            }
+
+            return (Max<T>(value, max).CompareTo(max) == 0 && Min<T>(value, min).CompareTo(min) == 0);
         }
 
         /// <summary>
@@ -1004,6 +1280,47 @@ namespace Arcana
         }
 
         /// <summary>
+        /// Returns a value, clamped between two others.
+        /// </summary>
+        /// <param name="value">Value to clamp.</param>
+        /// <param name="min">Inclusive minimum value to return.</param>
+        /// <param name="max">Inclusive maximum value to return.</param>
+        /// <returns>Clamped int value.</returns>
+        public static int Clamp(int value, int min, int max)
+        {
+            // Ensure the max and min values are correct.
+            if (max <= min)
+            {
+                if (max == min)
+                {
+                    return min;
+                }
+                else
+                {
+                    int temp = max;
+                    max = min;
+                    min = temp;
+                }
+            }
+
+            // Clamp the actual value.
+
+            // If value is less than minimum, return minimum.
+            if (value < min)
+            {
+                value = min;
+            }
+
+            // If value is greater than maximum, return maximum.
+            if (value > max)
+            {
+                value = max;
+            }
+
+            return value;
+        }
+
+        /// <summary>
         /// Clamp the magnitude of the <see cref="Vector2"/>, if necessary, and return it.
         /// </summary>
         /// <param name="vector">Vector to clamp.</param>
@@ -1049,6 +1366,135 @@ namespace Arcana
                 return Normalize(vector) * magnitude;
             }
 
+        }
+
+        /// <summary>
+        /// Generic function that compares values and chooses the smaller.
+        /// </summary>
+        /// <typeparam name="T">Any generic type that can be compared.</typeparam>
+        /// <param name="a">Lefthand term.</param>
+        /// <param name="b">Righthand term.</param>
+        /// <returns>Returns smaller of the two terms.</returns>
+        public static T Min<T>(T a, T b) where T : IComparable<T>
+        {
+            if (a.CompareTo(b) <= 0)
+            {
+                return a;
+            }
+            else
+            {
+                return b;
+            }
+        }
+
+        /// <summary>
+        /// Determine the smallest element in a collection of generics.
+        /// </summary>
+        /// <typeparam name="T">Any generic type that can be compared.</typeparam>
+        /// <param name="terms">Terms to compare.</param>
+        /// <returns>Returns the smallest term.</returns>
+        public static T MinOf<T>(params T[] terms) where T : IComparable<T>
+        {
+            // Check size of array.
+            if (terms.Length == 1)
+            {
+                return terms[0];
+            }
+            else
+            {
+                int index = 0;
+                T min = terms[0];
+
+                for (int i = 0; i < terms.Length; i++)
+                {
+                    if (terms[i].CompareTo(min) < 0)
+                    {
+                        index = i;
+                        min = terms[i];
+                    }
+                }
+
+                return terms[index];
+            }
+        }
+
+        /// <summary>
+        /// Generic function that compares values and chooses the larger.
+        /// </summary>
+        /// <typeparam name="T">Any generic type that can be compared.</typeparam>
+        /// <param name="a">Lefthand term.</param>
+        /// <param name="b">Righthand term.</param>
+        /// <returns>Returns larger of the two terms.</returns>
+        public static T Max<T>(T a, T b) where T : IComparable<T>
+        {
+            if (a.CompareTo(b) >= 0)
+            {
+                return a;
+            }
+            else
+            {
+                return b;
+            }
+        }
+
+        /// <summary>
+        /// Determine the largest element in a collection of generics.
+        /// </summary>
+        /// <typeparam name="T">Any generic type that can be compared.</typeparam>
+        /// <param name="terms">Terms to compare.</param>
+        /// <returns>Returns the largest term.</returns>
+        public static T MaxOf<T>(params T[] terms) where T : IComparable<T>
+        {
+            // Check size of array.
+            if (terms.Length == 1)
+            {
+                return terms[0];
+            }
+            else
+            {
+                int index = 0;
+                T max = terms[0];
+
+                for (int i = 0; i < terms.Length; i++)
+                {
+                    if (terms[i].CompareTo(max) > 0)
+                    {
+                        index = i;
+                        max = terms[i];
+                    }
+                }
+
+                return terms[index];
+            }
+        }
+
+        /// <summary>
+        /// Generic function that compares values and clamps them.
+        /// </summary>
+        /// <typeparam name="T">Any generic type representing a value that can be clamped.</typeparam>
+        /// <param name="value">Value to clamp.</param>
+        /// <param name="minimum">Minimum value to clamp to.</param>
+        /// <param name="maximum">Maximum value to clamp to.</param>
+        /// <returns>Returns clamped value.</returns>
+        public static T Clamp<T>(T value, T minimum, T maximum) where T : IComparable<T>
+        {
+            if (minimum.CompareTo(maximum) >= 1)
+            {
+                T swap = maximum;
+                maximum = minimum;
+                minimum = swap;
+            }
+
+            if (minimum.CompareTo(maximum) == 0)
+            {
+                return minimum;
+            }
+
+            T temp = value;
+            temp = Max<T>(temp, minimum);
+            temp = Min<T>(temp, maximum);
+
+            return temp;
         }
 
         #endregion

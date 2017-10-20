@@ -30,10 +30,10 @@ namespace Arcana.Entities.Attributes
         /// <summary>
         /// Creates a <see cref="HealthTracker"/> component.
         /// </summary>
-        /// <param name="parent"></param>
-        /// <param name="minHealth"></param>
-        /// <param name="maxHealth"></param>
-        /// <returns></returns>
+        /// <param name="parent">GameObject to which the component is being added.</param>
+        /// <param name="minHealth">Minimum health.</param>
+        /// <param name="maxHealth">Max health.</param>
+        /// <returns>Return a HealthTracker component reference.</returns>
         public static HealthTracker CreateComponent(GameObject parent, float minHealth = 0.0f, float maxHealth = Constants.DEFAULT_MAX_HEALTH)
         {
             // Create and add the instance to the calling game object.
