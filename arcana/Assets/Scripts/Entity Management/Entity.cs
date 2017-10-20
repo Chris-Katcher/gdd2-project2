@@ -17,7 +17,16 @@ namespace Arcana.Entities
 {
 
     /////////////////////
-    // Class Declaration.
+    // EntityFactory Declaration.
+    /////////////////////
+
+    public static class EntityFactory {
+            // TODO
+    }
+
+
+    /////////////////////
+    // Entity class.
     /////////////////////
 
     /// <summary>
@@ -84,7 +93,7 @@ namespace Arcana.Entities
         #region Service Methods
 
         /// <summary>
-        /// Used for initialization of UnityEngine components.
+        /// Initilizes the Entity.
         /// </summary>
         void Start()
         {
