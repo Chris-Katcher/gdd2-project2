@@ -91,6 +91,55 @@ namespace Arcana
 
         #endregion
         
+        #region // Constraint Constants
+
+        /// <summary>
+        /// Parameter flag for <see cref="Arcana.Entities.EntityType"/>.
+        /// </summary>
+        public const string PARAM_ENTITY_TYPE = "entitytype";
+
+        /// <summary>
+        /// Parameter flag for <see cref="Arcana.Entities.Entity"/> position.
+        /// </summary>
+        public const string PARAM_POSITION = "position";
+
+        /// <summary>
+        /// Parameter flag for <see cref="Arcana.Entities.Entity"/> dimensions.
+        /// </summary>
+        public const string PARAM_DIMENSIONS = "dimensions";
+
+        /// <summary>
+        /// Parameter flag for an <see cref="Arcana.Entities.Entity"/>'s health tracker.
+        /// </summary>
+        public const string PARAM_HEALTH_TRACKER = "healthtracker";
+
+        /// <summary>
+        /// Parameter flag.
+        /// </summary>
+        public const string PARAM_UNITY_CAMERA = "unitycamera";
+
+        /// <summary>
+        /// Parameter flag.
+        /// </summary>
+        public const string PARAM_ASPECT_RATIO = "aspectratio";
+
+        /// <summary>
+        /// Parameter flag.
+        /// </summary>
+        public const string PARAM_BACKGROUND = "background";
+
+        /// <summary>
+        /// Parameter flag.
+        /// </summary>
+        public const string PARAM_DISTANCE = "distance";
+
+        /// <summary>
+        /// Parameter flag.
+        /// </summary>
+        public const string PARAM_CAMERA_MODE = "cameramode";
+
+        #endregion
+
         #region // Entity Constants
 
         /// <summary>
@@ -99,7 +148,7 @@ namespace Arcana
         public const int DEFAULT_DIMENSION = 100; // in pixels.
 
         #endregion
-
+        
         #region // Camera Constants.
 
         /// <summary>

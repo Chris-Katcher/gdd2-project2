@@ -279,7 +279,7 @@ namespace Arcana.Cameras
                  // 1. Create an empty game object to store the new camera component.
                  // 2. Add this new game object as a child to our wrapping camera object item.
                  // 3. Pass the return value from AddChild, as the parent parameter for CameraFactory.CreateComponent, netting us our Camera component. 
-                this.m_camera = CameraFactory.CreateComponent(Services.AddChild(this.m_camera_object, Services.CreateEmptyObject("Camera")));
+                this.m_camera = CameraFactory.GetInstance().CreateComponent(Services.AddChild(this.m_camera_object, Services.CreateEmptyObject("Camera")));
             }
 
             // Since we know our references are hooked properly, we can change the name to reflect this.

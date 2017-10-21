@@ -47,28 +47,56 @@ namespace Arcana.Cameras
     /// <summary>
     /// This will construct a Camera (and UnityCamera) for our game object to hold.
     /// </summary>
-    public static class CameraFactory {
+    public class CameraFactory : IFactory<CameraSettings> {
 
-        #region // // Static Constructors.
+        #region // Static Members.
 
         /// <summary>
-        /// Creates an <see cref="Arcana.Cameras.CameraSettings"/> component and adds it the the requesting game object.
+        /// Singleton instance.
         /// </summary>
-        /// <param name="parent">GameObject receiving the new component.</param>
-        /// <returns>Returns a reference to constructed <see cref="Arcana.Cameras.CameraSettings"/> component.</returns>
-        public static CameraSettings CreateComponent(GameObject parent,
-            Vector2? _position = null,
-            CameraMode _mode = CameraMode.Fixed,
-            float _aspect = Constants.DEFAULT_ASPECT_RATIO,
-            float _size = Constants.DEFAULT_CAMERA_SIZE,
-            float _distance = Constants.DEFAULT_CAMERA_DISTANCE,
-            Color? _bg = null)
+        private static CameraFactory instance = null;
+        
+        /// <summary>
+        /// Get reference to CameraFactory.
+        /// </summary>
+        /// <returns>Returns a single factory.</returns>
+        public static CameraFactory GetInstance()
+        {
+            if (instance == null)
+            {
+                instance = new CameraFactory();
+            }
+
+            return instance;
+        }
+
+        #endregion
+
+        #region // Factory methods.
+
+        /// <summary>
+        /// Creates a new, empty game object, and returns the CameraSettings component back.
+        /// </summary>
+        /// <returns></returns>
+        public CameraSettings CreateComponent()
+        {
+            // Creates a component using the default settings.
+            return CreateComponent(Services.CreateEmptyObject("Camera Settings"), CreateSettings());
+        }
+
+        /// <summary>
+        /// Adds a new component to the parent game object, with parameters.
+        /// </summary>
+        /// <param name="parent">GameObject to add component to.</param>
+        /// <param name="parameters">Settings to apply to the new Entity.</param>
+        /// <returns>Return newly created component.</returns>
+        public CameraSettings CreateComponent(GameObject parent, Constraints parameters)
         {
             // Check game object.
             if (parent == null)
             {
                 // If the parent itself is null, do not return a component.
-                Debugger.Print("Tried to add a Arcanas.Cameras.Camera component but parent GameObject is null.", "NULL_REFERENCE");
+                Debugger.Print("Tried to add a component but parent GameObject is null.", "NULL_REFERENCE");
                 return null;
             }
 
@@ -92,13 +120,61 @@ namespace Arcana.Cameras
                 camera = CreateCamera(parent); // Build and add camera component to the parent GameObject.
             }
 
-            // Initalize the main component.
-            component.Initialize(parent, camera, _position, _mode, _aspect, _size, _distance, _bg);
-            
-            // Return the component.
+            // Assign non-optional information.
+            component.Initialize(parent, camera);
+
+            // Initialize the entity.
+            foreach (string key in parameters.ValidEntries)
+            {
+                component.Initialize(key, parameters.GetEntry(key).Value);
+            }
+
             return component;
         }
+        
+        /// <summary>
+        /// Adds a new, default component, to the parent game object.
+        /// </summary>
+        /// <param name="parent">GameObject to add component to.</param>
+        /// <returns>Return newly created component.</returns>
+        public CameraSettings CreateComponent(GameObject parent)
+        {
+            // Creates a component using the default settings.
+            return CreateComponent(parent, CreateSettings());
+        }
 
+        /// <summary>
+        /// Set up the parameters associated with this factory's IFactoryElement.
+        /// </summary>
+        /// <returns>Returns the <see cref="Constraints"/> collection object.</returns>
+        public Constraints CreateSettings(
+            Vector2? _position = null,
+            CameraMode _mode = CameraMode.Fixed,
+            float _aspect = Constants.DEFAULT_ASPECT_RATIO,
+            float _size = Constants.DEFAULT_CAMERA_SIZE,
+            float _distance = Constants.DEFAULT_CAMERA_DISTANCE,
+            Color? _bg = null)
+        {
+            // Create the collection.
+            Constraints parameters = new Constraints();
+            
+            // Verify nullable types.
+            if (_position.HasValue) { parameters.AddValue<Vector2>(Constants.PARAM_POSITION, _position.Value); } // Set the position.
+            if (_bg.HasValue) { parameters.AddValue<Color>(Constants.PARAM_BACKGROUND, _bg.Value); }
+
+            // Add non-nulllable types.
+            parameters.AddValue<CameraMode>(Constants.PARAM_CAMERA_MODE, _mode); // Camera mode.
+            parameters.AddValue<float>(Constants.PARAM_ASPECT_RATIO, _aspect); // Aspect ratio.
+            parameters.AddValue<float>(Constants.PARAM_DIMENSIONS, _size); // Orthographic size.
+            parameters.AddValue<float>(Constants.PARAM_DISTANCE, _distance); // Distance.
+
+            return parameters;
+        }
+
+        #endregion
+
+        #region // // Static Constructors.
+        
         /// <summary>
         /// Adds a new <see cref="UnityEngine.Camera"/> to the parent <see cref="GameObject"/>.
         /// </summary>
@@ -120,8 +196,9 @@ namespace Arcana.Cameras
             // Return its reference.
             return reference;
         }
-        #endregion
 
+        #endregion
+        
         #region // // Service Methods.
 
         /// <summary>
@@ -161,7 +238,7 @@ namespace Arcana.Cameras
     /// <summary>
     /// Holds settings that will be applied to the UnityCamera.
     /// </summary>
-    public class CameraSettings : MonoBehaviour
+    public class CameraSettings : MonoBehaviour, IFactoryElement
     {
 
         #region // // Data Members.
@@ -281,7 +358,7 @@ namespace Arcana.Cameras
 
         #endregion
 
-        #region // Service Methods.
+        #region // // Service Methods.
 
         /// <summary>
         /// Called when a new Camera is added to an object as a component.
@@ -319,6 +396,39 @@ namespace Arcana.Cameras
             
             // This should always be the initial value for the 'previous mode' at the start.
             this.m_previousMode = CameraMode.Disabled;            
+        }
+
+        /// <summary>
+        /// Initailize a parameter based on input key.
+        /// </summary>
+        /// <param name="parameter">Parameter reference.</param>
+        /// <param name="value">Value to set.</param>
+        public void Initialize(string parameter, object value)
+        {
+            switch(parameter)
+            {
+                case Constants.PARAM_UNITY_CAMERA:
+                    this.SetCamera((UnityCamera)value);
+                    break;
+                case Constants.PARAM_ASPECT_RATIO:
+                    this.SetAspectRatio((float)value);
+                    break;
+                case Constants.PARAM_POSITION:
+                    this.SetPosition((Vector2)value);
+                    break;
+                case Constants.PARAM_DIMENSIONS:
+                    this.SetOrthographicSize((float)value);
+                    break;
+                case Constants.PARAM_BACKGROUND:
+                    this.SetBackground((Color)value);
+                    break;
+                case Constants.PARAM_DISTANCE:
+                    this.SetAspectRatio((float)value);
+                    break;
+                case Constants.PARAM_CAMERA_MODE:
+                    this.SetMode((CameraMode)value);
+                    break;
+            }
         }
 
         /// <summary>
@@ -515,7 +625,7 @@ namespace Arcana.Cameras
 
         #endregion
 
-        #region // Mutator Methods.
+        #region // // Mutator Methods.
 
         /// <summary>
         /// Set the <see cref="UnityEngine.Camera"/> object.

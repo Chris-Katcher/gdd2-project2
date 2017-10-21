@@ -126,6 +126,27 @@ namespace Arcana
         }
 
         /// <summary>
+        /// Create and return a list of settings with values.
+        /// </summary>
+        public List<string> ValidEntries
+        {
+            get
+            {
+                List<string> settings = new List<string>();
+
+                foreach (string key in Keys)
+                {
+                    if (Rules[key].HasValue())
+                    {
+                        settings.Add(key);
+                    }
+                }
+
+                return settings;
+            }
+        }
+
+        /// <summary>
         /// Determine if there are any entries in the object's collection.
         /// </summary>
         public int Count
@@ -369,7 +390,7 @@ namespace Arcana
             // Check if the key exists.
             if (!HasKey(key))
             {
-                Constraints.AddKey(key, uid);
+                this.AddNewKey(key, uid);
             }
 
             if (!HasEntry(key))
@@ -403,7 +424,7 @@ namespace Arcana
         /// <typeparam name="T"></typeparam>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        private void AddValue<T>(string key, T value)
+        public void AddValue<T>(string key, T value)
         {
             // Assign the value to the entry.
             Constraint entry = Constraint.CreateConstraint(value);
