@@ -1,10 +1,27 @@
-﻿using System;
+﻿/************************************************
+ * Constraints.cs
+ * 
+ * Holds implementation for the Constraints collection
+ * class and Constraint class.
+ ************************************************/
+
+/////////////////////
+// Using statements.
+/////////////////////
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace Arcana
 {
+
+    #region // Class: Constraints (Collection)
+
+    /////////////////////
+    // Constraints class declaration.
+    /////////////////////
+
     /// <summary>
     /// The Constraints class allows rules to be passed into Component factories.
     /// </summary>
@@ -451,7 +468,15 @@ namespace Arcana
         #endregion
 
     }
-    
+
+    #endregion
+
+    #region // Class: Constraint (items)
+
+    /////////////////////
+    // Constraint class declaration.
+    /////////////////////
+
     /// <summary>
     /// Represents a constraint object. Used to pass a setting into component factories.
     /// </summary>
@@ -825,5 +850,7 @@ namespace Arcana
         #endregion
 
     }
+
+    #endregion
 
 }

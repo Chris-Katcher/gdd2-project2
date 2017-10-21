@@ -49,7 +49,7 @@ namespace Arcana.Cameras
     /// </summary>
     public class CameraFactory : IFactory<CameraSettings> {
 
-        #region // Static Members.
+        #region // // Static Members.
 
         /// <summary>
         /// Singleton instance.
@@ -60,7 +60,7 @@ namespace Arcana.Cameras
         /// Get reference to CameraFactory.
         /// </summary>
         /// <returns>Returns a single factory.</returns>
-        public static CameraFactory GetInstance()
+        public static CameraFactory Instance()
         {
             if (instance == null)
             {
@@ -72,12 +72,21 @@ namespace Arcana.Cameras
 
         #endregion
 
-        #region // Factory methods.
+        #region // // Factory methods.
+
+        /// <summary>
+        /// Returns a reference to the factory.
+        /// </summary>
+        /// <returns>Returns a single factory.</returns>
+        public IFactory<CameraSettings> GetInstance()
+        {
+            return Instance();
+        }
 
         /// <summary>
         /// Creates a new, empty game object, and returns the CameraSettings component back.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Returns newly created component.</returns>
         public CameraSettings CreateComponent()
         {
             // Creates a component using the default settings.

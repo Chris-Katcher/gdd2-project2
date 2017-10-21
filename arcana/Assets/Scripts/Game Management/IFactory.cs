@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace Arcana
 {
+
+    #region // Interface: IFactory
+
     /// <summary>
     /// Represents a Factory schema for creating Monobehavior/GameObjects, and returning them.
     /// </summary>
@@ -13,7 +16,13 @@ namespace Arcana
     {
 
         // Some classes may even contain Dictionary<string, Constraints> presets;
-        
+
+        /// <summary>
+        /// Get the single instance of the factory.
+        /// </summary>
+        /// <returns>Returns a single instance of the factory.</returns>
+        IFactory<T> GetInstance();
+
         /// <summary>
         /// Returns a created <see cref="MonoBehaviour"/>, with the option to pass in a series of terms.
         /// </summary>
@@ -36,6 +45,10 @@ namespace Arcana
 
     }
 
+    #endregion
+
+    #region // Interface: IFactoryElement
+
     /// <summary>
     /// Represents a schema for elements that can be created by a factory.
     /// </summary>
@@ -50,4 +63,7 @@ namespace Arcana
         void Initialize(string parameter, object value);
 
     }
+
+    #endregion
+
 }

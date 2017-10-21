@@ -104,39 +104,89 @@ namespace Arcana
         public const string PARAM_POSITION = "position";
 
         /// <summary>
-        /// Parameter flag for <see cref="Arcana.Entities.Entity"/> dimensions.
+        /// Parameter flag for <see cref="Arcana.Entities.Entity.m_dimensions"/>.
         /// </summary>
         public const string PARAM_DIMENSIONS = "dimensions";
 
         /// <summary>
-        /// Parameter flag for an <see cref="Arcana.Entities.Entity"/>'s health tracker.
+        /// Parameter flag for <see cref="Arcana.Entities.Entity.m_health"/>.
         /// </summary>
         public const string PARAM_HEALTH_TRACKER = "healthtracker";
 
         /// <summary>
-        /// Parameter flag.
+        /// Parameter flag for <see cref="Arcana.Cameras.CameraSettings.m_camera"/>.
         /// </summary>
         public const string PARAM_UNITY_CAMERA = "unitycamera";
 
         /// <summary>
-        /// Parameter flag.
+        /// Parameter flag for <see cref="Arcana.Cameras.CameraSettings.m_aspectRatio"/>.
         /// </summary>
         public const string PARAM_ASPECT_RATIO = "aspectratio";
 
         /// <summary>
-        /// Parameter flag.
+        /// Parameter flag for <see cref="Arcana.Cameras.CameraSettings.m_background"/>.
         /// </summary>
         public const string PARAM_BACKGROUND = "background";
 
         /// <summary>
-        /// Parameter flag.
+        /// Parameter flag for <see cref="Arcana.Cameras.CameraSettings.m_distance"/>.
         /// </summary>
         public const string PARAM_DISTANCE = "distance";
 
         /// <summary>
-        /// Parameter flag.
+        /// Parameter flag for <see cref="Arcana.Cameras.CameraSettings.m_cameraMode"/>.
         /// </summary>
         public const string PARAM_CAMERA_MODE = "cameramode";
+
+        /// <summary>
+        /// Parameter flag for <see cref="Arcana.Cameras.CameraManager.m_cameraShake"/>.
+        /// </summary>
+        public const string PARAM_CAMERA_SHAKE = "camerashake";
+
+        /// <summary>
+        /// Parameter flag for <see cref="Arcana.Cameras.CameraManager.m_cameraShakeStrength"/>.
+        /// </summary>
+        public const string PARAM_CAMERA_STRENGTH = "camerashakestrength";
+
+        /// <summary>
+        /// Parameter flag for <see cref="Arcana.Entities.Attributes.HealthTracker.m_timeBased"/>.
+        /// </summary>
+        public const string PARAM_TIME_FLAG = "timebased";
+
+        /// <summary>
+        /// Parameter flag for <see cref="Arcana.Entities.Attributes.HealthTracker.m_decayStep"/>.
+        /// </summary>
+        public const string PARAM_DECAY_STEP = "decaystep";
+
+        /// <summary>
+        /// Parameter flag for <see cref="Arcana.Entities.Attributes.HealthTracker.m_rateOfDecay"/>.
+        /// </summary>
+        public const string PARAM_DECAY_RATE = "decayrate";
+        
+        /// <summary>
+        /// Parameter flag for <see cref="Arcana.Entities.Attributes.HealthTracker.m_invulnerabilityPeriod"/>.
+        /// </summary>
+        public const string PARAM_INV_PERIOD = "invulnerabilityperiod";
+
+        /// <summary>
+        /// Parameter flag for <see cref="Arcana.Entities.Attributes.HealthTracker.m_maximumDamagePerFrame"/>.
+        /// </summary>
+        public const string PARAM_MAX_DPF = "maxdamageperframe";
+
+        /// <summary>
+        /// Parameter flag for <see cref="Arcana.Entities.Attributes.HealthTracker.MaximumHealth"/>.
+        /// </summary>
+        public const string PARAM_MAX_HEALTH = "maximumhealth";
+
+        /// <summary>
+        /// Parameter flag for <see cref="Arcana.Entities.Attributes.HealthTracker.MinimumHealth"/>.
+        /// </summary>
+        public const string PARAM_MIN_HEALTH = "minimumhealth";
+
+        /// <summary>
+        /// Parameter flag for <see cref="Arcana.Entities.Attributes.HealthTracker.Health"/>.
+        /// </summary>
+        public const string PARAM_CURRENT_HEALTH = "currenthealth";
 
         #endregion
 

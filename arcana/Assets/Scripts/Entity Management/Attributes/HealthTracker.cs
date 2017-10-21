@@ -16,6 +16,9 @@ using UnityEngine;
 
 namespace Arcana.Entities.Attributes
 {
+
+    #region // Class: HealthTrackerFactory class.
+
     /////////////////////
     // Factory declaration.
     /////////////////////
@@ -23,12 +26,144 @@ namespace Arcana.Entities.Attributes
     /// <summary>
     /// The HealthTrackerFactory builds components for those that request them.
     /// </summary>
-    public static class HealthTrackerFactory {
+    public class HealthTrackerFactory : IFactory<HealthTracker> {
+
+        #region Static Members.
+
+        /// <summary>
+        /// Single instance of the HealthTrackerFactory class.
+        /// </summary>
+        private static HealthTrackerFactory instance = null;
+
+        /// <summary>
+        /// Returns the instance of the factory.
+        /// </summary>
+        /// <returns>Returns a single factory.</returns>
+        public static HealthTrackerFactory Instance()
+        {
+            if (!HasInstance())
+            {
+                instance = new HealthTrackerFactory();
+            }
+
+            return instance;
+        }
+
+        /// <summary>
+        /// Check if an instance of the <see cref="HealthTrackerFactory"/> exists.
+        /// </summary>
+        /// <returns>Returns true if the factory exists.</returns>
+        public static bool HasInstance()
+        {
+            return (instance != null);
+        }
+
+        #endregion
+
+        #region Service Methods.
+        
+        /// <summary>
+        /// Adds a new component to the parent game object, with parameters.
+        /// </summary>
+        /// <param name="parent">GameObject to add component to.</param>
+        /// <param name="parameters">Settings to apply to the new Entity.</param>
+        /// <returns>Return newly created component.</returns>
+        public HealthTracker CreateComponent(GameObject parent, Constraints parameters)
+        {
+            // Check game object.
+            if (parent == null)
+            {
+                // If the parent itself is null, do not return a component.
+                Debugger.Print("Tried to add a component but parent GameObject is null.", "NULL_REFERENCE");
+                return null;
+            }
+
+            // Get reference to existing script if it already exists on this parent.
+            HealthTracker component = parent.GetComponent<HealthTracker>();
+
+            // If reference is null, create one.
+            if (component == null)
+            {
+                // Add a new camera component to the component reference.
+                component = parent.AddComponent<HealthTracker>();
+            }
+            
+            // Assign non-optional information.
+            component.Initialize();
+
+            // Initialize the entity.
+            foreach (string key in parameters.ValidEntries)
+            {
+                component.Initialize(key, parameters.GetEntry(key).Value);
+            }
+
+            // Return the component.
+            return component;
+        }
+
+        /// <summary>
+        /// Create a HealthTracker, and append it to the parent object, using the default settings.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <returns></returns>
+        public HealthTracker CreateComponent(GameObject parent)
+        {
+            return CreateComponent(parent, CreateSettings());
+        }
+
+        /// <summary>
+        /// Create a HealthTracker, and append it to an empty game object, using the default settings.
+        /// </summary>
+        /// <returns>Returns reference to created component.</returns>
+        public HealthTracker CreateComponent()
+        {
+            return CreateComponent(Services.CreateEmptyObject("Health Tracker"), CreateSettings());
+        }
+
+        /// <summary>
+        /// Set up the parameters associated with this factory's IFactoryElement.
+        /// </summary>
+        /// <returns>Returns the <see cref="Constraints"/> collection object.</returns>
+        public Constraints CreateSettings(
+            bool timeBased = Constants.DEFAULT_TIMEBASED_HEALTH,
+            float decayStep = Constants.DEFAULT_DECAY_STEP,
+            float decayRate = Constants.DEFAULT_DECAY_RATE,
+            float invPeriod = Constants.DEFAULT_INVULNERABILITY_PERIOD,
+            float maxDPF = Constants.DEFAULT_DAMAGE_LIMIT,
+            float minHealth = 0.0f,
+            float maxHealth = Constants.DEFAULT_MAX_HEALTH)
+        {
+            // Create the collection.
+            Constraints parameters = new Constraints();
+
+            // Add non-nulllable types.
+            parameters.AddValue<bool>(Constants.PARAM_TIME_FLAG, timeBased); // Time based decay flag.
+            parameters.AddValue<float>(Constants.PARAM_DECAY_STEP, decayStep); // Decay step.
+            parameters.AddValue<float>(Constants.PARAM_DECAY_RATE, decayRate); // Decay rate.
+            parameters.AddValue<float>(Constants.PARAM_INV_PERIOD, invPeriod); // Invincibility period length.
+            parameters.AddValue<float>(Constants.PARAM_MAX_DPF, maxDPF); // Max damage per frame.
+            parameters.AddValue<float>(Constants.PARAM_MIN_HEALTH, minHealth); // Minimum health.
+            parameters.AddValue<float>(Constants.PARAM_MAX_HEALTH, maxHealth); // Maximum health.
+            parameters.AddValue<float>(Constants.PARAM_CURRENT_HEALTH, maxHealth); // Current health.
+
+            return parameters;
+        }
+
+        /// <summary>
+        /// Get the reference to the single factory.
+        /// </summary>
+        /// <returns>Returns a single factory.</returns>
+        public IFactory<HealthTracker> GetInstance()
+        {
+            return Instance();
+        }
+
+        #endregion
 
         #region Static Constructor 
 
         /// <summary>
-        /// Creates a <see cref="HealthTracker"/> component.
+        /// (Deprecated) Creates a <see cref="HealthTracker"/> component.
         /// </summary>
         /// <param name="parent">GameObject to which the component is being added.</param>
         /// <param name="minHealth">Minimum health.</param>
@@ -54,7 +189,11 @@ namespace Arcana.Entities.Attributes
         #endregion
 
     }
-    
+
+    #endregion
+
+    #region // Class: HealthTracker class.
+
     /////////////////////
     // Class declaration.
     /////////////////////
@@ -62,8 +201,9 @@ namespace Arcana.Entities.Attributes
     /// <summary>
     /// The HealthTracker component keeps track of Entity life and health.
     /// </summary>
-    public class HealthTracker : MonoBehaviour
+    public class HealthTracker : MonoBehaviour, IFactoryElement
     {
+
         #region Data Members
 
         /////////////////////
@@ -75,7 +215,7 @@ namespace Arcana.Entities.Attributes
         /// When set to true, health also decreases when time passes.
         /// </summary>
         private bool m_timeBased;
-
+        
         /// <summary>
         /// When <see cref="m_timeBased"/> is true, health decreases by this step * rate of decay.
         /// </summary>
@@ -167,13 +307,48 @@ namespace Arcana.Entities.Attributes
             this.SetMinimum(Constants.DEFAULT_MIN_HEALTH);
             this.SetHealth(Constants.DEFAULT_MAX_HEALTH);
         }
+        
+        /// <summary>
+        /// Set the value of a property.
+        /// </summary>
+        /// <param name="parameter">Switch trigger that determines which property is set.</param>
+        public virtual void Initialize(string parameter, object value)
+        {
+            switch (parameter)
+            {
+                case Constants.PARAM_TIME_FLAG:
+                    this.m_timeBased = (bool)value;
+                    break;
+                case Constants.PARAM_DECAY_STEP:
+                    this.m_decayStep = (float)value;
+                    break;
+                case Constants.PARAM_DECAY_RATE:
+                    this.m_rateOfDecay = (float)value;
+                    break;
+                case Constants.PARAM_INV_PERIOD:
+                    this.m_invulnerabilityPeriod = (float)value;
+                    break;
+                case Constants.PARAM_MAX_DPF:
+                    this.m_maximumDamagePerFrame = (float)value;
+                    break;
+                case Constants.PARAM_MAX_HEALTH:
+                    this.SetMaximum((float)value);
+                    break;
+                case Constants.PARAM_MIN_HEALTH:
+                    this.SetMinimum((float)value);
+                    break;
+                case Constants.PARAM_CURRENT_HEALTH:
+                    this.SetHealth((float)value);
+                    break;
+            }
+        }
 
         /// <summary>
         /// Start method gifted by the UnityEngine.
         /// </summary>
         void Start()
         {
-            Initialize();
+            // Stub.
         }
 
         /// <summary>
@@ -451,7 +626,8 @@ namespace Arcana.Entities.Attributes
         
         #endregion
 
-
-
     }
+
+    #endregion
+
 }

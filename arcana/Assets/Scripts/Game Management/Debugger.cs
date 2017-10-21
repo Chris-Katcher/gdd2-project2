@@ -14,7 +14,10 @@ using System.Text;
 using UnityEngine;
 
 namespace Arcana
-{    
+{
+
+    #region // Static Class: Debugger class.
+
     /////////////////////
     // Class declaration.
     /////////////////////
@@ -144,4 +147,7 @@ namespace Arcana
 
         #endregion
     }
+
+    #endregion
+
 }

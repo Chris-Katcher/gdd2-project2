@@ -18,7 +18,7 @@ using UnityCamera = UnityEngine.Camera; // To prevent overwriting our own namesp
 namespace Arcana.Cameras
 {
 
-    #region // CameraManagerFactory class.
+    #region // Class: CameraManagerFactory class.
 
     /////////////////////
     // Factory class.
@@ -27,43 +27,131 @@ namespace Arcana.Cameras
     /// <summary>
     /// Handles creation of the CameraManager class and singleton.
     /// </summary>
-    public static class CameraManagerFactory
+    public class CameraManagerFactory : IFactory<CameraManager>
     {
 
         #region // Static members.
 
         /// <summary>
-        /// Single instance of the CameraManager class.
+        /// Single instance of the factory.
         /// </summary>
-        internal static CameraManager instance = null;
-
-        #endregion
-
-        #region // Static Constructor
+        private static CameraManagerFactory instance = null;
 
         /// <summary>
-        /// Creates a CameraManager component if it doesn't already exist.
+        /// Single instance of the CameraManager class.
         /// </summary>
-        /// <returns>Returns instance of the camera manager.</returns>
-        public static CameraManager CreateComponent(GameObject parent, GameObject _camera = null,
+        private static CameraManager manager = null;
+
+        /// <summary>
+        /// Get reference to CameraManagerFactory.
+        /// </summary>
+        /// <returns>Returns a single factory.</returns>
+        public static CameraManagerFactory Instance()
+        {
+            return instance;
+        }
+
+        /// <summary>
+        /// Get reference to CameraManager.
+        /// </summary>
+        /// <returns>Returns a single manager.</returns>
+        public static CameraManager GetManagerInstance()
+        {
+            return manager;
+        }
+
+        #endregion
+        
+        #region // Factory methods.
+
+        /// <summary>
+        /// Return a single CameraManagerFactory reference.
+        /// </summary>
+        /// <returns>Returns a single factory.</returns>
+        public IFactory<CameraManager> GetInstance()
+        {
+            return Instance();
+        }
+
+        /// <summary>
+        /// Creates a new, empty game object, and returns the CameraManager component back.
+        /// </summary>
+        /// <returns></returns>
+        public CameraManager CreateComponent()
+        {
+            if (!HasManagerInstance())
+            {
+                // Creates a component using the default settings.
+                manager = CreateComponent(Services.CreateEmptyObject("Camera Manager"), CreateSettings());
+            }
+
+            return manager;
+        }
+
+        /// <summary>
+        /// Adds a new component to the parent game object, with parameters.
+        /// </summary>
+        /// <param name="parent">GameObject to add component to.</param>
+        /// <param name="parameters">Settings to apply to the new Entity.</param>
+        /// <returns>Return newly created component.</returns>
+        public CameraManager CreateComponent(GameObject parent, Constraints parameters)
+        {
+            // Check if there is already an instance of the CameraManager component.
+            if (!HasManagerInstance())
+            {
+                // Check game object.
+                if (parent == null)
+                {
+                    // If the parent itself is null, do not return a component.
+                    Debugger.Print("Tried to add a component but parent GameObject is null.", "NULL_REFERENCE");
+                    return null;
+                }
+                
+                // Get reference to existing script if it already exists on this parent.
+                manager = parent.GetComponent<CameraManager>();
+
+                // Assign non-optional information.
+                manager.Initialize();
+
+                // Initialize the entity.
+                foreach (string key in parameters.ValidEntries)
+                {
+                    manager.Initialize(key, parameters.GetEntry(key).Value);
+                }
+            }
+
+            return manager;
+        }
+
+        /// <summary>
+        /// Adds a new, default component, to the parent game object.
+        /// </summary>
+        /// <param name="parent">GameObject to add component to.</param>
+        /// <returns>Return newly created component.</returns>
+        public CameraManager CreateComponent(GameObject parent)
+        {
+            // Creates a component using the default settings.
+            return CreateComponent(parent, CreateSettings());
+        }
+
+        /// <summary>
+        /// Set up the parameters associated with this factory's IFactoryElement.
+        /// </summary>
+        /// <returns>Returns the <see cref="Constraints"/> collection object.</returns>
+        public Constraints CreateSettings(
             float _shakeDecayFactor = Constants.DEFAULT_DECAY_FACTOR,
             float _shakeCycle = 0.0f,
             float _shakePeriod = Constants.DEFAULT_SHAKE_PERIOD,
             float _shakeStrength = Constants.DEFAULT_SHAKE_STRENGTH)
         {
-            // Check if there is already an instance of the CameraManager component.
-            if (!HasInstance())
-            {
-                // If there is no instance, create a new component and return it.
-                instance = parent.AddComponent<CameraManager>();
-                parent.name = "Camera Manager";
-
-                // Initialize the CameraManager.
-                instance.Initialize(_camera, _shakeDecayFactor, _shakeCycle, _shakePeriod, _shakeStrength);
-            }
+            // Create the collection.
+            Constraints parameters = new Constraints();
             
-            // Return the created instance.
-            return instance;
+            // Add non-nulllable types.
+            parameters.AddValue<DecayTracker<float>>(Constants.PARAM_CAMERA_SHAKE, new DecayTracker<float>(0.0f, _shakePeriod, _shakeDecayFactor, _shakeCycle)); // Shake time decay.
+            parameters.AddValue<DecayTracker<float>>(Constants.PARAM_CAMERA_STRENGTH, new DecayTracker<float>(0.005f, _shakeStrength, _shakeDecayFactor, _shakeCycle)); // Shake strength decay.
+            
+            return parameters;
         }
 
         #endregion
@@ -74,9 +162,9 @@ namespace Arcana.Cameras
         /// Checks if there is an instance of the CameraManager already.
         /// </summary>
         /// <returns>Returns true if instance is not null.</returns>
-        public static bool HasInstance()
+        public static bool HasManagerInstance()
         {
-            return (instance != null);
+            return (manager != null);
         }
 
         /// <summary>
@@ -84,9 +172,9 @@ namespace Arcana.Cameras
         /// </summary>
         public static void Release()
         {
-            if (HasInstance())
+            if (HasManagerInstance())
             {
-                UnityEngine.Object.Destroy(instance);
+                UnityEngine.Object.Destroy(manager);
             }
         }
 
@@ -96,7 +184,7 @@ namespace Arcana.Cameras
 
     #endregion
 
-    #region // CameraManager class.
+    #region // Class: CameraManager class.
 
     /////////////////////
     // Blueprint class.
@@ -105,7 +193,7 @@ namespace Arcana.Cameras
     /// <summary>
     /// Handles all functionality related to the camera users see from.
     /// </summary>
-    public class CameraManager : MonoBehaviour
+    public class CameraManager : MonoBehaviour, IFactoryElement
     {
         #region Data Members
 
@@ -117,7 +205,7 @@ namespace Arcana.Cameras
         /// Returns the instance of the manager.
         /// </summary>
         public static CameraManager Instance {
-            get { return CameraManagerFactory.instance; }
+            get { return CameraManagerFactory.GetManagerInstance(); }
         }
 
         /////////////////////
@@ -182,7 +270,7 @@ namespace Arcana.Cameras
         /// </summary>
         public bool HasInstance
         {
-            get { return (CameraManagerFactory.HasInstance()); }
+            get { return (CameraManagerFactory.HasManagerInstance()); }
         }
 
         /// <summary>
@@ -219,12 +307,9 @@ namespace Arcana.Cameras
             float _shakePeriod = Constants.DEFAULT_SHAKE_PERIOD,
             float _shakeStrength = Constants.DEFAULT_SHAKE_STRENGTH)
         {
-            if (!HasInstance)
-            {
-                InitializeCameraObject(_camera);
-                InitializeCamera(_camera.GetComponentInChildren<CameraSettings>().gameObject); // Even if there is no child, the function will properly handle this.
-                InitializeProperties(_shakeDecayFactor, _shakeCycle, _shakePeriod, _shakeStrength);
-            }
+            InitializeCameraObject(_camera);
+            InitializeCamera(_camera.GetComponentInChildren<CameraSettings>().gameObject); // Even if there is no child, the function will properly handle this.
+            InitializeProperties(_shakeDecayFactor, _shakeCycle, _shakePeriod, _shakeStrength);
         }
 
         /// <summary>
@@ -242,6 +327,23 @@ namespace Arcana.Cameras
             this.m_cameraShake = new DecayTracker<float>(0.0f, _shakePeriod, _shakeDecayFactor, _shakeCycle);
             this.m_cameraShakeStrength = new DecayTracker<float>(0.005f, _shakeStrength, _shakeDecayFactor, _shakeCycle);
 
+        }
+        
+        /// <summary>
+        /// Set the value of a property.
+        /// </summary>
+        /// <param name="parameter">Switch trigger that determines which property is set.</param>
+        public virtual void Initialize(string parameter, object value)
+        {
+            switch (parameter)
+            {
+                case Constants.PARAM_CAMERA_SHAKE:
+                    this.m_cameraShake = ((DecayTracker<float>)value);
+                    break;
+                case Constants.PARAM_CAMERA_STRENGTH:
+                    this.m_cameraShakeStrength = ((DecayTracker<float>)value);
+                    break;
+            }
         }
 
         /// <summary>
@@ -279,7 +381,7 @@ namespace Arcana.Cameras
                  // 1. Create an empty game object to store the new camera component.
                  // 2. Add this new game object as a child to our wrapping camera object item.
                  // 3. Pass the return value from AddChild, as the parent parameter for CameraFactory.CreateComponent, netting us our Camera component. 
-                this.m_camera = CameraFactory.GetInstance().CreateComponent(Services.AddChild(this.m_camera_object, Services.CreateEmptyObject("Camera")));
+                this.m_camera = CameraFactory.Instance().CreateComponent(Services.AddChild(this.m_camera_object, Services.CreateEmptyObject("Camera")));
             }
 
             // Since we know our references are hooked properly, we can change the name to reflect this.

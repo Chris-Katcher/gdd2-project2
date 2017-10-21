@@ -17,7 +17,7 @@ using Arcana.Entities.Attributes;
 namespace Arcana.Entities
 {
 
-    #region // Enum EntityType.
+    #region // Enum: EntityType.
 
     /////////////////////
     // Enum declaration for entity types.
@@ -39,7 +39,7 @@ namespace Arcana.Entities
 
     #endregion
 
-    #region // Factory class.
+    #region // Class: EntityFactory class.
 
     /////////////////////
     // Factory Declaration.
@@ -62,7 +62,7 @@ namespace Arcana.Entities
         /// Get reference to EntityFactory.
         /// </summary>
         /// <returns>Returns a single factory.</returns>
-        public static EntityFactory GetInstance()
+        public static EntityFactory Instance()
         {
             if (instance == null)
             {
@@ -70,6 +70,15 @@ namespace Arcana.Entities
             }
 
             return instance;
+        }
+
+        /// <summary>
+        /// Return the instance of the factory.
+        /// </summary>
+        /// <returns>Returns a single factory.</returns>
+        public IFactory<Entity> GetInstance()
+        {
+            return Instance();
         }
 
         #endregion
@@ -159,7 +168,7 @@ namespace Arcana.Entities
 
     #endregion
 
-    #region // Entity class.
+    #region // Class: Entity class.
 
     /////////////////////
     // Entity class.
@@ -230,10 +239,23 @@ namespace Arcana.Entities
         /// Entity's health tracker.
         /// </summary>
         private HealthTracker m_health;
+
+        /// <summary>
+        /// Tracks the status of an entity.
+        /// </summary>
+        private Status m_status;
         
         /////////////////////
         // Properties.
         /////////////////////
+
+        /// <summary>
+        /// Return a reference to this entity's containing body, to refer to other components.
+        /// </summary>
+        public GameObject Self
+        {
+            get { return gameObject; }
+        }
         
         /// <summary>
         /// The entity type belonging to the current entity. (Read-only).
@@ -280,8 +302,7 @@ namespace Arcana.Entities
         /// </summary>
         public bool IsAlive
         {
-            get;
-            set;
+            get { return !m_status.IsDead(); }
         }
 
         #endregion
@@ -293,7 +314,15 @@ namespace Arcana.Entities
         /// </summary>
         protected virtual void Start()
         {
-            this.Initialize();
+            if (m_status == null)
+            {
+                m_status = gameObject.AddComponent<Status>();
+            }
+
+            if (m_status.IsNull)
+            {
+                m_status.Run();
+            }
         }
 
         /// <summary>
@@ -301,18 +330,25 @@ namespace Arcana.Entities
         /// </summary>
         protected virtual void Update()
         {
-            // Call update entity for inherited classes.
-            UpdateEntity();
+            if (m_status.IsRunning())
+            {
+                // Call update entity for inherited classes.
+                UpdateEntity();
 
-            if (this.IsAlive)
-            {
-                // Call update life for inherited classes.
-                UpdateLife();
-            }
-            else
-            {
-                // Call on death for inherited classes.
-                OnDeath();
+                if (this.IsAlive)
+                {
+                    // Call update life for inherited classes.
+                    UpdateLife();
+                }
+                else if (m_status.JustKilled())
+                {
+                    // Call on death for inherited classes.
+                    OnDeath();
+                }
+                else if (m_status.IsDead())
+                {
+                    // Call while dead.
+                }
             }
         }
 
@@ -323,7 +359,10 @@ namespace Arcana.Entities
         {
             if (m_health.IsVulnerable())
             {
-                this.IsAlive = m_health.IsAlive();
+                if (!m_health.IsAlive())
+                {
+                    m_status.Kill();
+                }
             }
         }
 
@@ -340,7 +379,33 @@ namespace Arcana.Entities
         /// </summary>
         protected virtual void OnDeath()
         {
-            // Stub.
+            // Release on death.
+            m_status.Release();
+        }
+
+        /// <summary>
+        /// Reset the Entity.
+        /// </summary>
+        public virtual void Reset()
+        {
+            m_status.TriggerReset();
+            m_status.Run();
+        }
+
+        /// <summary>
+        /// Pause the Entity updates.
+        /// </summary>
+        public virtual void Pause()
+        {
+            m_status.Pause();
+        }
+
+        /// <summary>
+        /// Resume the Entity updates.
+        /// </summary>
+        public virtual void Resume()
+        {
+            m_status.Resume();
         }
 
         /// <summary>
@@ -375,7 +440,7 @@ namespace Arcana.Entities
             // Get components.
             if (_health == null)
             {
-                this.m_health = HealthTrackerFactory.CreateComponent(gameObject);
+                this.m_health = HealthTrackerFactory.Instance().CreateComponent(gameObject);
             }
             else
             {
