@@ -28,12 +28,25 @@ public class Player : MonoBehaviour {
     /// fires a projectile based upon a projectile
     /// </summary>
     /// <param name="fire">whether or not the fire button ahs been pressed</param>
-    public void fireProjPlayer(bool fire)
+    public void fireProjPlayer(bool fire1, bool fire2, bool fire3)
     {
-
-        //passes in bool and player position
-        m_projectile.fireProjectile(fire, transform.position);
+		// if else prevents players from mashing all buttons at once.
+		if (fire1)
+		{
+			//passes in bool and player position
+			m_projectile.fireProjectile1(fire1, transform.position);
+		}
+		else if (fire2)
+		{
+			m_projectile.fireProjectile2(fire2, transform.position);
+		}
+		else if (fire3)
+		{
+			m_projectile.fireProjectile3(fire3, transform.position);
+		}
 
     }
+
+	//TODO: add other projectiles 
 
 }

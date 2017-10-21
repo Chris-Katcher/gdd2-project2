@@ -83,15 +83,19 @@ public class SystemController : MonoBehaviour {
         float translation = m_inputManager.getPlayer1Translation();
         //gets bool of whether plyaer1 has jumped
         bool jump_pressed = m_inputManager.getPlayer1Jump();
-        //gets bool of whether fire button has been pressed
+        //gets bool of whether fire button has been pressed of the three types
         bool fire1_pressed = m_inputManager.getProjectileFire();
+		bool fire2_pressed = m_inputManager.getProjectileFire2();
+		bool fire3_pressed = m_inputManager.getProjectileFire3();
 
         //updates the wizard position and jump
         m_gameManager.UpdatePosWizzard1(translation);
         m_gameManager.UpdateJumpStatus(jump_pressed);
 
         //fires a projectile
-        m_player.fireProjPlayer(fire1_pressed);
+        m_player.fireProjPlayer(fire1_pressed, fire2_pressed, fire3_pressed);
+		//TODO: implement other projectiles
+		//m_player.fire
 
         // TODO: Stub code.
 

@@ -53,10 +53,24 @@ namespace Arcana.InputManagement
         }
 
         //returns whether or not the player has pressed the fire button
+		// The Green element is mapped to the green button (A)
         public bool getProjectileFire()
         {
-            return (bool)Input.GetButtonDown("Fire1");
+            return (bool)Input.GetButtonDown("Fire2");
         }
+
+		// The Blue element is mapped to the blue button (X)
+		public bool getProjectileFire2()
+		{
+			return (bool)Input.GetButtonDown("Fire3");
+			
+		}
+
+		// The red element is mapped to the red button (B)
+		public bool getProjectileFire3()
+		{
+			return (bool)Input.GetButtonDown("Fire1");
+		}
     }
 
     

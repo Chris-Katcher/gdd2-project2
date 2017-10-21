@@ -31,10 +31,10 @@ namespace Arcana.Entities
         //floats
         public float m_mass;
         public float m_maxSpeed;
-        public float m_initialSpeed = 1.0f;
+        public float m_initialSpeed;
 
         //initial velocity to be used in testing
-        private Vector3 initalVelocity = new Vector3(0.0f, -1.0f, 0.0f);
+        private Vector3 initalVelocity;
 
         // Reference to projectile Launcher
         public GameObject projectile_go;
@@ -46,11 +46,36 @@ namespace Arcana.Entities
         /// <param name="y">Y position</param>
         /// <param name="force">Force to be applied to the projectil||Direction of travel</param>
         /// <param name="position"></param>
-        public Projectile(float x, float y, Vector3 force)
+		/// <param name="type">Char for element 'F' for Fire, 'W' for water, 'G' for grass</param>
+        public Projectile(float x, float y, Vector3 force, char type)
         {
 
             //instantiates the projectile_go and adds it to the scene
-            projectile_go = UnityEngine.Resources.Load("LightningBolt") as GameObject;
+			// if char = F, make fire
+			if (type == 'F')
+			{
+				projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;
+			}
+			// if char = W, make water
+			else if (type == 'W')
+			{
+				projectile_go = UnityEngine.Resources.Load("Water") as GameObject;
+			}
+			// if char = G, make grass
+			else if (type == 'G')
+			{
+				projectile_go = UnityEngine.Resources.Load("Grass") as GameObject;
+			}
+			// else debug log that incorrect char was set
+			else
+			{
+				Debug.Log("Type '" + type + "' not recgonized. Please check the projectile manager script");
+				return;
+			}
+
+			
+			
+            
             Instantiate(projectile_go, new Vector3(x,y,0), Quaternion.identity);
 
             //sets force for now UNUSED
@@ -67,11 +92,11 @@ namespace Arcana.Entities
 
             //sets velocity
             m_velocity = new Vector3(m_direction.x, m_direction.y, m_direction.z);
+			
+			// Sets initial velocity
+			initalVelocity = new Vector3(m_initialSpeed, m_initialSpeed, 0.0f);
 
-            //sets mass
-            m_mass = 1.0f;
-            
-            //ApplyForce(initalVelocity);
+			ApplyForce(initalVelocity);
 
         }
 
@@ -95,14 +120,12 @@ namespace Arcana.Entities
         void UpdatePostition()
         {
 
-            //applys a force to get acceleration
-            ApplyForce(new Vector3(1.0f,1.0f,0.0f));
-
             //divides final acceleration by mass
             Vector3 scaleAcceleration = m_acceleration / m_mass;
 
-            //updates velocity based upon acceleration
-            m_velocity += scaleAcceleration * Time.deltaTime;
+
+			m_velocity += scaleAcceleration * Time.deltaTime;
+
 
             //resets acceleration to 0
             m_acceleration = Vector3.zero;
@@ -163,8 +186,8 @@ namespace Arcana.Entities
         public void ApplyForce(Vector3 p_force)
         {
 
-            //if acceleration == 0, then set equal to the force. Avoids nulls.
-            if(m_acceleration == Vector3.zero)
+			//if acceleration == 0, then set equal to the force. Avoids nulls.
+			if (m_acceleration == Vector3.zero)
             {
 
                 m_acceleration = p_force * 5;
@@ -173,12 +196,21 @@ namespace Arcana.Entities
             //else, add the force to the acceleration
             else
             {
-
-                m_acceleration += p_force * 5;
+					m_acceleration += p_force * 5;
 
             }
 
         }
+
+		/// <summary>
+		/// Stops all projectile movement and disables collider.
+		/// </summary>
+		public void Stop()
+		{
+			m_velocity = Vector3.zero;
+			m_mass = 100;
+			GetComponent<BoxCollider2D>().enabled = !enabled;
+		}
 
         
     }
