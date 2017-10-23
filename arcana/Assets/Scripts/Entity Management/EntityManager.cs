@@ -267,8 +267,6 @@ namespace Arcana.Entities
             else
             {
                 Resume(this.m_entities);
-
-
             }
         }
 

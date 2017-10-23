@@ -82,6 +82,7 @@ namespace Arcana.Cameras
             if (!HasManagerInstance())
             {
                 // Creates a component using the default settings.
+                Debugger.Print("Create CameraManager on an empty game object, with the default settings.");
                 manager = CreateComponent(Services.CreateEmptyObject("Camera Manager"), CreateSettings());
             }
 
@@ -106,9 +107,17 @@ namespace Arcana.Cameras
                     Debugger.Print("Tried to add a component but parent GameObject is null.", "NULL_REFERENCE");
                     return null;
                 }
-                
+
                 // Get reference to existing script if it already exists on this parent.
                 manager = parent.GetComponent<CameraManager>();
+
+                // If the manager is null.
+                if (manager == null)
+                {
+                    // If the manager instance is null, then create the component.
+                    Debugger.Print("Create and add the CameraManager component.");
+                    manager = parent.AddComponent<CameraManager>();
+                }
 
                 // Assign non-optional information.
                 manager.Initialize();
@@ -116,6 +125,7 @@ namespace Arcana.Cameras
                 // Initialize the entity.
                 foreach (string key in parameters.ValidEntries)
                 {
+                    Debugger.Print("Initialize the CameraManager component.");
                     manager.Initialize(key, parameters.GetEntry(key).Value);
                 }
             }

@@ -13,6 +13,7 @@ using Arcana;
 using Arcana.InputManagement;
 using Arcana.UI;
 using Arcana.Entities;
+using Arcana.Cameras;
 
 /////////////////////
 // Class declaration.
@@ -23,40 +24,70 @@ using Arcana.Entities;
 /// C# scripts for Unity must inherit the <see cref="MonoBehavior"/> class.
 /// </summary>
 public class SystemController : MonoBehaviour {
-    
+
     #region Data Members 
 
     /////////////////////
-    // Class members.
+    // Data members.
     /////////////////////
-    
-    // Create references to the UIManager, GameManager, and InputManager. //
-    
-    /// <summary>
-    /// SystemController access to the global UIManager.
-    /// </summary>
-    public UIManager m_uiManager;
-    
-    /// <summary>
-    /// SystemController access to the global GameManager.
-    /// </summary>
-    public GameManager m_gameManager;
-    
-    /// <summary>
-    /// SystemController access to the global InputManager.
-    /// </summary>
-    public InputManager m_inputManager;
-
-    private ProjectileManager m_projectile;
-
-    public Player m_player;
-    
-    // Flags. //
 
     /// <summary>
-    /// Initialization flag. False means this class has not yet been initialized.
+    /// If true, debug messages will print for this program.
     /// </summary>
-    public bool m_init = false;
+    public bool DEBUG_MODE = true;    // Will allow setting of debug mode.
+    
+    /// <summary>
+    /// Initialization flag.
+    /// </summary>
+    private bool m_initialized = false;
+
+    // Set up the managers.
+
+    /// <summary>
+    /// Empty game object that has all the manager components on it.
+    /// </summary>
+    private GameObject m_managers = null;
+
+    /// <summary>
+    /// The camera manager handles the cameras in the game.
+    /// </summary>
+    private CameraManager m_cameraManager = null;
+
+    /////////////////////
+    // Properties.
+    /////////////////////
+
+    /// <summary>
+    /// Name of the game object.
+    /// </summary>
+    private string Name
+    {
+        get { return "Arcana (System Controller)"; }
+    }
+
+    /// <summary>
+    /// Returns initialization flag.
+    /// </summary>
+    public bool Initialized
+    {
+        get { return this.m_initialized; }
+    }
+
+    /// <summary>
+    /// Returns reference to the managers object.
+    /// </summary>
+    public GameObject Managers
+    {
+        get { return this.m_managers; }
+    }
+
+    /// <summary>
+    /// Returns reference to the CameraManager.
+    /// </summary>
+    public CameraManager CameraController
+    {
+        get { return this.m_cameraManager; }
+    }
 
     #endregion
 
@@ -67,10 +98,8 @@ public class SystemController : MonoBehaviour {
     /// </summary>
     void Start ()
     {
-
+        // Initialize the program.
         this.Initialize();
-        print("System Conrtoller Init");
-
 	}
 	
 	/// <summary>
@@ -78,7 +107,13 @@ public class SystemController : MonoBehaviour {
     /// </summary>
 	void Update () 
     {
+        if (!Initialized)
+        {
+            // Initialize the controller if it hasn't been initialized.
+            this.Initialize();
+        }
 
+        /*
         //gets translation of player one
         float translation = m_inputManager.getPlayer1Translation();
         //gets bool of whether plyaer1 has jumped
@@ -94,7 +129,7 @@ public class SystemController : MonoBehaviour {
         //fires a projectile
         m_gameManager.fireProjPlayer1(fire1_pressed);
 
-        // TODO: Stub code.
+        // TODO: Stub code.*/
 
 	}
 
@@ -107,32 +142,64 @@ public class SystemController : MonoBehaviour {
     /// </summary>
     private void Initialize()
     {
-        // Create and initialize managers.
-        gameObject.AddComponent<InputManager>();
-        gameObject.AddComponent<Player>();
-        gameObject.AddComponent<GameManager>();
-        gameObject.AddComponent<InputManager>();
+        // If this hasn't been initialized.
 
-        // Set references to managers.
-        m_uiManager = new UIManager();
-        m_gameManager = gameObject.GetComponent<GameManager>();
-        m_inputManager = gameObject.GetComponent<InputManager>();
-        //m_player = gameObject.GetComponent<Player>();
-        m_gameManager.Initialize();
+        if (!this.Initialized) {
+            // Set the debug mode.
+            Debugger.SetDebugMode(DEBUG_MODE);
+            Debugger.Print("Initialize system controller.");
 
-        // Set initialized.
-        m_init = true;
+            // Set up the name for this manager.
+            gameObject.name = this.Name;
 
+            // Create the managers.
+            BuildManagers();
+
+            // Set the flags.
+            this.m_initialized = true;
+        }
+    }
+
+    /// <summary>
+    /// Constructs the manager objects and its components.
+    /// </summary>
+    private void BuildManagers()
+    {
+        // Build the manager object.
+        Debugger.Print("Build the manager.");
+        if (this.Managers == null)
+        {
+            this.m_managers = Services.CreateEmptyObject("Game Managers");
+        }
+
+        // Build the components.
+        Debugger.Print("Build manager components.");
+
+    }
+
+    /// <summary>
+    /// Builds the camera manager.
+    /// </summary>
+    private void BuildCameraManager()
+    {
+        // Get a reference to the factory.
+        Debugger.Print("Get instance to the factory.");
+        CameraManagerFactory factory = CameraManagerFactory.Instance();
+
+        // Set up initialization settings for the camera manager.
+        Debugger.Print("Create the factory constraints for the CameraManager.");
+        Constraints managerSettings = factory.CreateSettings(); // Filled with default values. Edit this to change component settings on creation.
+
+        // Build the manager.
+        Debugger.Print("Create the CameraManager component, add it to the Managers GameObject, and retain the reference.");
+        this.m_cameraManager = factory.CreateComponent(this.Managers, managerSettings);
     }
 
     #endregion
 
     #region Accessor Methods
 
-    private bool IsInitialized()
-    {
-        return m_init;
-    }
+    // TODO: Stub.
 
     #endregion
 
