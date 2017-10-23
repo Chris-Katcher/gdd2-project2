@@ -34,11 +34,20 @@ public class Player : MonoBehaviour {
     /// fires a projectile based upon a projectile
     /// </summary>
     /// <param name="fire">whether or not the fire button ahs been pressed</param>
-    public void fireProjPlayer(bool fire, Vector3 pos)
+    public void fireProjPlayer(bool fire, Vector3 pos, bool facingRight)
     {
-
+        if (facingRight)
+        {
+            pos.x += .5f;
+            pos.y += .1f;
+        } else
+        {
+            pos.x -= .5f;
+            pos.y += .1f;
+        }
+           
         //passes in bool and player position
-        m_projectile.fireProjectile(fire, pos);
+        m_projectile.fireProjectile(fire, pos, facingRight);
 
     }
 

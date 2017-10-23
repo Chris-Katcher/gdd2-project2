@@ -38,6 +38,10 @@ namespace Arcana
 
         public Player m_player1;
 
+        private bool isFacingRight = true;
+
+        private SpriteRenderer wizzard_sr;
+
         // TODO: Stub.
 
         public void UpdatePosWizzard1(float translation)
@@ -66,6 +70,15 @@ namespace Arcana
                 charMovement.jump_enabled = false;
             }
 
+            if(translation > 0 && !isFacingRight)
+            {
+                Flip();
+            }
+            else if (translation < 0 && isFacingRight)
+            {
+                Flip();
+            }
+
             wizzard1.transform.rotation = Quaternion.identity;
         }
 
@@ -79,9 +92,18 @@ namespace Arcana
             }
         }
 
+        public void Flip()
+        {
+            wizzard_sr.flipX = isFacingRight;
+            isFacingRight = !isFacingRight;
+            Vector3 theScale = transform.localScale;
+            theScale.x *= -1;
+            transform.localScale = theScale;
+        }
+
         public void fireProjPlayer1(bool fire1_pressed)
         {
-            m_player1.fireProjPlayer(fire1_pressed, wizzard1.transform.position);
+            m_player1.fireProjPlayer(fire1_pressed, wizzard1.transform.position, this.isFacingRight);
         }
 
         public void Initialize()
@@ -94,6 +116,7 @@ namespace Arcana
             Instantiate(wizzard1, new Vector3(1, 0, 0), Quaternion.identity);
 
             wizzard1_rb = wizzard1.GetComponent<Rigidbody2D>();
+            wizzard_sr = wizzard1.GetComponent<SpriteRenderer>();
             m_init = true;
 
             this.m_player1 = gameObject.GetComponent<Player>();

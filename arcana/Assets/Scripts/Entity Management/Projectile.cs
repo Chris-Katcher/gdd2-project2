@@ -55,13 +55,13 @@ namespace Arcana.Entities
             //GameObject projectile_go = UnityEngine.Resources.Load("FireBall") as GameObject;
             //Instantiate(projectile_go, new Vector3(x+1,y+1,0), Quaternion.identity);
 
-            proj_rb = this.GetComponent<Rigidbody2D>();
+            //proj_rb = this.GetComponent<Rigidbody2D>();
 
             float speed = 1.0f;
             float proj_force = 1000f;
             //* speed * proj_force
             //sets force for now UNUSED
-            proj_rb.AddForce(new Vector2(1000f, 0 ));
+            //proj_rb.AddForce(new Vector2(1000f, 0 ));
 
         }
 
@@ -90,27 +90,35 @@ namespace Arcana.Entities
 
             //Updates the velocity
             //this.UpdatePostition();
-            
+            //proj_rb.velocity = Vector2.right * 1.0f * 100000f;
             //Updates the position
             //this.SetTransform();
-            
+
+        }
+
+        void OnCollisionStay2D(Collision2D coll)
+        {
+            if (coll.transform.name != "Wizzard1(Clone)" && coll.transform.name != "FireBall(Clone)") 
+            {
+                Destroy(gameObject);
+            }
         }
 
         public void updatePos()
         {
-            proj_rb.velocity = Vector2.right * 1.0f * 100000f;
+            //proj_rb.velocity = Vector2.right * 1.0f * 100000f;
 
-            if (1.0f * proj_rb.velocity.x < m_maxSpeed)
-            {
+            //if (1.0f * proj_rb.velocity.x < m_maxSpeed)
+            //{
 
-                proj_rb.velocity = Vector2.right * 1.0f * 100000f;
+            //    proj_rb.velocity = Vector2.right * 1.0f * 100000f;
 
-            }
+            //}
 
-            if (Mathf.Abs(proj_rb.velocity.x) > m_maxSpeed)
-            {
-                proj_rb.velocity = new Vector2(Mathf.Sign(proj_rb.velocity.x) * m_maxSpeed, proj_rb.velocity.y);
-            }
+            //if (Mathf.Abs(proj_rb.velocity.x) > m_maxSpeed)
+            //{
+            //    proj_rb.velocity = new Vector2(Mathf.Sign(proj_rb.velocity.x) * m_maxSpeed, proj_rb.velocity.y);
+            //}
         }
 
         /// <summary>
