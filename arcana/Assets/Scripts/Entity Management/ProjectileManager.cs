@@ -66,7 +66,12 @@ namespace Arcana.Entities
 
         public void updateProjectiles()
         {
-            
+            foreach(GameObject p in projectiles)
+            {
+                Rigidbody2D rb = p.GetComponent<Rigidbody2D>();
+                float y = (float)Math.Cos(Time.frameCount*.85 );
+                //rb.AddForce(Vector2.up * y * 150f);
+            }
         }
     }
 }

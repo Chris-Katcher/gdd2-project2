@@ -100,7 +100,7 @@ namespace Arcana.Entities
         {
             if (coll.transform.name != "Wizzard1(Clone)" && coll.transform.name != "FireBall(Clone)") 
             {
-                Destroy(gameObject);
+                //Destroy(gameObject);
             }
         }
 
