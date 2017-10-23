@@ -47,22 +47,22 @@ namespace Arcana.Entities
         /// <param name="force">Force to be applied to the projectil||Direction of travel</param>
         /// <param name="position"></param>
 		/// <param name="type">Char for element 'F' for Fire, 'W' for water, 'G' for grass</param>
-        public Projectile(float x, float y, Vector3 force, char type)
+        public Projectile(float x, float y, Vector3 force, int type)
         {
 
             //instantiates the projectile_go and adds it to the scene
 			// if char = F, make fire
-			if (type == 'F')
+			if (type == 100)
 			{
 				projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;
 			}
 			// if char = W, make water
-			else if (type == 'W')
+			else if (type == 10)
 			{
 				projectile_go = UnityEngine.Resources.Load("Water") as GameObject;
 			}
 			// if char = G, make grass
-			else if (type == 'G')
+			else if (type == 1)
 			{
 				projectile_go = UnityEngine.Resources.Load("Grass") as GameObject;
 			}

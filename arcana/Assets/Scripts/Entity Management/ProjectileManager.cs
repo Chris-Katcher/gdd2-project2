@@ -19,7 +19,7 @@ namespace Arcana.Entities
         /// <param name="force">the force to be exerted on the projectile||its travel direction</param>
         /// <param name="position">the starting position of the projectile</param>
 		/// <param name="type">The element of projectile to make 'F for fire, 'W' for water, 'G' Grass</param>
-        private void createProjectile(float x, float y, Vector3 force, char type)
+        private void createProjectile(float x, float y, Vector3 force, int type)
         {
 
             //creates the projectile proj
@@ -43,7 +43,7 @@ namespace Arcana.Entities
             {
 
                 //creates a projectile of type 'Fire'
-                createProjectile(position.x,position.y,new Vector3(4.0f,0.0f,0), 'F');
+                createProjectile(position.x,position.y,new Vector3(4.0f,0.0f,0), 100);
 
             }
 
@@ -58,7 +58,7 @@ namespace Arcana.Entities
 			{
 
 				//creates a projectile of type 'Water'
-				createProjectile(position.x, position.y, new Vector3(4.0f, 0.0f, 0), 'W');
+				createProjectile(position.x, position.y, new Vector3(4.0f, 0.0f, 0), 10);
 
 			}
 
@@ -72,7 +72,7 @@ namespace Arcana.Entities
 			{
 
 				//creates a projectile of type 'Grass'
-				createProjectile(position.x, position.y, new Vector3(4.0f, 0.0f, 0), 'G');
+				createProjectile(position.x, position.y, new Vector3(4.0f, 0.0f, 0), 1);
 
 			}
 
