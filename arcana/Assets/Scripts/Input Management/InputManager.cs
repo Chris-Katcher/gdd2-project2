@@ -55,6 +55,10 @@ namespace Arcana.InputManagement
         //returns whether or not the player has pressed the fire button
         public bool getProjectileFire()
         {
+            if(Input.GetAxis("Fire1Controller") != 0)
+            {
+                return true;
+            }
             return (bool)Input.GetButtonDown("Fire1");
         }
     }

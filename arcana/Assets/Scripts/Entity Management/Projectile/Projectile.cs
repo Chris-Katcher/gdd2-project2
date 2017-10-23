@@ -30,14 +30,16 @@ namespace Arcana.Entities
 
         //floats
         public float m_mass;
-        public float m_maxSpeed;
+        public float m_maxSpeed = 5.0f;
         public float m_initialSpeed = 1.0f;
 
         //initial velocity to be used in testing
-        private Vector3 initalVelocity = new Vector3(0.0f, -1.0f, 0.0f);
+        //private Vector3 initalVelocity = new Vector3(0.0f, -1.0f, 0.0f);
 
         // Reference to projectile Launcher
-        public GameObject projectile_go;
+        //public GameObject projectile_go;
+
+        private Rigidbody2D proj_rb;
 
         /// <summary>
         /// Projectile Constructor
@@ -46,15 +48,20 @@ namespace Arcana.Entities
         /// <param name="y">Y position</param>
         /// <param name="force">Force to be applied to the projectil||Direction of travel</param>
         /// <param name="position"></param>
-        public Projectile(float x, float y, Vector3 force)
+        public void init_projectile(float x, float y, Vector3 force)
         {
 
             //instantiates the projectile_go and adds it to the scene
-            projectile_go = UnityEngine.Resources.Load("LightningBolt") as GameObject;
-            Instantiate(projectile_go, new Vector3(x,y,0), Quaternion.identity);
+            //GameObject projectile_go = UnityEngine.Resources.Load("FireBall") as GameObject;
+            //Instantiate(projectile_go, new Vector3(x+1,y+1,0), Quaternion.identity);
 
+            //proj_rb = this.GetComponent<Rigidbody2D>();
+
+            float speed = 1.0f;
+            float proj_force = 1000f;
+            //* speed * proj_force
             //sets force for now UNUSED
-            m_direction += force;
+            //proj_rb.AddForce(new Vector2(1000f, 0 ));
 
         }
 
@@ -66,7 +73,7 @@ namespace Arcana.Entities
         {
 
             //sets velocity
-            m_velocity = new Vector3(m_direction.x, m_direction.y, m_direction.z);
+            //m_velocity = new Vector3(m_direction.x, m_direction.y, m_direction.z);
 
             //sets mass
             m_mass = 1.0f;
@@ -82,11 +89,36 @@ namespace Arcana.Entities
         {
 
             //Updates the velocity
-            this.UpdatePostition();
-
+            //this.UpdatePostition();
+            //proj_rb.velocity = Vector2.right * 1.0f * 100000f;
             //Updates the position
-            this.SetTransform();
+            //this.SetTransform();
 
+        }
+
+        void OnCollisionStay2D(Collision2D coll)
+        {
+            if (coll.transform.name != "Wizzard1(Clone)" && coll.transform.name != "FireBall(Clone)") 
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        public void updatePos()
+        {
+            //proj_rb.velocity = Vector2.right * 1.0f * 100000f;
+
+            //if (1.0f * proj_rb.velocity.x < m_maxSpeed)
+            //{
+
+            //    proj_rb.velocity = Vector2.right * 1.0f * 100000f;
+
+            //}
+
+            //if (Mathf.Abs(proj_rb.velocity.x) > m_maxSpeed)
+            //{
+            //    proj_rb.velocity = new Vector2(Mathf.Sign(proj_rb.velocity.x) * m_maxSpeed, proj_rb.velocity.y);
+            //}
         }
 
         /// <summary>

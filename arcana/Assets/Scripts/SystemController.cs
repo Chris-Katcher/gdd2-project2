@@ -86,12 +86,13 @@ public class SystemController : MonoBehaviour {
         //gets bool of whether fire button has been pressed
         bool fire1_pressed = m_inputManager.getProjectileFire();
 
+        
         //updates the wizard position and jump
         m_gameManager.UpdatePosWizzard1(translation);
         m_gameManager.UpdateJumpStatus(jump_pressed);
-
+        
         //fires a projectile
-        m_player.fireProjPlayer(fire1_pressed);
+        m_gameManager.fireProjPlayer1(fire1_pressed);
 
         // TODO: Stub code.
 
@@ -116,7 +117,7 @@ public class SystemController : MonoBehaviour {
         m_uiManager = new UIManager();
         m_gameManager = gameObject.GetComponent<GameManager>();
         m_inputManager = gameObject.GetComponent<InputManager>();
-        m_player = gameObject.GetComponent<Player>();
+        //m_player = gameObject.GetComponent<Player>();
         m_gameManager.Initialize();
 
         // Set initialized.
