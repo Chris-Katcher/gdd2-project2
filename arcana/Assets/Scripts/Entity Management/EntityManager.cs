@@ -3,12 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Arcana.Entities.Attributes;
 
 
 namespace Arcana.Entities
 {
 
     #region // Class: EntityManagerFactory class.
+
+    /////////////////////
+    // Factory class.
+    /////////////////////
 
     /// <summary>
     /// Factory that fabricates EntityManager objects, and, keeps track of its instancing.
@@ -28,32 +33,10 @@ namespace Arcana.Entities
         private static EntityManager manager = null;
 
         /// <summary>
-        /// Returns EntityManager instance.
+        /// Returns EntityManagerFactory instance.
         /// </summary>
-        /// <returns>Returns reference to manager instance.</returns>
-        public static EntityManager Instance()
-        {
-            return manager;
-        }
-
-        /// <summary>
-        /// Returns true if there is a manager instance.
-        /// </summary>
-        /// <returns>Returns flag defining instance state.</returns>
-        public static bool HasManagerInstance()
-        {
-            return (Instance() != null);
-        }
-
-        #endregion
-
-        #region // Service Methods.
-
-        /// <summary>
-        /// Get (or create) the single instance of the factory.
-        /// </summary>
-        /// <returns>Returns a single factory instance.</returns>
-        public IFactory<EntityManager> GetInstance()
+        /// <returns>Returns reference to manager factory instance.</returns>
+        public static EntityManagerFactory Instance()
         {
             if (instance == null)
             {
@@ -64,11 +47,56 @@ namespace Arcana.Entities
         }
 
         /// <summary>
-        /// Create component on the parent object with supplied settings.
+        /// Get reference to the manager.
         /// </summary>
-        /// <param name="parent"></param>
-        /// <param name="parent"></param>
-        /// <returns></returns>
+        /// <returns>Returns a single manager.</returns>
+        public static EntityManager GetManagerInstance()
+        {
+            return manager;
+        }
+        
+        /// <summary>
+        /// On creation, set this to be the instance.
+        /// </summary>
+        public EntityManagerFactory()
+        {
+            instance = this;
+        }
+
+        #endregion
+
+        #region // Factory Methods.
+
+        /// <summary>
+        /// Get (or create) the single instance of the factory.
+        /// </summary>
+        /// <returns>Returns a single factory instance.</returns>
+        public IFactory<EntityManager> GetInstance()
+        {
+            return Instance();
+        }
+
+        /// <summary>
+        /// Create component on new empty object with default settings.
+        /// </summary>
+        /// <returns>Returns newly created component.</returns>
+        public EntityManager CreateComponent()
+        {
+            if (!HasManagerInstance())
+            {
+                Debugger.Print("Create EntityManager on an empty game object, with the default settings.");
+                manager = CreateComponent(Services.CreateEmptyObject("Entity Manager"), CreateSettings());
+            }
+
+            return manager;
+        }
+        
+        /// <summary>
+        /// Adds a new component to the parent game object, with parameters.
+        /// </summary>
+        /// <param name="parent">GameObject to add component to.</param>
+        /// <param name="parameters">Settings to apply to the new Entity.</param>
+        /// <returns>Return newly created component.</returns>
         public EntityManager CreateComponent(GameObject parent, Constraints parameters)
         {
             // Check if there is already an instance of the EntityManager component.
@@ -84,6 +112,14 @@ namespace Arcana.Entities
 
                 // Get reference to existing script if it already exists on this parent.
                 manager = parent.GetComponent<EntityManager>();
+
+                // If the manager is null.
+                if (manager == null)
+                {
+                    // If the manager instance is null, then create the component.
+                    Debugger.Print("Create and add the EntityManager component.");
+                    manager = parent.AddComponent<EntityManager>();
+                }
 
                 // Assign non-optional information.
                 manager.Initialize();
@@ -113,19 +149,6 @@ namespace Arcana.Entities
             return manager;
         }
 
-        /// <summary>
-        /// Create component on new empty object with default settings.
-        /// </summary>
-        /// <returns>Returns newly created component.</returns>
-        public EntityManager CreateComponent()
-        {
-            if (!HasManagerInstance())
-            {
-                manager = CreateComponent(Services.CreateEmptyObject("Entity Manager"), CreateSettings());
-            }
-
-            return manager;
-        }
 
         /// <summary>
         /// Create the Constraints for initialization of the fabricated class.
@@ -134,6 +157,7 @@ namespace Arcana.Entities
         public Constraints CreateSettings()
         {
             // Create the collection.
+            Debugger.Print("Creating settings for EntityManager initialization.");
             Constraints parameters = new Constraints();
 
             // TODO: Add non-nulllable types.
@@ -144,11 +168,39 @@ namespace Arcana.Entities
 
         #endregion
 
+        #region // Service Methods.
+
+        /// <summary>
+        /// Returns true if there is a manager instance.
+        /// </summary>
+        /// <returns>Returns flag defining instance state.</returns>
+        public static bool HasManagerInstance()
+        {
+            return (GetManagerInstance() != null);
+        }
+
+        /// <summary>
+        /// Delete the instance of the EntityManager.
+        /// </summary>
+        public static void Release()
+        {
+            if (HasManagerInstance())
+            {
+                UnityEngine.Object.Destroy(manager);
+            }
+        }
+
+        #endregion
+
     }
 
     #endregion
 
     #region // Class: EntityManager class.
+
+    /////////////////////
+    // Blueprint class.
+    /////////////////////
 
     /// <summary>
     /// EntityManager contains references to all the entities in the scene.
@@ -161,41 +213,46 @@ namespace Arcana.Entities
         /// <summary>
         /// Return reference to the instance of the EntityManager.
         /// </summary>
-        public static EntityManager GetInstance()
+        public static EntityManager Instance
         {
-            return EntityManagerFactory.Instance();
+            get { return EntityManagerFactory.GetManagerInstance(); }
         }
 
         /// <summary>
         /// Return true if instance exists.
         /// </summary>
+        /// <returns>Returns a boolean value.</returns>
         public static bool HasInstance()
         {
-            return (GetInstance() != null);
+            return (EntityManager.Instance != null);
         }
 
         #endregion
 
         #region // Data Members.
 
+        /////////////////////
         // Fields.
+        /////////////////////
 
         /// <summary>
-        /// List of all the Entity objects handled by the manager.
+        /// Manager status tracking for all entities.
+        /// </summary>
+        private Status m_status;
+
+        /// <summary>
+        /// Reference to all entities in the environment.
         /// </summary>
         private List<Entity> m_entities;
-
+        
         /// <summary>
         /// Stores cache of GameObjects with entity components. Only updates when requested.
         /// </summary>
         private List<GameObject> m_objects;
 
-        /// <summary>
-        /// Pause flag will pause all other entities, while paused.
-        /// </summary>
-        private bool m_pause;
-
+        /////////////////////
         // Properties.
+        /////////////////////
 
         /// <summary>
         /// Returns a list of all the GameObjects with Entity components, handled by this manager.
@@ -220,15 +277,7 @@ namespace Arcana.Entities
                 return m_objects;
             }
         }
-
-        /// <summary>
-        /// Determines if the manager has been paused.
-        /// </summary>
-        public bool IsPaused
-        {
-            get { return this.m_pause; }
-        }
-
+        
         /// <summary>
         /// Determine if the manager is empty.
         /// </summary>
@@ -251,7 +300,9 @@ namespace Arcana.Entities
         /// </summary>
         public void Start()
         {
-            // Stub;
+            // Create the status.
+            this.m_status = new Status();
+            this.m_status.Initialize();
         }
 
         /// <summary>
@@ -259,15 +310,12 @@ namespace Arcana.Entities
         /// </summary>
         public void Update()
         {
-            // Handle pausing all the entities.
-            if (IsPaused)
+            if (this.m_status.IsInitializing())
             {
-                Pause(this.m_entities);
+                this.Initialize();
+                this.m_status.Start();
             }
-            else
-            {
-                Resume(this.m_entities);
-            }
+
         }
 
         #endregion
@@ -279,7 +327,12 @@ namespace Arcana.Entities
         /// </summary>
         internal void Initialize()
         {
-            // Stub;
+            // Initialize the entity manager.
+            Debugger.Print("Initializing Entity Manager.");
+
+            // Create the lists.
+            this.m_objects = new List<GameObject>();
+            this.m_entities = new List<Entity>();
         }
 
         /// <summary>
@@ -304,7 +357,7 @@ namespace Arcana.Entities
         /// </summary>
         public void Pause()
         {
-            this.m_pause = true;
+            this.m_status.Pause();
         }
 
         /// <summary>
@@ -327,7 +380,7 @@ namespace Arcana.Entities
         /// </summary>
         public void Resume()
         {
-            this.m_pause = false;
+            this.m_status.Resume();
         }
 
         /// <summary>
@@ -348,10 +401,6 @@ namespace Arcana.Entities
         #endregion
 
         #endregion
-
-        // Accessor Methods.
-
-        // Mutator Methods.
 
     }
 

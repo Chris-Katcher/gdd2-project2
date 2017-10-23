@@ -53,6 +53,11 @@ public class SystemController : MonoBehaviour {
     /// </summary>
     private CameraManager m_cameraManager = null;
 
+    /// <summary>
+    /// The entity manager handles all entities in the game.
+    /// </summary>
+    private EntityManager m_entityManager = null;
+
     /////////////////////
     // Properties.
     /////////////////////
@@ -87,6 +92,14 @@ public class SystemController : MonoBehaviour {
     public CameraManager CameraController
     {
         get { return this.m_cameraManager; }
+    }
+
+    /// <summary>
+    /// Returns reference to the EntityManager.
+    /// </summary>
+    public EntityManager EntityController
+    {
+        get { return this.m_entityManager; }
     }
 
     #endregion
@@ -164,35 +177,66 @@ public class SystemController : MonoBehaviour {
     /// Constructs the manager objects and its components.
     /// </summary>
     private void BuildManagers()
-    {
-        // Build the manager object.
+    {        
+        // Build the manager object. //
         Debugger.Print("Build the manager.");
-        if (this.Managers == null)
-        {
-            this.m_managers = Services.CreateEmptyObject("Game Managers");
-        }
 
-        // Build the components.
+        // Create the game manager component.
+        this.m_managers = Services.CreateEmptyObject("Game Managers");
+            
+        // Make the system controller object the parent.
+        Services.AddChild(gameObject, this.m_managers);
+
+        // Build the components. //
         Debugger.Print("Build manager components.");
 
+        // Build the camera manager.
+        BuildCameraManager();
+
+        // Build the entity manager.
+        BuildEntityManager();
     }
 
     /// <summary>
-    /// Builds the camera manager.
+    /// Build and initialize the camera manager.
     /// </summary>
     private void BuildCameraManager()
     {
+        // Build the camera manager.
+        Debugger.Print("Build the camera manager component.");
+
         // Get a reference to the factory.
         Debugger.Print("Get instance to the factory.");
         CameraManagerFactory factory = CameraManagerFactory.Instance();
 
         // Set up initialization settings for the camera manager.
         Debugger.Print("Create the factory constraints for the CameraManager.");
-        Constraints managerSettings = factory.CreateSettings(); // Filled with default values. Edit this to change component settings on creation.
+        Constraints managerSettings = factory.CreateSettings(_color: Constants.CORNFLOWER_BLUE); // Filled with default values. Edit this to change component settings on creation.
 
         // Build the manager.
         Debugger.Print("Create the CameraManager component, add it to the Managers GameObject, and retain the reference.");
         this.m_cameraManager = factory.CreateComponent(this.Managers, managerSettings);
+    }
+
+    /// <summary>
+    /// Build and initialize the entity manager.
+    /// </summary>
+    private void BuildEntityManager()
+    {
+        // Build the manager.
+        Debugger.Print("Build the entity manager component.");
+
+        // Get a reference to the factory.
+        Debugger.Print("Get instance to the factory.");
+        EntityManagerFactory factory = EntityManagerFactory.Instance();
+
+        // Set up initialization settings for the manager.
+        Debugger.Print("Create the factory constraints for the EntityManager.");
+        Constraints managerSettings = factory.CreateSettings(); // Filled with default values. Edit this to change component settings on creation.
+
+        // Build the manager.
+        Debugger.Print("Create the EntityManager component, add it to the Managers GameObject, and retain the reference.");
+        this.m_entityManager = factory.CreateComponent(this.Managers, managerSettings);
     }
 
     #endregion

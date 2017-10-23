@@ -69,7 +69,7 @@ namespace Arcana.Cameras
 
             return instance;
         }
-
+        
         #endregion
 
         #region // // Factory methods.
@@ -728,7 +728,9 @@ namespace Arcana.Cameras
                 _mode == CameraMode.Disabled)
             {
                 // Set the mode.
+                this.m_previousMode = this.m_cameraMode;
                 this.m_cameraMode = _mode;
+
                 // Update mode if need be.
                 this.UpdateMode();
             }

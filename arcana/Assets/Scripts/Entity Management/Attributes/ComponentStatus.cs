@@ -13,6 +13,7 @@ namespace Arcana.Entities.Attributes
     public enum ComponentStatus
     {
         NULL,
+        Init,
         Start,
         Run,
         Pause,
@@ -151,6 +152,15 @@ namespace Arcana.Entities.Attributes
         }
 
         /// <summary>
+        /// Returns true if in the Init state.
+        /// </summary>
+        /// <returns>Returns flag current status is init.</returns>
+        public bool IsInitializing()
+        {
+            return (this.m_currentStatus == ComponentStatus.Init);
+        }
+
+        /// <summary>
         /// Returns true if current status is set to pause.
         /// </summary>
         /// <returns>Returns flag current status is pause.</returns>
@@ -264,6 +274,14 @@ namespace Arcana.Entities.Attributes
         #endregion
 
         #region // Mutator Methods.
+
+        /// <summary>
+        /// Calls the initialization state.
+        /// </summary>
+        public void Initialize()
+        {
+            ChangeStatus(ComponentStatus.Init);
+        }
 
         /// <summary>
         /// If not currently paused, set the state to pause.

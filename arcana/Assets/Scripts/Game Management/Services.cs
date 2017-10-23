@@ -33,6 +33,15 @@ namespace Arcana
         // Constants.
         /////////////////////
 
+        #region // Color References.
+
+        /// <summary>
+        /// Default background color of the camera.
+        /// </summary>
+        public readonly static Color CORNFLOWER_BLUE = new Color32(100, 149, 237, 255);
+
+        #endregion
+
         #region // Vector References
 
         // Vector2 references.
@@ -332,25 +341,25 @@ namespace Arcana
         /// <summary>
         /// Add a child to the parent <see cref="GameObject"/>. Returns the child <see cref="GameObject"/>.
         /// </summary>
-        /// <param name="parent">The object receiving the child.</param>
-        /// <param name="child">The object placed as the child.</param>
+        /// <param name="gParent">The object receiving the child.</param>
+        /// <param name="gChild">The object placed as the child.</param>
         /// <returns>Returns the child object.</returns>
-        public static GameObject AddChild(GameObject parent, GameObject child)
+        public static GameObject AddChild(GameObject gParent, GameObject gChild)
         {
-            child.transform.parent = parent.transform;
-            return child;
+            gChild.transform.parent = gParent.transform;
+            return gChild;
         }
 
         /// <summary>
         /// Add a parent to the child <see cref="GameObject"/>. Returns the parent <see cref="GameObject"/>.
         /// </summary>
-        /// <param name="child">The object receiving the parent.</param>
-        /// <param name="parent">The object placed as the parent.</param>
+        /// <param name="gChild">The object receiving the parent.</param>
+        /// <param name="gParent">The object placed as the parent.</param>
         /// <returns>Returns the child object.</returns>
-        public static GameObject AddParent(GameObject child, GameObject parent)
+        public static GameObject AddParent(GameObject gChild, GameObject gParent)
         {
-            child.transform.parent = parent.transform;
-            return parent;
+            gChild.transform.parent = gParent.transform;
+            return gParent;
         }
 
         #endregion

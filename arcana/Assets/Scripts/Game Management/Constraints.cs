@@ -153,7 +153,7 @@ namespace Arcana
 
                 foreach (string key in Keys)
                 {
-                    if (Rules[key].HasValue())
+                    if (Rules.ContainsKey(key) && Rules[key].HasValue())
                     {
                         settings.Add(key);
                     }

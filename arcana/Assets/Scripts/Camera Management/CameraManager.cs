@@ -48,6 +48,11 @@ namespace Arcana.Cameras
         /// <returns>Returns a single factory.</returns>
         public static CameraManagerFactory Instance()
         {
+            if (instance == null)
+            {
+                instance = new CameraManagerFactory();
+            }
+
             return instance;
         }
 
@@ -58,6 +63,14 @@ namespace Arcana.Cameras
         public static CameraManager GetManagerInstance()
         {
             return manager;
+        }
+
+        /// <summary>
+        /// On creation, set this to be the instance.
+        /// </summary>
+        public CameraManagerFactory()
+        {
+            instance = this;
         }
 
         #endregion
@@ -140,8 +153,13 @@ namespace Arcana.Cameras
         /// <returns>Return newly created component.</returns>
         public CameraManager CreateComponent(GameObject parent)
         {
-            // Creates a component using the default settings.
-            return CreateComponent(parent, CreateSettings());
+            if (!HasManagerInstance())
+            {
+                // Creates a component using the default settings.
+                manager = CreateComponent(parent, CreateSettings());
+            }
+
+            return manager;
         }
 
         /// <summary>
@@ -149,15 +167,23 @@ namespace Arcana.Cameras
         /// </summary>
         /// <returns>Returns the <see cref="Constraints"/> collection object.</returns>
         public Constraints CreateSettings(
+            Color? _color = null,
             float _shakeDecayFactor = Constants.DEFAULT_DECAY_FACTOR,
             float _shakeCycle = 0.0f,
             float _shakePeriod = Constants.DEFAULT_SHAKE_PERIOD,
             float _shakeStrength = Constants.DEFAULT_SHAKE_STRENGTH)
         {
             // Create the collection.
+            Debugger.Print("Building parameters for CameraSettings Component constructor.");
             Constraints parameters = new Constraints();
-            
+
+
+            // Add nullable types.
+            Debugger.Print("Adding color.");
+            parameters.AddValue<Color?>(Constants.PARAM_BACKGROUND, _color);
+
             // Add non-nulllable types.
+            Debugger.Print("Adding decay trackers.");
             parameters.AddValue<DecayTracker<float>>(Constants.PARAM_CAMERA_SHAKE, new DecayTracker<float>(0.0f, _shakePeriod, _shakeDecayFactor, _shakeCycle)); // Shake time decay.
             parameters.AddValue<DecayTracker<float>>(Constants.PARAM_CAMERA_STRENGTH, new DecayTracker<float>(0.005f, _shakeStrength, _shakeDecayFactor, _shakeCycle)); // Shake strength decay.
             
@@ -205,7 +231,8 @@ namespace Arcana.Cameras
     /// </summary>
     public class CameraManager : MonoBehaviour, IFactoryElement
     {
-        #region Data Members
+
+        #region Static Members
 
         /////////////////////
         // Static members.
@@ -214,12 +241,26 @@ namespace Arcana.Cameras
         /// <summary>
         /// Returns the instance of the manager.
         /// </summary>
-        public static CameraManager Instance {
+        public static CameraManager Instance
+        {
             get { return CameraManagerFactory.GetManagerInstance(); }
         }
 
+        /// <summary>
+        /// Return true if instance exists.
+        /// </summary>
+        /// <returns>Returns a boolean value.</returns>
+        public static bool HasInstance()
+        {
+            return (CameraManager.Instance != null);
+        }
+
+        #endregion
+
+        #region Data Members
+        
         /////////////////////
-        // Data members.
+        // Fields.
         /////////////////////
 
         /// <summary>
@@ -274,15 +315,7 @@ namespace Arcana.Cameras
         {
             get { return (ShakeTimeLeft > 0.0f); }
         }
-
-        /// <summary>
-        /// Check if CameraManager has an instance.
-        /// </summary>
-        public bool HasInstance
-        {
-            get { return (CameraManagerFactory.HasManagerInstance()); }
-        }
-
+        
         /// <summary>
         /// Check if CameraManager has a reference to its camera object.
         /// </summary>
@@ -296,7 +329,15 @@ namespace Arcana.Cameras
         /// </summary>
         public bool HasCamera
         {
-            get { return (this.HasCameraObject && (this.m_camera.GetComponentInChildren<CameraSettings>() != null)); }
+            get { return (this.HasCameraObject && (this.m_camera.gameObject.GetComponent<UnityEngine.Camera>() != null)); }
+        }
+
+        /// <summary>
+        /// Return a reference to the UnityEngine.Camera component.
+        /// </summary>
+        public UnityCamera Viewport
+        {
+            get { return this.m_camera.gameObject.GetComponent<UnityEngine.Camera>(); }
         }
 
         #endregion
@@ -311,25 +352,31 @@ namespace Arcana.Cameras
         /// Initialize the CameraManager.
         /// </summary>
         /// <param name="_camera">Optional object containing the camera.</param>
-        internal void Initialize(GameObject _camera = null, 
+        internal void Initialize(GameObject _camera = null,
+            GameObject _unityCamera = null,
+            Color? _color = null,
             float _shakeDecayFactor = Constants.DEFAULT_DECAY_FACTOR,
             float _shakeCycle = 0.0f,
             float _shakePeriod = Constants.DEFAULT_SHAKE_PERIOD,
             float _shakeStrength = Constants.DEFAULT_SHAKE_STRENGTH)
         {
             InitializeCameraObject(_camera);
-            InitializeCamera(_camera.GetComponentInChildren<CameraSettings>().gameObject); // Even if there is no child, the function will properly handle this.
-            InitializeProperties(_shakeDecayFactor, _shakeCycle, _shakePeriod, _shakeStrength);
+            InitializeCamera(_unityCamera); // Even if there is no child, the function will properly handle this.
+            InitializeProperties(_color, _shakeDecayFactor, _shakeCycle, _shakePeriod, _shakeStrength);
         }
 
         /// <summary>
         /// Initialize the properties and data members of the manager.
         /// </summary>
-        private void InitializeProperties(float _shakeDecayFactor = Constants.DEFAULT_DECAY_FACTOR,
+        private void InitializeProperties(
+            Color? _color = null,
+            float _shakeDecayFactor = Constants.DEFAULT_DECAY_FACTOR,
             float _shakeCycle = 0.0f,
             float _shakePeriod = Constants.DEFAULT_SHAKE_PERIOD,
             float _shakeStrength = Constants.DEFAULT_SHAKE_STRENGTH)
         {
+            Debugger.Print("Initializing camera manager properties.");
+
             // Set the stopped position.
             this.m_stopPosition = Services.ToVector2(this.m_camera_object.transform.position);
 
@@ -337,6 +384,8 @@ namespace Arcana.Cameras
             this.m_cameraShake = new DecayTracker<float>(0.0f, _shakePeriod, _shakeDecayFactor, _shakeCycle);
             this.m_cameraShakeStrength = new DecayTracker<float>(0.005f, _shakeStrength, _shakeDecayFactor, _shakeCycle);
 
+            // Change the color.
+            if (_color.HasValue) { ChangeBackground(_color.Value); } else { ChangeBackground(Color.black); }
         }
         
         /// <summary>
@@ -347,10 +396,16 @@ namespace Arcana.Cameras
         {
             switch (parameter)
             {
+                case Constants.PARAM_BACKGROUND:
+                    Debugger.Print("Setting background by parameter: " + ((Color)value));
+                    ChangeBackground((Color)value);
+                    break;
                 case Constants.PARAM_CAMERA_SHAKE:
+                    Debugger.Print("Setting camera shake delay tracker by parameter: " + ((DecayTracker<float>)value));
                     this.m_cameraShake = ((DecayTracker<float>)value);
                     break;
                 case Constants.PARAM_CAMERA_STRENGTH:
+                    Debugger.Print("Setting camera strength delay tracker by parameter: " + ((DecayTracker<float>)value));
                     this.m_cameraShakeStrength = ((DecayTracker<float>)value);
                     break;
             }
@@ -361,15 +416,17 @@ namespace Arcana.Cameras
         /// </summary>
         private void InitializeCameraObject(GameObject _cameraObject = null)
         {
+            Debugger.Print("Initializing Camera Object.");
+
             // If there is no camera and parameter isn't null.
             if (!HasCameraObject && _cameraObject != null)
             {
-                this.m_camera_object = Services.AddParent(_cameraObject, gameObject);
+                this.m_camera_object = Services.AddChild(gameObject, _cameraObject);
             }
             else
             {
                 // Create a new, empty game object, and parent it to this instance of the CameraManager's gameObject.
-                this.m_camera_object = Services.AddParent(Services.CreateEmptyObject("Camera Object"), gameObject);
+                this.m_camera_object = Services.AddChild(gameObject, Services.CreateEmptyObject("Camera Object"));
             }
 
             this.m_camera_object.name = "Camera Object";
@@ -380,20 +437,41 @@ namespace Arcana.Cameras
         /// </summary>
         private void InitializeCamera(GameObject _camera = null)
         {
-            if (!HasCamera && _camera != null)
+            Debugger.Print("Initializing Camera object and UnityEngine.Camera component.");
+
+            // 1. Get the Camera's GameObject.
+            GameObject temp_object = _camera;
+
+            if (temp_object == null)
             {
-                this.m_camera = _camera.GetComponent<CameraSettings>();
-                Services.AddParent(_camera, this.m_camera_object);
+                // If the Camera's GameObject is null and a main camera still doesn't exist.
+                // 1b. Create a new one.
+                temp_object = Services.CreateEmptyObject("Camera");
             }
-            else
+            
+            // 2. Make it a child of the camera object data member.
+            temp_object = Services.AddChild(this.m_camera_object, temp_object);
+
+            // 3. Get the Camera component.
+            UnityCamera temp_component = temp_object.GetComponent<UnityEngine.Camera>();
+
+            if (temp_component == null)
             {
-                // This next line is a bit bulky but:
-                 // 1. Create an empty game object to store the new camera component.
-                 // 2. Add this new game object as a child to our wrapping camera object item.
-                 // 3. Pass the return value from AddChild, as the parent parameter for CameraFactory.CreateComponent, netting us our Camera component. 
-                this.m_camera = CameraFactory.Instance().CreateComponent(Services.AddChild(this.m_camera_object, Services.CreateEmptyObject("Camera")));
+                // If the component is null:
+                // 3b. create a new one.          
+                temp_object.AddComponent<UnityEngine.Camera>();
             }
 
+            // 4. Get the CameraSettings component.
+            this.m_camera = temp_object.GetComponent<CameraSettings>();
+
+            if (this.m_camera == null)
+            {
+                // If the component is null:
+                // 3b. create a new one.          
+                this.m_camera = CameraFactory.Instance().CreateComponent(temp_object);
+            }
+            
             // Since we know our references are hooked properly, we can change the name to reflect this.
             this.m_camera.gameObject.name = "Camera";
         }
@@ -437,6 +515,7 @@ namespace Arcana.Cameras
         {
             if (IsShaking)
             {
+                Debugger.Print("Shaking camera...");
                 if (!Services.IsEmpty((Vector2?) this.m_stopPosition))
                 {
                     // Only shake if the decay isn't paused.
@@ -463,6 +542,7 @@ namespace Arcana.Cameras
         {
             if (IsShaking)
             {
+                Debugger.Print("Stopping camera...");
                 if (!Services.IsEmpty((Vector2?)this.m_stopPosition))
                 {
                     this.m_camera_object.transform.position = this.m_stopPosition;
@@ -509,6 +589,15 @@ namespace Arcana.Cameras
         {
             this.m_cameraShake.Resume();
             this.m_cameraShakeStrength.Resume();
+        }
+
+        /// <summary>
+        /// Change the color of the camera.
+        /// </summary>
+        /// <param name="_color">Color to set the background of the viewport to.</param>
+        public void ChangeBackground(Color _color)
+        {
+            Viewport.backgroundColor = _color;
         }
 
         #endregion        
