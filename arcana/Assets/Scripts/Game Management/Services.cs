@@ -33,6 +33,30 @@ namespace Arcana
         // Constants.
         /////////////////////
 
+        #region // Input References
+
+        /// <summary>
+        /// Timeouts will default to half a second.
+        /// </summary>
+        public const float DEFAULT_INPUT_TIMEOUT = 0.5f;
+
+        /// <summary>
+        /// Left mouse button.
+        /// </summary>
+        public const int LEFT_MOUSE_BUTTON = 0;
+
+        /// <summary>
+        /// Right mouse button.
+        /// </summary>
+        public const int RIGHT_MOUSE_BUTTON = 1;
+
+        /// <summary>
+        /// Middle mouse button.
+        /// </summary>
+        public const int MIDDLE_MOUSE_BUTTON = 2;
+
+        #endregion
+
         #region // Color References.
 
         /// <summary>
@@ -736,7 +760,7 @@ namespace Arcana
         {
             return new Vector3(x, y, z);
         }
-        
+
         #endregion
 
         #region // Random Functions.
@@ -744,6 +768,15 @@ namespace Arcana
         /////////////////////
         // Random Number Functions.
         /////////////////////
+
+        /// <summary>
+        /// Generate random UnityEngine.Color.
+        /// </summary>
+        /// <returns>Returns a random, opaque, Color32 object.</returns>
+        public static Color GetRandomColor()
+        {
+            return new Color32((byte)NextInt(0, 255), (byte)NextInt(0, 255), (byte)NextInt(0, 255), (byte)255);
+        }
 
         /// <summary>
         /// Generate random int using <see cref="UnityEngine.Random.Range(int, int)"/>.

@@ -22,8 +22,12 @@ namespace Arcana.Entities
 
         #region // Static Members.
 
+        /////////////////////
+        // Static members.
+        /////////////////////
+
         /// <summary>
-        /// Instance of the Factory.
+        /// Instance of the factory.
         /// </summary>
         private static EntityManagerFactory instance = null;
 
@@ -58,7 +62,7 @@ namespace Arcana.Entities
         /// <summary>
         /// On creation, set this to be the instance.
         /// </summary>
-        public EntityManagerFactory()
+        private EntityManagerFactory()
         {
             instance = this;
         }
@@ -66,6 +70,10 @@ namespace Arcana.Entities
         #endregion
 
         #region // Factory Methods.
+
+        /////////////////////
+        // Factory methods.
+        /////////////////////
 
         /// <summary>
         /// Get (or create) the single instance of the factory.
@@ -148,8 +156,7 @@ namespace Arcana.Entities
 
             return manager;
         }
-
-
+        
         /// <summary>
         /// Create the Constraints for initialization of the fabricated class.
         /// </summary>
@@ -169,6 +176,10 @@ namespace Arcana.Entities
         #endregion
 
         #region // Service Methods.
+
+        /////////////////////
+        // Service methods.
+        /////////////////////
 
         /// <summary>
         /// Returns true if there is a manager instance.
@@ -210,6 +221,10 @@ namespace Arcana.Entities
 
         #region // Static Members.
 
+        /////////////////////
+        // Static members.
+        /////////////////////
+
         /// <summary>
         /// Return reference to the instance of the EntityManager.
         /// </summary>
@@ -250,6 +265,11 @@ namespace Arcana.Entities
         /// </summary>
         private List<GameObject> m_objects;
 
+        /// <summary>
+        /// Tracks initialization internally.
+        /// </summary>
+        private bool m_initialized = false;
+
         /////////////////////
         // Properties.
         /////////////////////
@@ -277,6 +297,14 @@ namespace Arcana.Entities
                 return m_objects;
             }
         }
+
+        /// <summary>
+        /// Reference to component's current state.
+        /// </summary>
+        public Status Status
+        {
+            get { return this.m_status; }
+        }
         
         /// <summary>
         /// Determine if the manager is empty.
@@ -293,16 +321,18 @@ namespace Arcana.Entities
 
         #region // Service Methods.
 
+        /////////////////////
+        // Service methods.
+        /////////////////////
+
         #region // // UnityEngine methods.
 
         /// <summary>
         /// Run when the EntityManager is created for the very first time.
         /// </summary>
         public void Start()
-        {
-            // Create the status.
-            this.m_status = new Status();
-            this.m_status.Initialize();
+        { 
+            // Start method.
         }
 
         /// <summary>
@@ -310,12 +340,7 @@ namespace Arcana.Entities
         /// </summary>
         public void Update()
         {
-            if (this.m_status.IsInitializing())
-            {
-                this.Initialize();
-                this.m_status.Start();
-            }
-
+            // Update method.
         }
 
         #endregion
@@ -327,12 +352,29 @@ namespace Arcana.Entities
         /// </summary>
         internal void Initialize()
         {
-            // Initialize the entity manager.
-            Debugger.Print("Initializing Entity Manager.");
+            if (!this.m_initialized)
+            {
+                // Initialize the entity manager.
+                Debugger.Print("Initializing entity manager.", gameObject.name);
 
-            // Create the lists.
-            this.m_objects = new List<GameObject>();
-            this.m_entities = new List<Entity>();
+                // Create the status.
+                this.m_status = gameObject.GetComponent<Status>();
+                if (this.m_status == null)
+                {
+                    this.m_status = gameObject.AddComponent<Status>();
+                    this.m_status.Initialize();
+                }
+
+                // Create the lists.
+                this.m_objects = new List<GameObject>();
+                this.m_entities = new List<Entity>();
+
+                // Initialization flag.
+                this.m_initialized = true;
+
+                // Start the status object.
+                this.m_status.Start();
+            }
         }
 
         /// <summary>

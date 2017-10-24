@@ -14,6 +14,8 @@ using Arcana.InputManagement;
 using Arcana.UI;
 using Arcana.Entities;
 using Arcana.Cameras;
+using Arcana.States;
+using System.Collections.Generic;
 
 /////////////////////
 // Class declaration.
@@ -35,7 +37,7 @@ public class SystemController : MonoBehaviour {
     /// If true, debug messages will print for this program.
     /// </summary>
     public bool DEBUG_MODE = true;    // Will allow setting of debug mode.
-    
+
     /// <summary>
     /// Initialization flag.
     /// </summary>
@@ -44,9 +46,24 @@ public class SystemController : MonoBehaviour {
     // Set up the managers.
 
     /// <summary>
+    /// The controller calling input actions.
+    /// </summary>
+    private Controller m_controller = Controller.System;
+
+    /// <summary>
     /// Empty game object that has all the manager components on it.
     /// </summary>
     private GameObject m_managers = null;
+
+    /// <summary>
+    /// The input manager handles commands and sequences.
+    /// </summary>
+    private InputManager m_inputManager = null;
+
+    /// <summary>
+    /// The state manager handles all states in the game.
+    /// </summary>
+    private StateManager m_stateManager = null;
 
     /// <summary>
     /// The camera manager handles the cameras in the game.
@@ -57,6 +74,7 @@ public class SystemController : MonoBehaviour {
     /// The entity manager handles all entities in the game.
     /// </summary>
     private EntityManager m_entityManager = null;
+
 
     /////////////////////
     // Properties.
@@ -109,21 +127,31 @@ public class SystemController : MonoBehaviour {
     /// <summary>
     /// Entry point for the program.
     /// </summary>
-    void Start ()
+    void Start()
     {
         // Initialize the program.
         this.Initialize();
-	}
-	
-	/// <summary>
+    }
+
+    /// <summary>
     /// Update is called once per frame.
     /// </summary>
-	void Update () 
+    void Update()
     {
+        // This is the format for getting key input.
+        if (this.m_inputManager.GetAction(this.m_controller, Actions.ChangeCameraBackground))
+        {
+            this.m_cameraManager.ChangeBackground(Services.GetRandomColor());
+        }
+
         if (!Initialized)
         {
             // Initialize the controller if it hasn't been initialized.
             this.Initialize();
+        }
+        else
+        {
+
         }
 
         /*
@@ -144,7 +172,7 @@ public class SystemController : MonoBehaviour {
 
         // TODO: Stub code.*/
 
-	}
+    }
 
     #endregion
 
@@ -177,25 +205,100 @@ public class SystemController : MonoBehaviour {
     /// Constructs the manager objects and its components.
     /// </summary>
     private void BuildManagers()
-    {        
+    {
         // Build the manager object. //
         Debugger.Print("Build the manager.");
 
         // Create the game manager component.
         this.m_managers = Services.CreateEmptyObject("Game Managers");
-            
+
         // Make the system controller object the parent.
         Services.AddChild(gameObject, this.m_managers);
 
         // Build the components. //
         Debugger.Print("Build manager components.");
 
+        // Build the input manager.
+        BuildInputManager();
+
+        // Build the state manager.
+        BuildStateManager();
+
         // Build the camera manager.
         BuildCameraManager();
 
         // Build the entity manager.
         BuildEntityManager();
+
     }
+
+    #region Manager Building Methods.
+
+    /// <summary>
+    /// Build and initialize the input manager.
+    /// </summary>
+    private void BuildInputManager()
+    {
+        // Build the manager.
+        Debugger.Print("Build the input manager component.");
+
+        // Get a reference to the factory.
+        Debugger.Print("Get instance to the factory.");
+        InputManagerFactory factory = InputManagerFactory.Instance();
+
+        // Set up initialization settings for the manager.
+        Debugger.Print("Create the factory constraints for the InputManager.");
+        Constraints managerSettings = factory.CreateSettings(); // Filled with default values. Edit this to change component settings on creation.
+
+        // Build the manager.
+        Debugger.Print("Create the InputManager component, add it to the Managers GameObject, and retain the reference.");
+        this.m_inputManager = factory.CreateComponent(this.Managers, managerSettings);
+
+        // Add the system control scheme.
+        this.m_inputManager.AddControlScheme(m_controller, BuildControlScheme());
+    }
+
+    /// <summary>
+    /// Create a ControlScheme for system level actions.
+    /// </summary>
+    /// <returns></returns>
+    private ControlScheme BuildControlScheme()
+    {
+        ControlScheme cs = new ControlScheme();
+
+        // Creates an "A" button command that triggers on release.
+        Command test = new Command(KeyCode.A);
+        CommandResponse testTrigger = new CommandResponse(test, CommandResponseMode.Release);
+        CommandSequence inputSequence = new CommandSequence();
+        inputSequence.Push(testTrigger);
+        
+        // Assign the control to change the camera background.
+        cs.AddControl(Actions.ChangeCameraBackground, inputSequence);
+        
+        return cs;
+    }
+
+    /// <summary>
+    /// Build and initialize the state manager.
+    /// </summary>
+    private void BuildStateManager()
+    {
+        // Build the manager.
+        Debugger.Print("Build the state manager component.");
+
+        // Get a reference to the factory.
+        Debugger.Print("Get instance to the factory.");
+        StateManagerFactory factory = StateManagerFactory.Instance();
+
+        // Set up initialization settings for the manager.
+        Debugger.Print("Create the factory constraints for the StateManager.");
+        Constraints managerSettings = factory.CreateSettings(); // Filled with default values. Edit this to change component settings on creation.
+
+        // Build the manager.
+        Debugger.Print("Create the StateManager component, add it to the Managers GameObject, and retain the reference.");
+        this.m_stateManager = factory.CreateComponent(this.Managers, managerSettings);
+    }
+
 
     /// <summary>
     /// Build and initialize the camera manager.
@@ -240,6 +343,8 @@ public class SystemController : MonoBehaviour {
     }
 
     #endregion
+    
+    #endregion
 
     #region Accessor Methods
 
@@ -254,5 +359,5 @@ public class SystemController : MonoBehaviour {
 
 
     #endregion
-    
+
 }

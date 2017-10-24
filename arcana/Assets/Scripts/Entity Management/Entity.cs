@@ -73,6 +73,18 @@ namespace Arcana.Entities
         }
 
         /// <summary>
+        /// On creation, sets this to be the instance.
+        /// </summary>
+        private EntityFactory()
+        {
+            instance = this;
+        }
+
+        #endregion
+
+        #region // Factory Methods.
+
+        /// <summary>
         /// Return the instance of the factory.
         /// </summary>
         /// <returns>Returns a single factory.</returns>
@@ -80,11 +92,7 @@ namespace Arcana.Entities
         {
             return Instance();
         }
-
-        #endregion
-
-        #region // Service Methods. 
-
+        
         /// <summary>
         /// Creates a new, empty game object, and returns the Entity component back.
         /// </summary>
@@ -92,6 +100,7 @@ namespace Arcana.Entities
         public Entity CreateComponent()
         {
             // Creates a component using the default settings.
+            Debugger.Print("Create an Entity on an empty game object.");
             return CreateComponent(Services.CreateEmptyObject("Entity"), CreateSettings());
         }
 
@@ -107,16 +116,18 @@ namespace Arcana.Entities
             if (parent == null)
             {
                 // If the parent itself is null, do not return a component.
-                Debugger.Print("Tried to add a Arcanas.Cameras.Camera component but parent GameObject is null.", "NULL_REFERENCE");
+                Debugger.Print("Tried to add a component but parent GameObject is null.", "NULL_REFERENCE");
                 return null;
             }
 
             // Set up the entity.
+            Debugger.Print("Create the component.");
             Entity e = parent.AddComponent<Entity>();
             
             // Initialize the entity.
             foreach (string key in parameters.ValidEntries)
             {
+                Debugger.Print("Initialize the component.");
                 e.Initialize(key, parameters.GetEntry(key).Value);
             }
 
@@ -139,31 +150,36 @@ namespace Arcana.Entities
         /// </summary>
         /// <returns></returns>
         public virtual Constraints CreateSettings(
-            EntityType _type = EntityType.NULL, 
+            EntityType _type = EntityType.NULL,
             Vector2? _position = null,
             Dimension _dimensions = null,
             HealthTracker _tracker = null)
         {
             // Create the collection.
+            Debugger.Print("Building parameters for Entity component.");
             Constraints parameters = new Constraints();
 
             // Set the type.
+            Debugger.Print("Setting type.");
             if (_type != EntityType.NULL) { parameters.AddValue<EntityType>(Constants.PARAM_ENTITY_TYPE, _type); }
-            
+
             // Set the position.
+            Debugger.Print("Setting position.");
             if (_position.HasValue) { parameters.AddValue<Vector2>(Constants.PARAM_POSITION, _position.Value); }
 
             // Dimension.
+            Debugger.Print("Setting dimensions.");
             if (_dimensions != null) { parameters.AddValue<Dimension>(Constants.PARAM_DIMENSIONS, _dimensions); }
 
             // Health tracker.
+            Debugger.Print("Setting health tracker.");
             if (_tracker != null) { parameters.AddValue<HealthTracker>(Constants.PARAM_HEALTH_TRACKER, _tracker); }
 
             return parameters;
         }
 
         #endregion
-
+        
     }
 
     #endregion
@@ -244,6 +260,11 @@ namespace Arcana.Entities
         /// Tracks the status of an entity.
         /// </summary>
         private Status m_status;
+
+        /// <summary>
+        /// Tracks initialization internally.
+        /// </summary>
+        private bool m_initialized = false;
         
         /////////////////////
         // Properties.
@@ -263,6 +284,14 @@ namespace Arcana.Entities
         public EntityType EntityType
         {
             get { return this.m_entityType; }
+        }
+
+        /// <summary>
+        /// Reference to Status tracker.
+        /// </summary>
+        public Status Status
+        {
+            get { return this.m_status; }
         }
 
         /// <summary>
@@ -296,15 +325,7 @@ namespace Arcana.Entities
         {
             get { return m_dimensions.Depth; }
         }
-
-        /// <summary>
-        /// Property tracking whether or not the entity is alive.
-        /// </summary>
-        public bool IsAlive
-        {
-            get { return !m_status.IsDead(); }
-        }
-
+        
         #endregion
 
         #region Service Methods
@@ -314,15 +335,8 @@ namespace Arcana.Entities
         /// </summary>
         protected virtual void Start()
         {
-            if (m_status == null)
-            {
-                m_status = gameObject.AddComponent<Status>();
-            }
-
-            if (m_status.IsNull)
-            {
-                m_status.Run();
-            }
+            // Run this method when initializing an entity.
+            this.Initialize();
         }
 
         /// <summary>
@@ -330,82 +344,44 @@ namespace Arcana.Entities
         /// </summary>
         protected virtual void Update()
         {
-            if (m_status.IsRunning())
+            // Update method.
+        }
+
+        /// <summary>
+        /// Update collision responses and physics calculations.
+        /// </summary>
+        protected virtual void FixedUpdate()
+        {
+            // FixedUpdate method.
+        }
+
+        #region Initialization Methods.
+
+        /// <summary>
+        /// Initialize is run after the component is constructed.
+        /// </summary>
+        protected virtual void Initialize()
+        {
+            if (!this.m_initialized)
             {
-                // Call update entity for inherited classes.
-                UpdateEntity();
+                // Initialize the entity manager.
+                Debugger.Print("Initializing Entity.", "Entity [" + GetEntityTypeAsString() + "]");
 
-                if (this.IsAlive)
+                // Create the status.
+                this.m_status = gameObject.GetComponent<Status>();
+                if (this.m_status == null)
                 {
-                    // Call update life for inherited classes.
-                    UpdateLife();
+                    Debugger.Print("Create the status object.");
+                    this.m_status = gameObject.AddComponent<Status>();
+                    this.m_status.Initialize();
                 }
-                else if (m_status.JustKilled())
-                {
-                    // Call on death for inherited classes.
-                    OnDeath();
-                }
-                else if (m_status.IsDead())
-                {
-                    // Call while dead.
-                }
+                
+                // Initialization flag.
+                this.m_initialized = true;
+
+                // Start the status object.
+                this.m_status.Start();
             }
-        }
-
-        /// <summary>
-        /// Update the Entity's status.
-        /// </summary>
-        protected virtual void UpdateEntity()
-        {
-            if (m_health.IsVulnerable())
-            {
-                if (!m_health.IsAlive())
-                {
-                    m_status.Kill();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Updates that occur while alive.
-        /// </summary>
-        protected virtual void UpdateLife()
-        {
-            // Stub.
-        }
-
-        /// <summary>
-        /// Event triggered upon death.
-        /// </summary>
-        protected virtual void OnDeath()
-        {
-            // Release on death.
-            m_status.Release();
-        }
-
-        /// <summary>
-        /// Reset the Entity.
-        /// </summary>
-        public virtual void Reset()
-        {
-            m_status.TriggerReset();
-            m_status.Run();
-        }
-
-        /// <summary>
-        /// Pause the Entity updates.
-        /// </summary>
-        public virtual void Pause()
-        {
-            m_status.Pause();
-        }
-
-        /// <summary>
-        /// Resume the Entity updates.
-        /// </summary>
-        public virtual void Resume()
-        {
-            m_status.Resume();
         }
 
         /// <summary>
@@ -418,16 +394,19 @@ namespace Arcana.Entities
         protected virtual void Initialize(EntityType _type = EntityType.Entity, Vector2? _position = null, Dimension _dimensions = null, HealthTracker _health = null)
         {
             // Set the name and type.
+            Debugger.Print("Setting Entity data member and property values.", gameObject.name);
             this.m_entityType = _type;
             gameObject.name += " " + Entity.Parse(_type);
 
             // Initial location of the game object the entity belongs to.
+            Debugger.Print("Setting position.", gameObject.name);
             if (_position.HasValue)
             {
                 gameObject.transform.position = Services.ToVector3(_position.Value.x, _position.Value.y, Position.z);
             }
 
             // Create objects for data members.
+            Debugger.Print("Setting dimensions.", gameObject.name);
             if (_dimensions == null)
             {
                 this.m_dimensions = new Dimension(Constants.DEFAULT_DIMENSION, 0.0f);
@@ -438,6 +417,7 @@ namespace Arcana.Entities
             }
 
             // Get components.
+            Debugger.Print("Setting health tracker.", gameObject.name);
             if (_health == null)
             {
                 this.m_health = HealthTrackerFactory.Instance().CreateComponent(gameObject);
@@ -446,11 +426,10 @@ namespace Arcana.Entities
             {
                 this.m_health = _health;
             }
-            
         }
 
         /// <summary>
-        /// Set the value of a property.
+        /// Set the value of a property via the factory.
         /// </summary>
         /// <param name="parameter">Switch trigger that determines which property is set.</param>
         public virtual void Initialize(string parameter, object value)
@@ -469,10 +448,36 @@ namespace Arcana.Entities
                     break;
                 case Constants.PARAM_HEALTH_TRACKER:
                     this.m_health = (HealthTracker)value;
-                    break;                
+                    break;
             }
         }
 
+        #endregion
+        
+        /// <summary>
+        /// Reset the Entity.
+        /// </summary>
+        public virtual void Reset()
+        {
+            m_status.TriggerReset();
+        }
+
+        /// <summary>
+        /// Pause the Entity updates.
+        /// </summary>
+        public virtual void Pause()
+        {
+            m_status.Pause();
+        }
+
+        /// <summary>
+        /// Resume the Entity updates.
+        /// </summary>
+        public virtual void Resume()
+        {
+            m_status.Resume();
+        }
+        
         #endregion
 
         #region Accessor Methods
@@ -494,7 +499,7 @@ namespace Arcana.Entities
         {
             return this.m_entityType;
         }
-
+        
         #endregion
 
         #region Mutator Methods

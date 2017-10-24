@@ -14,12 +14,15 @@ namespace Arcana.Entities.Attributes
     {
         NULL,
         Init,
+        Loading,
         Start,
         Run,
         Pause,
         Resume,
         Reset,
         Dead,
+        Active,
+        Inactive,
         Destroy
     }
 
@@ -152,6 +155,44 @@ namespace Arcana.Entities.Attributes
         }
 
         /// <summary>
+        /// Check if currently a given state.
+        /// </summary>
+        /// <param name="check">Status value to check.</param>
+        /// <returns>Returns boolean if matches input.</returns>
+        public bool IsState(ComponentStatus check)
+        {
+            return (this.m_currentStatus == check);
+        }
+
+        /// <summary>
+        /// Check if it was previously the given state.
+        /// </summary>
+        /// <param name="check">Status value to check.</param>
+        /// <returns>Returns boolean if matches input.</returns>
+        public bool WasState(ComponentStatus check)
+        {
+            return (this.m_previousStatus == check);
+        }
+        
+        /// <summary>
+        /// Returns true if in the Inactive state.
+        /// </summary>
+        /// <returns>Returns flag current status is Inactive.</returns>
+        public bool IsInactive()
+        {
+            return (this.m_currentStatus == ComponentStatus.Inactive);
+        }
+
+        /// <summary>
+        /// Returns true if in the Active state.
+        /// </summary>
+        /// <returns>Returns flag current status is Active.</returns>
+        public bool IsActive()
+        {
+            return (this.m_currentStatus == ComponentStatus.Active);
+        }
+
+        /// <summary>
         /// Returns true if in the Init state.
         /// </summary>
         /// <returns>Returns flag current status is init.</returns>
@@ -274,6 +315,16 @@ namespace Arcana.Entities.Attributes
         #endregion
 
         #region // Mutator Methods.
+
+        public void Activate()
+        {
+            ChangeStatus(ComponentStatus.Active);
+        }
+
+        public void Deactivate()
+        {
+            ChangeStatus(ComponentStatus.Inactive);
+        }
 
         /// <summary>
         /// Calls the initialization state.

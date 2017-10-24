@@ -68,7 +68,7 @@ namespace Arcana.Cameras
         /// <summary>
         /// On creation, set this to be the instance.
         /// </summary>
-        public CameraManagerFactory()
+        private CameraManagerFactory()
         {
             instance = this;
         }
@@ -348,6 +348,8 @@ namespace Arcana.Cameras
         // Service methods.
         /////////////////////
 
+        #region Initialization Methods
+
         /// <summary>
         /// Initialize the CameraManager.
         /// </summary>
@@ -476,6 +478,10 @@ namespace Arcana.Cameras
             this.m_camera.gameObject.name = "Camera";
         }
 
+        #endregion
+
+        #region UnityEngine Methods
+
         /// <summary>
         /// Update in the UnityEngine loop.
         /// </summary>
@@ -497,6 +503,8 @@ namespace Arcana.Cameras
                 this.StopShaking();
             }
         }
+
+        #endregion
 
         /// <summary>
         /// Move the camera object.
@@ -600,7 +608,8 @@ namespace Arcana.Cameras
             Viewport.backgroundColor = _color;
         }
 
-        #endregion        
+        #endregion
+
     }
 
     #endregion
