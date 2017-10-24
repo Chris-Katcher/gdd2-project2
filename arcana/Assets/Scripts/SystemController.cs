@@ -121,6 +121,8 @@ public class SystemController : MonoBehaviour {
     }
 
     #endregion
+    
+    #region Service Methods
 
     #region MonoBehavior Methods
 
@@ -139,11 +141,11 @@ public class SystemController : MonoBehaviour {
     void Update()
     {
         // This is the format for getting key input.
-        if (this.m_inputManager.GetAction(this.m_controller, Actions.ChangeCameraBackground))
+        if (this.GetAction(Actions.ChangeCameraBackground))
         {
             this.m_cameraManager.ChangeBackground(Services.GetRandomColor());
         }
-
+        
         if (!Initialized)
         {
             // Initialize the controller if it hasn't been initialized.
@@ -176,7 +178,7 @@ public class SystemController : MonoBehaviour {
 
     #endregion
 
-    #region Service Methods
+    #region Initialization Methods.
 
     /// <summary>
     /// Initialize the managers.
@@ -229,6 +231,9 @@ public class SystemController : MonoBehaviour {
 
         // Build the entity manager.
         BuildEntityManager();
+        
+        // Add the controls.
+        InitializeControls();
 
     }
 
@@ -264,18 +269,41 @@ public class SystemController : MonoBehaviour {
     /// <returns></returns>
     private ControlScheme BuildControlScheme()
     {
-        ControlScheme cs = new ControlScheme();
+        return new ControlScheme();
+    }
+
+    /// <summary>
+    /// Initialize the system controller's controls.
+    /// </summary>
+    private void InitializeControls()
+    {
+        Debugger.Print("Adding controls to the control scheme for Controller: " + this.m_controller);
+
+        AddHandle("Mouse X", CommandTypes.MouseMovement);
+        AddHandle("Mouse Y", CommandTypes.Axis);
 
         // Creates an "A" button command that triggers on release.
-        Command test = new Command(KeyCode.A);
-        CommandResponse testTrigger = new CommandResponse(test, CommandResponseMode.Release);
-        CommandSequence inputSequence = new CommandSequence();
-        inputSequence.Push(testTrigger);
+        AddHandle(Actions.ChangeCameraBackground, new Command(KeyCode.A), CommandResponseMode.Release);
+
+
+        /* *
         
-        // Assign the control to change the camera background.
-        cs.AddControl(Actions.ChangeCameraBackground, inputSequence);
+        Tested out functionality: the new input system works!
+
+        // Creates an "A" button command that triggers on release.
+        AddHandle(Actions.ChangeCameraBackground, new Command(KeyCode.A), CommandResponseMode.Release);
+
+        // Creates an "S" button command that triggers on press.
+        AddHandle(Actions.ChangeCameraBackground, new Command(KeyCode.S), CommandResponseMode.Press);
+
+        // Creates an "D" button command that triggers on held.
+        AddHandle(Actions.ChangeCameraBackground, new Command(KeyCode.D), CommandResponseMode.Held);
         
-        return cs;
+        // Creates an axis detection for whenever Mouse moves.
+        AddHandle(Actions.ChangeCameraBackground, new Command("Mouse X", CommandTypes.MouseMovement), CommandResponseMode.NonZero);
+       
+         * */
+
     }
 
     /// <summary>
@@ -343,7 +371,101 @@ public class SystemController : MonoBehaviour {
     }
 
     #endregion
+
+    #endregion
+
+    #region Input Methods.
+
+    /// <summary>
+    /// Wrapper function for handling input.
+    /// </summary>
+    /// <param name="_action">Action to check for.</param>
+    /// <returns>Returns true if action should be performed.</returns>
+    public bool GetAction(Actions _action)
+    {
+        return (this.m_inputManager.GetAction(this.m_controller, _action));
+    }
+
+    /// <summary>
+    /// Returns the value for a tracked axis.
+    /// </summary>
+    /// <param name="_name">Axis being tracked.</param>
+    /// <returns>Returns a value.</returns>
+    public float GetAxis(string _name)
+    {
+        return (this.m_inputManager.GetAxis(this.m_controller, _name));
+    }
+
+    /// <summary>
+    /// Returns the raw value for a tracked axis.
+    /// </summary>
+    /// <param name="_name">Axis being tracked.</param>
+    /// <returns>Returns a value.</returns>
+    public float GetAxisRaw(string _name)
+    {
+        return (this.m_inputManager.GetAxisRaw(this.m_controller, _name));
+    }
+
+    /// <summary>
+    /// Return the ControlScheme from the input manager.
+    /// </summary>
+    /// <returns>ControlScheme object.</returns>
+    public ControlScheme GetScheme()
+    {
+        return this.m_inputManager.GetScheme(this.m_controller);
+    }
+
+    /// <summary>
+    /// Link an action to perform with a command.
+    /// </summary>
+    /// <param name="_action">Action to perform.</param>
+    /// <param name="_command">Binding that will cause action.</param>
+    /// <param name="_response">Response type that will trigger action.</param>
+    public void AddHandle(Actions _action, Command _command, CommandResponseMode _response)
+    {
+        CommandResponse response = new CommandResponse(_command, _response);
+        CommandSequence sequence = new CommandSequence();
+        sequence.Push(response);
+
+        AddActionHandle(_action, sequence);
+    }
+
+    /// <summary>
+    /// Link an axis with a name and response trigger.
+    /// </summary>
+    /// <param name="_axis">Name of the axis-trigger pair.</param>
+    /// <param name="_command">Axis read by trigger.</param>
+    /// <param name="_response">Trigger.</param>
+    public void AddHandle(string _axis, CommandTypes _type = CommandTypes.Axis)
+    {
+        CommandResponse response = new CommandResponse(new Command(_axis, _type), CommandResponseMode.NonZero);
+        AddAxisHandle(_axis, response);
+    }
     
+    /// <summary>
+    /// Link an action to a series of commands.
+    /// </summary>
+    /// <param name="_action">Action to perform.</param>
+    /// <param name="_sequence">Series of responses needed to activate action.</param>
+    public void AddActionHandle(Actions _action, CommandSequence _sequence)
+    {
+        // Add the control to the existing scheme.
+        GetScheme().AddControl(_action, _sequence);
+    }
+
+    /// <summary>
+    /// Link the axis to the command response.
+    /// </summary>
+    /// <param name="_axis">Axis name.</param>
+    /// <param name="_response">Response triggering axis value.</param>
+    public void AddAxisHandle(string _axis, CommandResponse _response)
+    {
+        // Add tracking information for the axis in question.
+        GetScheme().AddAxis(_axis, _response);
+    }
+
+    #endregion
+
     #endregion
 
     #region Accessor Methods

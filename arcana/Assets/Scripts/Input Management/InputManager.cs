@@ -274,7 +274,7 @@ namespace Arcana.InputManagement
         /// Creates control schemse for each player.
         /// </summary>
         private Dictionary<Controller, ControlScheme> m_schemes;
-
+        
         /// <summary>
         /// Initialization flag.
         /// </summary>
@@ -284,11 +284,14 @@ namespace Arcana.InputManagement
         // Properties.
         /////////////////////
 
+        /// <summary>
+        /// Returns collection of all control schemes.
+        /// </summary>
         public Dictionary<Controller, ControlScheme> ControlSchemes
         {
             get { return this.m_schemes; }
         }
-        
+
         #endregion
 
         #region Service Methods.
@@ -353,6 +356,61 @@ namespace Arcana.InputManagement
         #endregion
 
         #region Accessor Methods.
+        
+        /// <summary>
+        /// Get the axis value.
+        /// </summary>
+        /// <param name="_controller">Controller requesting axis data.</param>
+        /// <param name="_axis">Axis to check.</param>
+        /// <returns>Returns value.</returns>
+        public float GetAxis(Controller _controller = Controller.System, string _axis = "")
+        {
+            if (_controller == Controller.Debug)
+            {
+                // If a debug controller is requesting input and this isn't in debug mode, return false.
+                if (!Debugger.DEBUG_MODE)
+                {
+                    return 0.0f;
+                }
+            }
+
+            // Check player index compared to control scheme.
+            if (ControlSchemes.ContainsKey(_controller))
+            {
+                return ControlSchemes[_controller].GetAxis(_axis);
+            }
+
+            // If no scheme, no action.
+            return 0.0f;
+        }
+
+
+        /// <summary>
+        /// Get the raw axis value.
+        /// </summary>
+        /// <param name="_controller">Controller requesting axis data.</param>
+        /// <param name="_axis">Axis to check.</param>
+        /// <returns>Returns value.</returns>
+        public float GetAxisRaw(Controller _controller = Controller.System, string _axis = "")
+        {
+            if (_controller == Controller.Debug)
+            {
+                // If a debug controller is requesting input and this isn't in debug mode, return false.
+                if (!Debugger.DEBUG_MODE)
+                {
+                    return 0.0f;
+                }
+            }
+
+            // Check player index compared to control scheme.
+            if (ControlSchemes.ContainsKey(_controller))
+            {
+                return ControlSchemes[_controller].GetAxisRaw(_axis);
+            }
+
+            // If no scheme, no action.
+            return 0.0f;
+        }
 
         /// <summary>
         /// Return flag checking if an action has been performed, based on the input player index.
@@ -362,6 +420,15 @@ namespace Arcana.InputManagement
         /// <returns>Returns a boolean true if action has been completed.</returns>
         public bool GetAction(Controller _controller = Controller.System, Actions _action = Actions.Idle)
         {
+            if (_controller == Controller.Debug)
+            {
+                // If a debug controller is requesting input and this isn't in debug mode, return false.
+                if (!Debugger.DEBUG_MODE)
+                {
+                    return false;
+                }
+            }
+
             // Check player index compared to control scheme.
             if (ControlSchemes.ContainsKey(_controller))
             {
@@ -370,6 +437,21 @@ namespace Arcana.InputManagement
 
             // If no scheme, no action.
             return false;
+        }
+
+        /// <summary>
+        /// Returns control scheme for requesting controller, if it exists.
+        /// </summary>
+        /// <param name="_controller">Controller requesting scheme.</param>
+        /// <returns>Returns a ControlScheme object.</returns>
+        public ControlScheme GetScheme(Controller _controller)
+        {
+            if (ControlSchemes.ContainsKey(_controller))
+            {
+                return ControlSchemes[_controller];
+            }
+
+            return null;
         }
 
         #endregion

@@ -54,8 +54,13 @@ namespace Arcana.InputManagement
         /// <summary>
         /// Control scheme created for a single player.
         /// </summary>
-        private Dictionary<Actions, CommandSequence> m_controls = null;
-        
+        private Dictionary<Actions, List<CommandSequence>> m_controls = null;
+
+        /// <summary>
+        /// List of axes that should be tracked.
+        /// </summary>
+        private Dictionary<string, CommandResponse> m_axes = null;
+                
         /////////////////////
         // Properties.
         /////////////////////
@@ -63,9 +68,17 @@ namespace Arcana.InputManagement
         /// <summary>
         /// Reference to the control scheme.
         /// </summary>
-        public Dictionary<Actions, CommandSequence> Controls
+        public Dictionary<Actions, List<CommandSequence>> Controls
         {
             get { return this.m_controls; }
+        }
+
+        /// <summary>
+        /// Returns axes.
+        /// </summary>
+        public Dictionary<string, CommandResponse> Axes
+        {
+            get { return this.m_axes; }
         }
 
         #endregion
@@ -77,12 +90,49 @@ namespace Arcana.InputManagement
         /// </summary>
         public ControlScheme()
         {
-            this.m_controls = new Dictionary<Actions, CommandSequence>();
+            this.m_controls = new Dictionary<Actions, List<CommandSequence>>();
+            this.m_axes = new Dictionary<string, CommandResponse>();
         }
 
         #endregion
 
         #region Accessor Methods.
+
+        /// <summary>
+        /// Return the axis value.
+        /// </summary>
+        /// <param name="_name">Axis to search for.</param>
+        /// <returns>Float between -1 and 1.</returns>
+        public float GetAxis(string _name)
+        {
+            if (m_axes.ContainsKey(_name))
+            {
+                if (m_axes[_name].IsCommandActive())
+                {
+                    return m_axes[_name].GetAxis();
+                }
+            }
+
+            return 0.0f;
+        }
+
+        /// <summary>
+        /// Return the axis raw value.
+        /// </summary>
+        /// <param name="_name">Axis to search for.</param>
+        /// <returns>Float between -1 and 1.</returns>
+        public float GetAxisRaw(string _name)
+        {
+            if (m_axes.ContainsKey(_name))
+            {
+                if (m_axes[_name].IsCommandActive())
+                {
+                    return m_axes[_name].GetAxisRaw();
+                }
+            }
+
+            return 0.0f;
+        }
 
         /// <summary>
         /// Returns true if action has been triggered.
@@ -91,16 +141,21 @@ namespace Arcana.InputManagement
         /// <returns>Returns true if action has been triggered; false if action hasn't or hasn't been added to the collection.</returns>
         public bool TriggerAction(Actions _action)
         {
-            CommandSequence input = GetActionTrigger(_action);
-            if (input != null)
+            List<CommandSequence> validInputs = GetActionTriggers(_action);
+
+            if (validInputs == null)
             {
-                return TriggerAction(_action, input);
+                Debugger.Print("Action doesn't have any command sequences set up.");
             }
             else
             {
-                Debugger.Print("Action doesn't have a command sequence set up.");
-                return false;
+                foreach (CommandSequence seq in validInputs)
+                {
+                    if (TriggerAction(_action, seq)) { return true; }
+                }
             }
+
+            return false;
         }
 
         /// <summary>
@@ -111,7 +166,22 @@ namespace Arcana.InputManagement
         /// <returns></returns>
         private bool TriggerAction(Actions _action, CommandSequence _input)
         {
-            return (this.m_controls.ContainsKey(_action) && this.m_controls[_action].Matches(_input));
+            if (this.m_controls.ContainsKey(_action))
+            {
+                // An action exists. Check to see if an input sequence triggers it.
+                List<CommandSequence> triggers = this.m_controls[_action];
+
+                foreach (CommandSequence seq in triggers)
+                {
+                    // If any one matches:
+                    if (seq.Matches(_input) && _input.IsSequenceActive(_input))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -119,7 +189,7 @@ namespace Arcana.InputManagement
         /// </summary>
         /// <param name="_action">Action to be performed.</param>
         /// <returns>Returns the input sequence required.</returns>
-        private CommandSequence GetActionTrigger(Actions _action)
+        private List<CommandSequence> GetActionTriggers(Actions _action)
         {
             if (this.m_controls.ContainsKey(_action))
             {
@@ -140,15 +210,32 @@ namespace Arcana.InputManagement
         /// <param name="_input">Mapped input.</param>
         public void AddControl(Actions _action, CommandSequence _input)
         {
-            if (this.m_controls.ContainsKey(_action))
+            if (!this.m_controls.ContainsKey(_action))
+            {                
+                // Add a new scheme, if it doesn't already exist.
+                this.m_controls.Add(_action, new List<CommandSequence>());
+            }
+
+            // Add the sequence to the list.
+            this.m_controls[_action].Add(_input);
+        }
+
+        /// <summary>
+        /// Add an axis to track.
+        /// </summary>
+        /// <param name="_axis">Track this axis</param>
+        /// <param name="_axisTrigger">Trigger axis values on this movement trigger.</param>
+        public void AddAxis(string _axis, CommandResponse _axisTrigger)
+        {
+            if (!this.m_axes.ContainsKey(_axis))
             {
-                // Overwrite the value.
-                this.m_controls[_action] = _input;
+                // Add a new scheme, if it doesn't already exist.
+                this.m_axes.Add(_axis, _axisTrigger);
             }
             else
             {
-                // Add the scheme.
-                this.m_controls.Add(_action, _input);
+                // Overwrite value.
+                this.m_axes[_axis] = _axisTrigger;
             }
         }
         
@@ -739,6 +826,38 @@ namespace Arcana.InputManagement
         }
 
         /// <summary>
+        /// Get the axis if the command is active.
+        /// </summary>
+        /// <returns>Returns value.</returns>
+        public float GetAxis()
+        {
+            if (IsCommandActive() && IsAxis)
+            {
+                return m_command.GetAxis();
+            }
+            else
+            {
+                return 0.0f;
+            }
+        }
+
+        /// <summary>
+        /// Get the axis raw if the command is active.
+        /// </summary>
+        /// <returns>Returns value.</returns>
+        public float GetAxisRaw()
+        {
+            if (IsCommandActive() && IsAxis)
+            {
+                return m_command.GetAxisRaw();
+            }
+            else
+            {
+                return 0.0f;
+            }
+        }
+
+        /// <summary>
         /// Checks response for equality.
         /// </summary>
         /// <param name="other">Response to compare.</param>
@@ -859,6 +978,49 @@ namespace Arcana.InputManagement
 
             // Return true if input matched.
             return true;
+        }
+
+        /// <summary>
+        /// Check if the input sequence has all of its commands as active.
+        /// </summary>
+        /// <param name="_input">Input list of responses.</param>
+        /// <returns>Returns true if the input sequence commands are all active.</returns>
+        public bool IsSequenceActive(List<CommandResponse> _input)
+        {
+            bool active = true;
+
+            foreach (CommandResponse cr in _input)
+            {
+                if (!cr.IsCommandActive())
+                {
+                    active = false;
+                    break;
+                }                
+            }
+
+            return active;
+        }
+
+
+        /// <summary>
+        /// Check if the input sequence has all of its commands as active.
+        /// </summary>
+        /// <param name="_input">Input list of responses.</param>
+        /// <returns>Returns true if the input sequence commands are all active.</returns>
+        public bool IsSequenceActive(CommandSequence _sequence)
+        {
+            bool active = true;
+
+            foreach (CommandResponse cr in _sequence.Sequence)
+            {
+                if (!cr.IsCommandActive())
+                {
+                    active = false;
+                    break;
+                }
+            }
+
+            return active;
         }
 
         #endregion
