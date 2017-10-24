@@ -33,6 +33,24 @@ namespace Arcana.Entities
         public float m_maxSpeed;
         public float m_initialSpeed;
 
+        //enum
+        public enum Spell
+        {
+
+            fireW = 12,
+            fireE = 102,
+            fireP = 3,
+            waterF = 21,
+            waterE = 120,
+            waterP = 30,
+            earthF = 201,
+            earthW = 210,
+            earthP = 300
+
+        };
+
+        public Spell spell;
+
         //initial velocity to be used in testing
         private Vector3 initalVelocity;
 
@@ -51,7 +69,8 @@ namespace Arcana.Entities
         {
 
             //instantiates the projectile_go and adds it to the scene
-			// if char = F, make fire
+            // if char = F, make fire
+
 			if (type == 100)
 			{
 				projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;
