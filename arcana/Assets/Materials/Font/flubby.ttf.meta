@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 3b88744b8c03b7d489a51f2c7aa365d7
+timeCreated: 1508901894
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Flubby
+  fontNames:
+  - Flubby
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
