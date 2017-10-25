@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f8b34e1be14e47441a0c74ba1030d037
+guid: c747bfa2afac42d459608215c40ff18f
 timeCreated: 1508901894
 licenseType: Free
 TrueTypeFontImporter:
@@ -9,9 +9,9 @@ TrueTypeFontImporter:
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: NoNameFont
+  fontName: absender
   fontNames:
-  - No Name
+  - absender
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

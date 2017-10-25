@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 2a9dfbe7ed3c421418fb706bd2af475c
+guid: bb0a19a1e1f623f48adb3f81a70641b4
 timeCreated: 1508901894
 licenseType: Free
 TrueTypeFontImporter:
@@ -9,9 +9,9 @@ TrueTypeFontImporter:
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: 8BIT WONDER
+  fontName: HandyGeorge
   fontNames:
-  - 8Bit Wonder
+  - HandyGeorge
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

@@ -387,15 +387,128 @@ namespace Arcana.Entities
         /// <param name="value">Value to assign.</param>
         public void Initialize(string parameter, object value)
         {
-            switch (parameter)
-            {
-                // TODO.
-            }
+            return; // No implementation necessary for this interface method.
         }
 
         #endregion
 
-        #region // // Other methods.
+        #endregion
+
+        #region // Accessor Methods.
+
+        /// <summary>
+        /// Checks if entity already exists in list.
+        /// </summary>
+        /// <param name="e">Entity to search for.</param>
+        /// <returns>Returns true if it is contained within the list.</returns>
+        public bool HasEntity(Entity e)
+        {
+            return this.m_entities.Contains(e);
+        }
+
+        /// <summary>
+        /// Checks if a given entity is available to be reused.
+        /// </summary>
+        /// <param name="e">Entity to check.</param>
+        /// <returns>Returns true if entity is inactive.</returns>
+        public bool IsAvailable(Entity e)
+        {
+            // When an element is marked as inactive, it's available to be reused.
+            return (e.IsAvailable());
+        }
+
+        /// <summary>
+        /// Get next available will return the first inactive Entity in the list it can find.
+        /// If it is unavailable, it will create a new Entity.
+        /// </summary>
+        /// <param name="_type">Type of Entity to request.</param>
+        /// <returns>Returns entity of given type if it is available.</returns>
+        public Entity GetNextAvailable(EntityType _type)
+        {
+            // Temp value.
+            Entity available = null;
+
+            // Find the first available entity in the list.
+            foreach (Entity e in this.m_entities)
+            {
+                if (IsAvailable(e))
+                {
+                    available = e;
+                    break; // Break out the for loop.
+                }
+            }
+
+            // If available is still null, make a new Entity.
+            if (available == null)
+            {
+                // Creates default entity.
+                available = MakeEntity(_type, null);
+            }
+
+            // Return available.
+            return available;
+        }
+
+        #endregion
+
+        #region // Mutator methods.
+
+        /// <summary>
+        /// Creates a new Entity and adds it to the list.
+        /// </summary>
+        /// <returns>Returns the newly created Entity.</returns>
+        public Entity MakeEntity(EntityType _type = EntityType.NULL, GameObject _parent = null, Constraints _parameters = null)
+        {
+            Entity e = null;
+            GameObject p = _parent;
+            Constraints c = _parameters;
+
+            if(p == null)
+            {
+                p = Services.CreateEmptyObject("Entity");
+            }
+
+            if (c == null)
+            {
+                c = EntityFactory.Instance().CreateSettings(_type);
+            }
+
+            // Create and add the entity.
+            e = EntityFactory.Instance().CreateComponent(p, c);
+            this.m_entities.Add(e);
+
+            return e;
+        }
+
+        /// <summary>
+        /// Make available will call the entity's MakeAvailable function.
+        /// </summary>
+        /// <param name="e">Entity to make available.</param>
+        private void MakeAvailable(Entity e)
+        {
+            e.MakeAvailable();
+        }
+
+        /// <summary>
+        /// Entity is added to the list.
+        /// </summary>
+        /// <param name="e">Entity to add.</param>
+        private void AddEntity(Entity e)
+        {
+            this.m_entities.Add(e);
+        }
+
+        /// <summary>
+        /// Entity is removed from the list.
+        /// </summary>
+        /// <param name="e">Entity to remove.</param>
+        private void RemoveEntity(Entity e)
+        {
+            if (HasEntity(e))
+            {
+                this.m_entities.Remove(e);
+            }
+        }
 
         /// <summary>
         /// Pauses the entire manager.
@@ -442,8 +555,6 @@ namespace Arcana.Entities
                 }
             }
         }
-
-        #endregion
 
         #endregion
 

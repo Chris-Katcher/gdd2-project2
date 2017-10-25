@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: c747bfa2afac42d459608215c40ff18f
+guid: 2a9dfbe7ed3c421418fb706bd2af475c
 timeCreated: 1508901894
 licenseType: Free
 TrueTypeFontImporter:
@@ -9,9 +9,9 @@ TrueTypeFontImporter:
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: absender
+  fontName: 8BIT WONDER
   fontNames:
-  - Absender
+  - 8BIT WONDER
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

@@ -31,6 +31,7 @@ namespace Arcana.Entities
     {
         NULL,
         Entity,
+        Environment,
         Projectile,
         Player,
         Platform,
@@ -75,7 +76,7 @@ namespace Arcana.Entities
         /// <summary>
         /// On creation, sets this to be the instance.
         /// </summary>
-        private EntityFactory()
+        protected EntityFactory()
         {
             instance = this;
         }
@@ -148,12 +149,12 @@ namespace Arcana.Entities
         /// <summary>
         /// Set up the parameters associated with this factory's IFactoryElement.
         /// </summary>
+        /// <param name="_type">EntityType to be assigned.</param>
+        /// <param name="_position">Initial position of the environment.</param>
         /// <returns></returns>
         public virtual Constraints CreateSettings(
             EntityType _type = EntityType.NULL,
-            Vector2? _position = null,
-            Dimension _dimensions = null,
-            HealthTracker _tracker = null)
+            Vector2? _position = null)
         {
             // Create the collection.
             Debugger.Print("Building parameters for Entity component.");
@@ -166,15 +167,7 @@ namespace Arcana.Entities
             // Set the position.
             Debugger.Print("Setting position.");
             if (_position.HasValue) { parameters.AddValue<Vector2>(Constants.PARAM_POSITION, _position.Value); }
-
-            // Dimension.
-            Debugger.Print("Setting dimensions.");
-            if (_dimensions != null) { parameters.AddValue<Dimension>(Constants.PARAM_DIMENSIONS, _dimensions); }
-
-            // Health tracker.
-            Debugger.Print("Setting health tracker.");
-            if (_tracker != null) { parameters.AddValue<HealthTracker>(Constants.PARAM_HEALTH_TRACKER, _tracker); }
-
+            
             return parameters;
         }
 
@@ -224,6 +217,9 @@ namespace Arcana.Entities
                 case EntityType.Entity:
                     result = "(Entity)";
                     break;
+                case EntityType.Environment:
+                    result = "(Environment)";
+                    break;
                 case EntityType.NULL:
                 default:
                     result = "";
@@ -242,30 +238,30 @@ namespace Arcana.Entities
         /////////////////////
 
         /// <summary>
+        /// Tracks initialization internally.
+        /// </summary>
+        protected bool m_initialized = false;
+
+        /// <summary>
+        /// Flag for visibility.
+        /// </summary>
+        private bool m_visible = true;
+
+        /// <summary>
+        /// Flag for display.
+        /// </summary>
+        private bool m_display = true;
+
+        /// <summary>
         /// The entity type.
         /// </summary>
         private EntityType m_entityType;
 
         /// <summary>
-        /// Entity dimension manager. (Usually for calculations).
-        /// </summary>
-        private Dimension m_dimensions;
-
-        /// <summary>
-        /// Entity's health tracker.
-        /// </summary>
-        private HealthTracker m_health;
-
-        /// <summary>
         /// Tracks the status of an entity.
         /// </summary>
         private Status m_status;
-
-        /// <summary>
-        /// Tracks initialization internally.
-        /// </summary>
-        private bool m_initialized = false;
-        
+                
         /////////////////////
         // Properties.
         /////////////////////
@@ -276,6 +272,14 @@ namespace Arcana.Entities
         public GameObject Self
         {
             get { return gameObject; }
+        }
+
+        /// <summary>
+        /// Reference to initialization flag.
+        /// </summary>
+        public bool Initialized
+        {
+            get { return this.m_initialized; }
         }
         
         /// <summary>
@@ -301,42 +305,22 @@ namespace Arcana.Entities
         {
             get { return gameObject.transform.position; }
         }
-
-        /// <summary>
-        /// Reference to Entity width.
-        /// </summary>
-        public float Width
-        {
-            get { return m_dimensions.Width; }
-        }
-        
-        /// <summary>
-        /// Reference to Entity width.
-        /// </summary>
-        public float Height
-        {
-            get { return m_dimensions.Height; }
-        }
-
-        /// <summary>
-        /// Reference to Entity depth level.
-        /// </summary>
-        public float Depth
-        {
-            get { return m_dimensions.Depth; }
-        }
         
         #endregion
 
         #region Service Methods
+
+        #region UnityEngine Methods.
 
         /// <summary>
         /// Initilizes the Entity.
         /// </summary>
         protected virtual void Start()
         {
-            // Run this method when initializing an entity.
-            this.Initialize();
+            if (!Initialized)
+            {
+                this.Initialize();
+            }
         }
 
         /// <summary>
@@ -354,6 +338,8 @@ namespace Arcana.Entities
         {
             // FixedUpdate method.
         }
+
+        #endregion
 
         #region Initialization Methods.
 
@@ -380,7 +366,7 @@ namespace Arcana.Entities
                 this.m_initialized = true;
 
                 // Start the status object.
-                this.m_status.Start();
+                this.m_status.Activate();
             }
         }
 
@@ -391,7 +377,7 @@ namespace Arcana.Entities
         /// <param name="_position">Position of the transform. If left null, the entity will inherit this value from its gameObject.</param>
         /// <param name="_dimensions">Dimensions reflect the boundaries of the entity.</param>
         /// <param name="_health">An entity may be able to be destroyed.</param>
-        protected virtual void Initialize(EntityType _type = EntityType.Entity, Vector2? _position = null, Dimension _dimensions = null, HealthTracker _health = null)
+        protected virtual void Initialize(EntityType _type = EntityType.Entity, Vector2? _position = null)
         {
             // Set the name and type.
             Debugger.Print("Setting Entity data member and property values.", gameObject.name);
@@ -405,27 +391,6 @@ namespace Arcana.Entities
                 gameObject.transform.position = Services.ToVector3(_position.Value.x, _position.Value.y, Position.z);
             }
 
-            // Create objects for data members.
-            Debugger.Print("Setting dimensions.", gameObject.name);
-            if (_dimensions == null)
-            {
-                this.m_dimensions = new Dimension(Constants.DEFAULT_DIMENSION, 0.0f);
-            }
-            else
-            {
-                this.m_dimensions = _dimensions;
-            }
-
-            // Get components.
-            Debugger.Print("Setting health tracker.", gameObject.name);
-            if (_health == null)
-            {
-                this.m_health = HealthTrackerFactory.Instance().CreateComponent(gameObject);
-            }
-            else
-            {
-                this.m_health = _health;
-            }
         }
 
         /// <summary>
@@ -443,41 +408,34 @@ namespace Arcana.Entities
                     Vector2 _position = (Vector2)value;
                     gameObject.transform.position = Services.ToVector3(_position.x, _position.y, Position.z);
                     break;
-                case Constants.PARAM_DIMENSIONS:
-                    this.m_dimensions = (Dimension)value;
-                    break;
-                case Constants.PARAM_HEALTH_TRACKER:
-                    this.m_health = (HealthTracker)value;
-                    break;
             }
         }
 
         #endregion
-        
+
+        #region Object Pool Methods.
+
         /// <summary>
-        /// Reset the Entity.
+        /// Returns true if this object can be repurposed.
         /// </summary>
-        public virtual void Reset()
+        /// <returns>Returns true if available.</returns>
+        public virtual bool IsAvailable()
         {
-            m_status.TriggerReset();
+            // In the base case, an entity is reusable if it is inactive.
+            return (this.Status.IsInactive() || this.Status.IsNull);
         }
 
         /// <summary>
-        /// Pause the Entity updates.
+        /// This method is called in order to ready an Entity for reuse.
         /// </summary>
-        public virtual void Pause()
+        public virtual void MakeAvailable()
         {
-            m_status.Pause();
+            // Make it available.
+            this.m_status.TriggerReset();
         }
 
-        /// <summary>
-        /// Resume the Entity updates.
-        /// </summary>
-        public virtual void Resume()
-        {
-            m_status.Resume();
-        }
-        
+        #endregion
+
         #endregion
 
         #region Accessor Methods
@@ -503,34 +461,7 @@ namespace Arcana.Entities
         #endregion
 
         #region Mutator Methods
-
-        /// <summary>
-        /// Set the vertical dimension of the Entity.
-        /// </summary>
-        /// <param name="height">Height of the Entity.</param>
-        public void SetHeight(float height)
-        {
-            this.m_dimensions.SetHeight(Services.Max(height, 0.1f));
-        }
-
-        /// <summary>
-        /// Set the horizontal dimension of the Entity.
-        /// </summary>
-        /// <param name="width">Width of the Entity.</param>
-        public void SetWidth(float width)
-        {
-            this.m_dimensions.SetWidth(Services.Max(width, 0.1f));
-        }
-
-        /// <summary>
-        /// Set the depth level of the Entity.
-        /// </summary>
-        /// <param name="depth">Depth level of the Entity.</param>
-        public void SetDepth(int depth)
-        {
-            this.m_dimensions.SetDepth(Services.Max(depth, 0.1f));
-        }
-
+        
         /// <summary>
         /// Null objects can have their type reset. In this case, null just means empty.
         /// </summary>
@@ -541,6 +472,64 @@ namespace Arcana.Entities
             {
                 this.m_entityType = type;
             }
+        }
+
+        /// <summary>
+        /// Reset the Entity.
+        /// </summary>
+        public virtual void ResetEntity()
+        {
+            m_status.TriggerReset();
+        }
+
+        /// <summary>
+        /// Pause the Entity updates.
+        /// </summary>
+        public virtual void Pause()
+        {
+            m_status.Pause();
+        }
+
+        /// <summary>
+        /// Resume the Entity updates.
+        /// </summary>
+        public virtual void Resume()
+        {
+            m_status.Resume();
+        }
+
+        /// <summary>
+        /// Activate the entity.
+        /// </summary>
+        public virtual void Activate()
+        {
+            this.Status.Activate();
+        }
+
+        /// <summary>
+        /// Deactivate the entity.
+        /// </summary>
+        public virtual void Deactivate()
+        {
+            this.Status.Deactivate();
+        }
+
+        /// <summary>
+        /// Set Entity visibility flag.
+        /// </summary>
+        /// <param name="_visibility">Visibility of the entity.</param>
+        public virtual void SetVisibility(bool _visibility)
+        {
+            this.m_visible = _visibility;
+        }
+
+        /// <summary>
+        /// Set GUI display flag.
+        /// </summary>
+        /// <param name="_displayGUI">Visibility of the HUD elements.</param>
+        public virtual void SetDisplay(bool _displayGUI)
+        {
+            this.m_display = _displayGUI;
         }
 
         #endregion

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: bb0a19a1e1f623f48adb3f81a70641b4
+guid: f8b34e1be14e47441a0c74ba1030d037
 timeCreated: 1508901894
 licenseType: Free
 TrueTypeFontImporter:
@@ -9,9 +9,9 @@ TrueTypeFontImporter:
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: HandyGeorge
+  fontName: NoNameFont
   fontNames:
-  - Handy George
+  - NoNameFont
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
