@@ -91,10 +91,7 @@ namespace Arcana.Entities
 				Debug.Log("Type '" + type + "' not recgonized. Please check the projectile manager script");
 				return;
 			}
-
-			
-			
-            
+       
             Instantiate(projectile_go, new Vector3(x,y,0), Quaternion.identity);
 
             //sets force for now UNUSED

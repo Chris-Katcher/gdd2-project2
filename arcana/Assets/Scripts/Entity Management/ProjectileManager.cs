@@ -22,9 +22,8 @@ namespace Arcana.Entities
         private void createProjectile(float x, float y, Vector3 force, int type)
         {
 
-            //creates the projectile proj
-            Projectile proj = new Projectile(x, y, force, type);   
-
+            Projectile proj = new Projectile(x, y, force, type);
+   
             //adds it to list of projectiles
             this.projectiles.Add(proj);
 
