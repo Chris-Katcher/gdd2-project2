@@ -50,9 +50,10 @@ namespace Arcana
         /// </summary>
         /// <param name="_message">Message to print to the log.</param>
         /// <param name="_title">Title of message. There is no title, by default.</param>
-        public static void Print(string _message, string _title = "")
+        /// <param name="_mode">If true, allow this function to run.</param>
+        public static void Print(string _message, string _title = "", bool _mode = true)
         {
-            if (DEBUG_MODE)
+            if (DEBUG_MODE && _mode)
             {
                 string message = "";
 
@@ -72,9 +73,10 @@ namespace Arcana
         /// </summary>
         /// <param name="_message">Message to print to the log.</param>
         /// <param name="_title">Title of message. There is no title, by default.</param>
-        public static void Break(string _message = "", string _title = "")
+        /// <param name="_mode">If true, allow this function to run.</param>
+        public static void Break(string _message = "", string _title = "", bool _mode = true)
         {
-            if (DEBUG_MODE)
+            if (DEBUG_MODE && _mode)
             {
                 if (_message.Length > 0)
                 {
@@ -93,9 +95,10 @@ namespace Arcana
         /// <param name="b">Right side value.</param>
         /// <param name="_message">Message to print to the log.</param>
         /// <param name="_title">Title of message. There is no title, by default.</param>
-        public static void Assert<T>(IComparable<T> a, IComparable<T> b, string _message = "", string _title = "")
+        /// <param name="_mode">If true, allow this function to run.</param>
+        public static void Assert<T>(IComparable<T> a, IComparable<T> b, string _message = "", string _title = "", bool _mode = true)
         {
-            if (DEBUG_MODE)
+            if (DEBUG_MODE && _mode)
             {
 
                 // Get the assertion.
@@ -120,9 +123,10 @@ namespace Arcana
         /// <summary>
         /// Clear errors from the developer console.
         /// </summary>
-        public static void Clear()
+        /// <param name="_mode">If true, allow this function to run.</param>
+        public static void Clear(bool _mode = true)
         {
-            if (DEBUG_MODE)
+            if (DEBUG_MODE && _mode)
             {
                 Debug.ClearDeveloperConsole();
             }
@@ -131,18 +135,23 @@ namespace Arcana
         /// <summary>
         /// Toggle the debug mode flag.
         /// </summary>
-        public static void ToggleDebugMode()
+        /// <param name="_mode">If true, allow this function to run.</param>
+        public static void ToggleDebugMode(bool _mode = true)
         {
-            DEBUG_MODE = !DEBUG_MODE;
+            if (_mode)
+            {
+                DEBUG_MODE = !DEBUG_MODE;
+            }
         }
 
         /// <summary>
         /// Set debug mode flag.
         /// </summary>
         /// <param name="_flag">Debug mode flag.</param>
-        public static void SetDebugMode(bool _flag)
+        /// <param name="_mode">If true, allow this function to run.</param>
+        public static void SetDebugMode(bool _flag, bool _mode = true)
         {
-            DEBUG_MODE = _flag;
+            DEBUG_MODE = _flag && _mode;
         }
 
         #endregion

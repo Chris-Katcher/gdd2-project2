@@ -25,12 +25,15 @@ using System.Collections.Generic;
 /// SystemController acts as the entry point for the program.
 /// C# scripts for Unity must inherit the <see cref="MonoBehavior"/> class.
 /// </summary>
-public class SystemController : MonoBehaviour {
+[AddComponentMenu("Arcana/Managers/SystemController")]
+public class SystemController : ArcanaObject {
 
     #region Data Members 
 
+    #region Fields.
+
     /////////////////////
-    // Data members.
+    // Fields.
     /////////////////////
 
     /// <summary>
@@ -48,12 +51,12 @@ public class SystemController : MonoBehaviour {
     /// <summary>
     /// The controller calling input actions.
     /// </summary>
-    private Controller m_controller = Controller.System;
+    private Director m_controller = Director.SystemController;
 
     /// <summary>
     /// Empty game object that has all the manager components on it.
     /// </summary>
-    private GameObject m_managers = null;
+    private ArcanaObject m_managers = null;
 
     /// <summary>
     /// The input manager handles commands and sequences.
@@ -75,31 +78,18 @@ public class SystemController : MonoBehaviour {
     /// </summary>
     private EntityManager m_entityManager = null;
 
+    #endregion
 
+    #region Properties.
+    
     /////////////////////
     // Properties.
     /////////////////////
-
-    /// <summary>
-    /// Name of the game object.
-    /// </summary>
-    private string Name
-    {
-        get { return "Arcana (System Controller)"; }
-    }
-
-    /// <summary>
-    /// Returns initialization flag.
-    /// </summary>
-    public bool Initialized
-    {
-        get { return this.m_initialized; }
-    }
-
+    
     /// <summary>
     /// Returns reference to the managers object.
     /// </summary>
-    public GameObject Managers
+    public ArcanaObject Managers
     {
         get { return this.m_managers; }
     }
@@ -137,25 +127,19 @@ public class SystemController : MonoBehaviour {
     }
 
     #endregion
-    
-    #region Service Methods
+
+    #endregion
 
     #region UnityEngine Methods
-
+    
     /// <summary>
-    /// Entry point for the program.
+    /// Update high-level system event responses for the main game loop.
     /// </summary>
-    void Start()
+    public override void Update()
     {
-        // Initialize the program.
-        this.Initialize();
-    }
+        // For the system controller, don't call the base update.
+        // We don't want it to be destroyed when flagged for destruction, since, it's the main game loop.
 
-    /// <summary>
-    /// Update is called once per frame.
-    /// </summary>
-    void Update()
-    {
         // If the system controller hasn't been initialized:
         if (!Initialized)
         {
@@ -165,7 +149,7 @@ public class SystemController : MonoBehaviour {
         else
         {
             // If the system controller has been initialized, perform these actions.
-
+            
             // Handle user input.
             HandleInput();
 
@@ -187,110 +171,47 @@ public class SystemController : MonoBehaviour {
             m_gameManager.fireProjPlayer1(fire1_pressed);
 
             // TODO: Stub code.*/
-            
-        }        
+
+        }
     }
-    
+
     #endregion
 
     #region Initialization Methods.
 
     /// <summary>
-    /// Initialize the managers.
+    /// Initialize the main game loop.
     /// </summary>
-    private void Initialize()
+    public override void Initialize()
     {
-        // If this hasn't been initialized.
+        if (!this.Initialized)
+        {
+            // Call the base. (This will also set our initialization flag to true).
+            base.Initialize();
 
-        if (!this.Initialized) {
             // Set the debug mode.
             Debugger.SetDebugMode(DEBUG_MODE);
-            Debugger.Print("Initialize system controller.");
 
-            // Set up the name for this manager.
-            gameObject.name = this.Name;
+            // Build the system controller object.
+            Debugger.Print("Initialize system controller object.");
 
-            // Create the managers.
+            // Create an empty game object and add the manager object.
+            this.m_managers = Services.CreateEmptyObject("System Managers").AddComponent<ArcanaObject>();
+
+            // Make the system controller object the parent.
+            Services.AddChild(this.Self, this.m_managers.Self);
+
+            // Set up the name for the manager.
+            this.Name = "Arcana (System Controller)";
+
+            // Ensure no movement.
+            this.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
+
+            // Build (or request) the managers.
             BuildManagers();
 
-            // Set the flags.
-            this.m_initialized = true;
-        }
-    }
-
-    /// <summary>
-    /// Constructs the manager objects and its components.
-    /// </summary>
-    private void BuildManagers()
-    {
-        // Build the manager object. //
-        Debugger.Print("Build the manager.");
-
-        // Ensure no movement.
-        this.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
-
-        // Create the game manager component.
-        this.m_managers = Services.CreateEmptyObject("System Managers");
-
-        // Make the system controller object the parent.
-        Services.AddChild(gameObject, this.m_managers);
-
-        // Build the components. //
-        Debugger.Print("Build manager components.");
-
-        // Build the input manager.
-        BuildInputManager();
-
-        // Build the state manager.
-        BuildStateManager();
-
-        // Build the camera manager.
-        BuildCameraManager();
-
-        // Build the entity manager.
-        BuildEntityManager();
-        
-        // Add the controls.
-        InitializeControls();
-
-    }
-
-    #region Manager Building Methods.
-
-    /// <summary>
-    /// Build and initialize the input manager.
-    /// </summary>
-    private void BuildInputManager()
-    {
-        // Build the manager.
-        Debugger.Print("Build the input manager component.");
-
-        // Get a reference to the factory.
-        Debugger.Print("Get instance to the factory.");
-        InputManagerFactory factory = InputManagerFactory.Instance();
-
-        // Set up initialization settings for the manager.
-        Debugger.Print("Create the factory constraints for the InputManager.");
-        Constraints managerSettings = factory.CreateSettings(); // Filled with default values. Edit this to change component settings on creation.
-
-        // Build the manager.
-        Debugger.Print("Create the InputManager component, add it to the Managers GameObject, and retain the reference.");
-        this.m_inputManager = factory.CreateComponent(this.Managers, managerSettings);
-
-        // Add the system control scheme.
-        BuildControlScheme();
-    }
-
-    /// <summary>
-    /// Create a ControlScheme for system level actions.
-    /// </summary>
-    private void BuildControlScheme()
-    {
-        // If a scheme doesn't exist, build a new one.
-        if (GetScheme() == null)
-        {
-           Debugger.Print("Creating the control scheme for " + this.Name);
-           this.m_inputManager.AddControlScheme(this.m_controller, new ControlScheme());
+            // Add the controls.
+            InitializeControls();
         }
     }
 
@@ -306,7 +227,7 @@ public class SystemController : MonoBehaviour {
 
         // Creates an "A" button command that triggers on release.
         RegisterAction(Actions.ChangeCameraBackground, new Command(KeyCode.A), CommandResponseMode.Release);
-        
+
         // Creates an "S" button command that triggers on press.
         RegisterAction(Actions.ChangeCameraBackground, new Command(KeyCode.S), CommandResponseMode.Press);
 
@@ -337,6 +258,61 @@ public class SystemController : MonoBehaviour {
 
     }
 
+    #region Manager Building Methods.
+
+    /// <summary>
+    /// Constructs the manager objects and its components.
+    /// </summary>
+    private void BuildManagers()
+    {
+        // Build the managers.
+        Debugger.Print("Build the managers.");
+
+        // Build the input manager.
+        BuildInputManager();
+
+        // Build the state manager.
+        BuildStateManager();
+
+        // Build the camera manager.
+        BuildCameraManager();
+
+        // Build the entity manager.
+        BuildEntityManager();
+
+    }
+    
+    /// <summary>
+    /// Build and initialize the input manager.
+    /// </summary>
+    private void BuildInputManager()
+    {
+        // Build the manager.
+        Debugger.Print("Build the input manager component.");
+        
+        // Build the manager.
+        Debugger.Print("Create the InputManager component, add it to the Managers GameObject, and retain the reference.");
+        this.m_inputManager = InputManager.Create(this.Managers);
+
+        // Add the system control scheme.
+        // BuildControlScheme();
+    }
+
+    /// <summary>
+    /// Create a ControlScheme for system level actions.
+    /// </summary>
+    private void BuildControlScheme()
+    {
+        /*
+        // If a scheme doesn't exist, build a new one.
+        if (GetScheme() == null)
+        {
+            Debugger.Print("Creating the control scheme for " + this.Name);
+            // TODO: this.m_inputManager.AddControlScheme(this.m_controller, new ControlScheme());
+        }
+        */
+    }
+
     /// <summary>
     /// Build and initialize the state manager.
     /// </summary>
@@ -344,21 +320,12 @@ public class SystemController : MonoBehaviour {
     {
         // Build the manager.
         Debugger.Print("Build the state manager component.");
-
-        // Get a reference to the factory.
-        Debugger.Print("Get instance to the factory.");
-        StateManagerFactory factory = StateManagerFactory.Instance();
-
-        // Set up initialization settings for the manager.
-        Debugger.Print("Create the factory constraints for the StateManager.");
-        Constraints managerSettings = factory.CreateSettings(); // Filled with default values. Edit this to change component settings on creation.
-
+        
         // Build the manager.
         Debugger.Print("Create the StateManager component, add it to the Managers GameObject, and retain the reference.");
-        this.m_stateManager = factory.CreateComponent(this.Managers, managerSettings);
+        this.m_stateManager = StateManager.Create(this.Managers);
     }
-
-
+    
     /// <summary>
     /// Build and initialize the camera manager.
     /// </summary>
@@ -366,18 +333,10 @@ public class SystemController : MonoBehaviour {
     {
         // Build the camera manager.
         Debugger.Print("Build the camera manager component.");
-
-        // Get a reference to the factory.
-        Debugger.Print("Get instance to the factory.");
-        CameraManagerFactory factory = CameraManagerFactory.Instance();
-
-        // Set up initialization settings for the camera manager.
-        Debugger.Print("Create the factory constraints for the CameraManager.");
-        Constraints managerSettings = factory.CreateSettings(_color: Constants.CORNFLOWER_BLUE); // Filled with default values. Edit this to change component settings on creation.
-
+        
         // Build the manager.
         Debugger.Print("Create the CameraManager component, add it to the Managers GameObject, and retain the reference.");
-        this.m_cameraManager = factory.CreateComponent(this.Managers, managerSettings);
+        this.m_cameraManager = CameraManager.Create(this.Managers);
     }
 
     /// <summary>
@@ -387,18 +346,10 @@ public class SystemController : MonoBehaviour {
     {
         // Build the manager.
         Debugger.Print("Build the entity manager component.");
-
-        // Get a reference to the factory.
-        Debugger.Print("Get instance to the factory.");
-        EntityManagerFactory factory = EntityManagerFactory.Instance();
-
-        // Set up initialization settings for the manager.
-        Debugger.Print("Create the factory constraints for the EntityManager.");
-        Constraints managerSettings = factory.CreateSettings(); // Filled with default values. Edit this to change component settings on creation.
-
+        
         // Build the manager.
         Debugger.Print("Create the EntityManager component, add it to the Managers GameObject, and retain the reference.");
-        this.m_entityManager = factory.CreateComponent(this.Managers, managerSettings);
+        this.m_entityManager = EntityManager.Create(this.Managers);
     }
 
     #endregion
@@ -412,6 +363,7 @@ public class SystemController : MonoBehaviour {
     /// </summary>
     private void HandleInput()
     {
+        /*
         // This is the format for getting key input.
 
         // If GetAction(Action) --> Perform functionality.
@@ -426,9 +378,10 @@ public class SystemController : MonoBehaviour {
             Vector2 mouse = Services.ToVector2(Input.mousePosition);
             Debugger.Print("Left mouse button was clicked: " + mouse);
         }
-
+        */
     }
 
+    /*
     /// <summary>
     /// Wrapper function for handling input.
     /// </summary>
@@ -436,7 +389,7 @@ public class SystemController : MonoBehaviour {
     /// <returns>Returns true if action should be performed.</returns>
     public bool GetAction(Actions _action)
     {
-        return (this.m_inputManager.GetAction(this.m_controller, _action));
+        // return (this.m_inputManager.GetAction(this.m_controller, _action));
     }
 
     /// <summary>
@@ -446,7 +399,7 @@ public class SystemController : MonoBehaviour {
     /// <returns>Returns a value.</returns>
     public float GetAxis(string _name)
     {
-        return (this.m_inputManager.GetAxis(this.m_controller, _name));
+       // return (this.m_inputManager.GetAxis(this.m_controller, _name));
     }
 
     /// <summary>
@@ -456,7 +409,7 @@ public class SystemController : MonoBehaviour {
     /// <returns>Returns a value.</returns>
     public float GetAxisRaw(string _name)
     {
-        return (this.m_inputManager.GetAxisRaw(this.m_controller, _name));
+        // return (this.m_inputManager.GetAxisRaw(this.m_controller, _name));
     }
 
     /// <summary>
@@ -465,8 +418,9 @@ public class SystemController : MonoBehaviour {
     /// <returns>ControlScheme object.</returns>
     public ControlScheme GetScheme()
     {
-        return this.m_inputManager.GetScheme(this.m_controller);
+        // return this.m_inputManager.GetScheme(this.m_controller);
     }
+    */
 
     /// <summary>
     /// Link an action to perform with a command.
@@ -494,7 +448,7 @@ public class SystemController : MonoBehaviour {
         CommandResponse response = new CommandResponse(new Command(_axis, _type), CommandResponseMode.NonZero);
         AddControl(_axis, response);
     }
-    
+
     /// <summary>
     /// Link an action to a series of commands.
     /// </summary>
@@ -503,7 +457,7 @@ public class SystemController : MonoBehaviour {
     public void AddControl(Actions _action, CommandSequence _sequence)
     {
         // Add the control to the existing scheme.
-        GetScheme().AddControl(_action, _sequence);
+        // GetScheme().AddControl(_action, _sequence);
     }
 
     /// <summary>
@@ -514,11 +468,9 @@ public class SystemController : MonoBehaviour {
     public void AddControl(string _axis, CommandResponse _response)
     {
         // Add tracking information for the axis in question.
-        GetScheme().AddAxis(_axis, _response);
+        // GetScheme().AddAxis(_axis, _response);
     }
 
     #endregion
-
-    #endregion
-
+    
 }

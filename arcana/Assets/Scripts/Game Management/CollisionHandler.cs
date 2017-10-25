@@ -1,7 +1,8 @@
 ﻿/************************************************
  * CollisionHandler.cs
  * 
- * This file contains implementation for the CollisionHandler class.
+ * This file contains:
+ * - The CollisionHandler class.
  ************************************************/
 
 /////////////////////
@@ -11,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace Arcana.Physics
 {
@@ -20,7 +22,7 @@ namespace Arcana.Physics
     public class CollisionHandler
     { 
 
-        // TODO: Stub.
+        // TODO: Handle collisions.
 
     }
 }

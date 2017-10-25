@@ -1,8 +1,9 @@
 ﻿/************************************************
  * Services.cs
  * 
- * Services contain references to program-wide constants and has helper functions that can be called.
- * Services offers program-wide reference to constants and helper functions.
+ * This file contains:
+ * - The Constants class.
+ * - The Services class.
  ************************************************/
 
 /////////////////////
@@ -17,6 +18,9 @@ using Arcana.Entities.Attributes;
 
 namespace Arcana
 {
+
+    #region Class: Constants class.
+
     /////////////////////
     // Class declaration.
     /////////////////////
@@ -231,8 +235,18 @@ namespace Arcana
         public const int DEFAULT_DIMENSION = 100; // in pixels.
 
         #endregion
-        
+
         #region // Camera Constants.
+
+        /// <summary>
+        /// Default camera field of view.
+        /// </summary>
+        public const float DEFAULT_OFFSET = 50.0f;
+
+        /// <summary>
+        /// Default camera field of view.
+        /// </summary>
+        public const float DEFAULT_FIELD_OF_VIEW = 12.5f;
 
         /// <summary>
         /// Default camera shake period of time in seconds.
@@ -344,13 +358,105 @@ namespace Arcana
 
     }
 
+    #endregion
+
+    #region Class: Services class.
+
+    /////////////////////
+    // Class declaration.
+    /////////////////////
+
     /// <summary>
     /// Services called to aid in comparisons and completions.
     /// </summary>
     public static class Services
     {
 
+        #region Type functions.
+
+        /// <summary>
+        /// Returns true if descendant type is the same as the base or is a subclass of the base type.
+        /// </summary>
+        /// <param name="_desc">Descendant class type.</param>
+        /// <param name="_base">Base class type.</param>
+        public static bool IsSameOrSubclassOf(Type _desc, Type _base)
+        {
+            return (Is(_desc, _base) || IsSubclassOf(_desc, _base));
+        }
+
+        /// <summary>
+        /// Returns true if the types match exactly. Subclasses will return false.
+        /// </summary>
+        /// <param name="_input">Input type to check.</param>
+        /// <param name="_expected">Checks if it matches this type.</param>
+        /// <returns>Returns true if the types are the same.</returns>
+        public static bool Is(Type _input, Type _expected)
+        {
+            return _input == _expected;
+        }
+
+        /// <summary>
+        /// Returns true if the potential descendant is a subclass of base class. Returns false if the same type and not a subclass.
+        /// </summary>
+        /// <param name="_desc">Checking to see if this type is a descendant of the base.</param>
+        /// <param name="_base">Base class ot compare against.</param>
+        /// <returns></returns>
+        public static bool IsSubclassOf(Type _desc, Type _base)
+        {
+            if (!Is(_desc, _base))
+            {
+                return _desc.IsSubclassOf(_base);
+            }
+
+            return false;
+        }
+
+        #endregion
+
+        #region String functions.
+
+        /// <summary>
+        /// Concatenate a series of strings, with optional separator.
+        /// </summary>
+        /// <param name="separator">Separator to join strings on.</param>
+        /// <returns>Returns concatenated string.</returns>
+        public static string Concat(string separator = ", ", params string[] terms)
+        {
+            string result = "";
+
+            if (terms.Length > 1)
+            {
+                result = string.Join(separator, terms);
+            }
+            else if (terms.Length == 1)
+            {
+                result = terms[0];
+            }
+
+            return result;
+        }
+
+        #endregion
+
         #region UnityEngine Helpers
+        
+        /// <summary>
+        /// Return color of specified value.
+        /// </summary>
+        /// <returns>Returns Color from a Color32 object.</returns>
+        public static Color GetColor(int r, int g, int b)
+        {
+            return new Color32((byte)Services.Clamp(r, 0, 255), (byte)Services.Clamp(g, 0, 255), (byte)Services.Clamp(b, 0, 255), (byte)255);
+        }
+
+        /// <summary>
+        /// Return color of specified value.
+        /// </summary>
+        /// <returns>Returns Color from a Color32 object.</returns>
+        public static Color GetColor(float r, float g, float b)
+        {
+            return new Color32((byte)Services.Clamp(r, 0, 255), (byte)Services.Clamp(g, 0, 255), (byte)Services.Clamp(b, 0, 255), (byte)255);
+        }
 
         /// <summary>
         /// Creates an empty <see cref="GameObject"/>, with input title, and returns it.
@@ -1640,8 +1746,93 @@ namespace Arcana
 
         #endregion
 
+        #region // Extension Methods.
+
+        /// <summary>
+        /// Map a value left in one range, to a value in another. (from <see cref="Services"/>) 
+        /// </summary>
+        /// <param name="value">Value to map.</param>
+        /// <param name="originalStart">Start of the original range.</param>
+        /// <param name="originalEnd">End of the original range.</param>
+        /// <param name="start">Start of the newly mapped range.</param>
+        /// <param name="end">End of the newly mapped range.</param>
+        /// <returns></returns>
+        public static int MapValue(this int value, int originalStart, int originalEnd, int start, int end)
+        {
+            float divisor = originalEnd - originalStart;
+            if (divisor == 0) { divisor = 0.00001f; }
+
+            float quotient = (float)(value - originalStart) / (divisor);
+
+            return  (int) quotient * (end - start) + start;
+        }
+        
+        /// <summary>
+        /// Map a value left in one range, to a value in another. (from <see cref="Services"/>) 
+        /// </summary>
+        /// <param name="value">Value to map.</param>
+        /// <param name="originalStart">Start of the original range.</param>
+        /// <param name="originalEnd">End of the original range.</param>
+        /// <param name="start">Start of the newly mapped range.</param>
+        /// <param name="end">End of the newly mapped range.</param>
+        /// <returns></returns>
+        public static float MapValue(this float value, float originalStart, float originalEnd, float start, float end)
+        {
+            float divisor = originalEnd - originalStart;
+            if (divisor == 0) { divisor = 0.00001f; }
+
+            return (value - originalStart) / (divisor) * (end - start) + start;
+        }
+        
+        /// <summary>
+        /// Map a value left in one range, to a value in another. (from <see cref="Services"/>) 
+        /// </summary>
+        /// <param name="value">Value to map.</param>
+        /// <param name="originalStart">Start of the original range.</param>
+        /// <param name="originalEnd">End of the original range.</param>
+        /// <param name="start">Start of the newly mapped range.</param>
+        /// <param name="end">End of the newly mapped range.</param>
+        /// <returns></returns>
+        public static double MapValue(this double value, double originalStart, double originalEnd, double start, double end)
+        {
+            double divisor = originalEnd - originalStart;
+            if (divisor == 0) { divisor = 0.00001f; }
+
+            return (value - originalStart) / (divisor) * (end - start) + start;
+        }
+                
+        /// <summary>
+        /// Return the distance value between two colors in RGB color space.
+        /// </summary>
+        /// <param name="a">Color base.</param>
+        /// <param name="b">Color to find rgb distance from.</param>
+        /// <returns>Returns a float of the distance.</returns>
+        public static float Distance(this Color32 a, Color32 b)
+        {
+            float r2 = Mathf.Pow(a.r + b.r, 2);
+            float g2 = Mathf.Pow(a.g + b.g, 2);
+            float b2 = Mathf.Pow(a.b + b.b, 2);
+
+            return Mathf.Sqrt(r2 + g2 + b2);
+        }
+
+        /// <summary>
+        /// Returns true if the RGB values match.
+        /// </summary>
+        /// <param name="a">Color base.</param>
+        /// <param name="b">Color to compare.</param>
+        /// <returns>Returns true if they are the same.</returns>
+        public static bool IsSame(this Color32 a, Color32 b)
+        {
+            return (a.r == b.r && a.g == b.g && a.b == b.b);
+        }
+
+        #endregion
+
         #endregion
 
     }
+
+    #endregion
 
 }

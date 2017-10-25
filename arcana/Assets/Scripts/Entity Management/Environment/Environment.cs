@@ -1,35 +1,23 @@
-﻿using System;
+﻿/************************************************
+ * Environment.cs
+ * 
+ * This file contains:
+ * - The Environment class. (Child of Entity).
+ ************************************************/
+
+/////////////////////
+// Using statements.
+/////////////////////
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using Arcana.Entities;
 
-
 namespace Arcana.Environment
 {
-
-    #region Factory: EnvironmentFactory factory.
-
-    /// <summary>
-    /// Constructs Environment entities.
-    /// </summary>
-    public class EnvironmentFactory : EntityFactory
-    {
-        /// <summary>
-        /// Set up parameters to be used with this factory's product.
-        /// </summary>
-        /// <param name="_type">EntityType to be assigned.</param>
-        /// <param name="_position">Initial position of the environment.</param>
-        /// <returns></returns>
-        public sealed override Constraints CreateSettings(EntityType _type = EntityType.Environment, Vector2? _position = null)
-        {
-            return base.CreateSettings(_type, _position);
-        }
-    }
-
-    #endregion
-
+    
     #region Class: Environment class.
 
     /// <summary>
@@ -40,6 +28,8 @@ namespace Arcana.Environment
 
         #region Data Members.
 
+        #region Fields.
+
         /////////////////////
         // Data members.
         /////////////////////
@@ -48,7 +38,13 @@ namespace Arcana.Environment
         /// Physical objects that can be placed in the scene are props.
         /// </summary>
         private List<Entity> m_props;
-        
+
+        // TODO: Add component for determining boundaries.
+
+        #endregion
+
+        #region Properties.
+
         /////////////////////
         // Properties.
         /////////////////////
@@ -63,27 +59,30 @@ namespace Arcana.Environment
 
         #endregion
 
-        #region Service Methods.
+        #endregion
 
         #region Initialization Methods.
 
         /// <summary>
         /// Initialize the environment.
         /// </summary>
-        protected sealed override void Initialize()
+        public override void Initialize()
         {
-            // Call the base class's initialization function.
-            base.Initialize();
+            if (!this.Initialized)
+            {
+                // Call the base class's initialization function.
+                base.Initialize();
 
-            // Make the props object.
-            this.m_props = new List<Entity>();
+                // Make the props object.
+                this.m_props = new List<Entity>();
 
+                // TODO: Change Entity to Props.
+                // TODO: Initialize the spawnable area.
+            }
         }
 
         #endregion
-
-        #endregion
-
+        
         #region Accessor Methods.
 
         /// <summary>
@@ -99,7 +98,7 @@ namespace Arcana.Environment
         /// If this has props, the environment is not available to be reused.
         /// </summary>
         /// <returns>Returns true if available.</returns>
-        public sealed override bool IsAvailable()
+        public override bool IsAvailable()
         {
             return (!HasProps() && base.IsAvailable());
         }
@@ -107,7 +106,7 @@ namespace Arcana.Environment
         /// <summary>
         /// Run when asked to make entity available.
         /// </summary>
-        public sealed override void MakeAvailable()
+        public override void MakeAvailable()
         {
             this.m_props = new List<Entity>();
             this.Status.Activate();
@@ -141,6 +140,12 @@ namespace Arcana.Environment
         #endregion
 
     }
+
+    #endregion
+
+    #region Enum: EnvironmentType
+
+    // TODO: Create environment types.
 
     #endregion
 

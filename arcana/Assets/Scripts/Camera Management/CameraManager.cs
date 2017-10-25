@@ -1,8 +1,9 @@
 ﻿/************************************************
  * CameraManager.cs
  * 
- * This file contains implementation for the CameraManager class,
- * and the CameraManagerFactory class.
+ * This file contains:
+ * - The CameraManager class. (Child of Arcana Object).
+ * - The CameraMode enum.
  ************************************************/
 
 /////////////////////
@@ -13,204 +14,492 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityCamera = UnityEngine.Camera; // To prevent overwriting our own namespace.
+using Arcana.Utilities;
 
 namespace Arcana.Cameras
 {
 
-    #region // Class: CameraManagerFactory class.
+    #region Class: CameraManager class.
 
     /////////////////////
-    // Factory class.
+    // Manager declaration.
     /////////////////////
 
     /// <summary>
-    /// Handles creation of the CameraManager class and singleton.
+    /// Handles all functionality related to the camera users see from.
     /// </summary>
-    public class CameraManagerFactory : IFactory<CameraManager>
+    [AddComponentMenu("Arcana/Managers/CameraManager")]
+    public class CameraManager : ArcanaObject
     {
 
-        #region // Static members.
+        #region Static Methods.
+
+        #region Enum Parsing Method.
 
         /// <summary>
-        /// Single instance of the factory.
+        /// Parse the type of the enum as a string.
         /// </summary>
-        private static CameraManagerFactory instance = null;
-
-        /// <summary>
-        /// Single instance of the CameraManager class.
-        /// </summary>
-        private static CameraManager manager = null;
-
-        /// <summary>
-        /// Get reference to CameraManagerFactory.
-        /// </summary>
-        /// <returns>Returns a single factory.</returns>
-        public static CameraManagerFactory Instance()
+        /// <param name="_mode">Enum value to parse.</param>
+        /// <returns>Returns a string.</returns>
+        public static string Parse(CameraMode _mode)
         {
-            if (instance == null)
+            string result = "";
+
+            switch (_mode)
             {
-                instance = new CameraManagerFactory();
+                case CameraMode.Free:
+                    result = "(Free)";
+                    break;
+                case CameraMode.Fixed:
+                    result = "(Fixed)";
+                    break;
+                case CameraMode.TargetAll:
+                    result = "(Target All)";
+                    break;
+                case CameraMode.TargetOne:
+                    result = "(Target One)";
+                    break;
+                default:
+                    result = "(Unknown Camera Mode)";
+                    break;
             }
 
-            return instance;
-        }
-
-        /// <summary>
-        /// Get reference to CameraManager.
-        /// </summary>
-        /// <returns>Returns a single manager.</returns>
-        public static CameraManager GetManagerInstance()
-        {
-            return manager;
-        }
-
-        /// <summary>
-        /// On creation, set this to be the instance.
-        /// </summary>
-        private CameraManagerFactory()
-        {
-            instance = this;
+            return result;
         }
 
         #endregion
         
-        #region // Factory methods.
+        #region Instancing Methods.
+
+        /////////////////////
+        // Static methods for instancing.
+        /////////////////////
 
         /// <summary>
-        /// Return a single CameraManagerFactory reference.
+        /// Static instance of the factory. (We only want one).
         /// </summary>
-        /// <returns>Returns a single factory.</returns>
-        public IFactory<CameraManager> GetInstance()
-        {
-            return Instance();
-        }
+        public static CameraManager instance = null;
 
         /// <summary>
-        /// Creates a new, empty game object, and returns the CameraManager component back.
+        /// Returns the single instance of the factory.
         /// </summary>
-        /// <returns></returns>
-        public CameraManager CreateComponent()
+        /// <returns>Returns a ComponentFactory MonoBehaviour component.</returns>
+        public static CameraManager GetInstance()
         {
-            if (!HasManagerInstance())
+            if (instance == null)
             {
-                // Creates a component using the default settings.
-                Debugger.Print("Create CameraManager on an empty game object, with the default settings.");
-                manager = CreateComponent(Services.CreateEmptyObject("Camera Manager"), CreateSettings());
+                Debugger.Print("Creating new instance of ComponentFactory.");
+                instance = Services.CreateEmptyObject("Camera Manager").AddComponent<CameraManager>();
             }
 
-            return manager;
+            return instance;
         }
-
+        
         /// <summary>
-        /// Adds a new component to the parent game object, with parameters.
+        /// Returns true if instance exists.
         /// </summary>
-        /// <param name="parent">GameObject to add component to.</param>
-        /// <param name="parameters">Settings to apply to the new Entity.</param>
-        /// <returns>Return newly created component.</returns>
-        public CameraManager CreateComponent(GameObject parent, Constraints parameters)
+        /// <returns>Returns boolean indicating instance existence.</returns>
+        public static bool HasInstance()
         {
-            // Check if there is already an instance of the CameraManager component.
-            if (!HasManagerInstance())
-            {
-                // Check game object.
-                if (parent == null)
-                {
-                    // If the parent itself is null, do not return a component.
-                    Debugger.Print("Tried to add a component but parent GameObject is null.", "NULL_REFERENCE");
-                    return null;
-                }
-
-                // Get reference to existing script if it already exists on this parent.
-                manager = parent.GetComponent<CameraManager>();
-
-                // If the manager is null.
-                if (manager == null)
-                {
-                    // If the manager instance is null, then create the component.
-                    Debugger.Print("Create and add the CameraManager component.");
-                    manager = parent.AddComponent<CameraManager>();
-                }
-
-                // Assign non-optional information.
-                manager.Initialize();
-
-                // Initialize the entity.
-                foreach (string key in parameters.ValidEntries)
-                {
-                    Debugger.Print("Initialize the CameraManager component.");
-                    manager.Initialize(key, parameters.GetEntry(key).Value);
-                }
-            }
-
-            return manager;
-        }
-
-        /// <summary>
-        /// Adds a new, default component, to the parent game object.
-        /// </summary>
-        /// <param name="parent">GameObject to add component to.</param>
-        /// <returns>Return newly created component.</returns>
-        public CameraManager CreateComponent(GameObject parent)
-        {
-            if (!HasManagerInstance())
-            {
-                // Creates a component using the default settings.
-                manager = CreateComponent(parent, CreateSettings());
-            }
-
-            return manager;
-        }
-
-        /// <summary>
-        /// Set up the parameters associated with this factory's IFactoryElement.
-        /// </summary>
-        /// <returns>Returns the <see cref="Constraints"/> collection object.</returns>
-        public Constraints CreateSettings(
-            Color? _color = null,
-            float _shakeDecayFactor = Constants.DEFAULT_DECAY_FACTOR,
-            float _shakeCycle = 0.0f,
-            float _shakePeriod = Constants.DEFAULT_SHAKE_PERIOD,
-            float _shakeStrength = Constants.DEFAULT_SHAKE_STRENGTH)
-        {
-            // Create the collection.
-            Debugger.Print("Building parameters for CameraSettings Component constructor.");
-            Constraints parameters = new Constraints();
-
-
-            // Add nullable types.
-            Debugger.Print("Adding color.");
-            parameters.AddValue<Color?>(Constants.PARAM_BACKGROUND, _color);
-
-            // Add non-nulllable types.
-            Debugger.Print("Adding decay trackers.");
-            parameters.AddValue<DecayTracker<float>>(Constants.PARAM_CAMERA_SHAKE, new DecayTracker<float>(0.0f, _shakePeriod, _shakeDecayFactor, _shakeCycle)); // Shake time decay.
-            parameters.AddValue<DecayTracker<float>>(Constants.PARAM_CAMERA_STRENGTH, new DecayTracker<float>(0.005f, _shakeStrength, _shakeDecayFactor, _shakeCycle)); // Shake strength decay.
-            
-            return parameters;
+            return (instance != null);
         }
 
         #endregion
 
-        #region // Service Methods.
+        #region Component Factory Methods.
 
         /// <summary>
-        /// Checks if there is an instance of the CameraManager already.
+        /// Creates a new component.
         /// </summary>
-        /// <returns>Returns true if instance is not null.</returns>
-        public static bool HasManagerInstance()
+        /// <returns>Creates a new component and adds it to the parent.</returns>
+        public static CameraManager Create(ArcanaObject _parent)
         {
-            return (manager != null);
+            if (!HasInstance())
+            {
+                instance = _parent.GetComponent<CameraManager>();
+            }
+
+            if (!HasInstance())
+            {
+                instance = ComponentFactory.Create<CameraManager>(_parent);
+            }
+
+            return instance;
+        }
+        
+        #endregion
+
+        #endregion
+
+        #region Constructor.
+
+        /////////////////////
+        // Private constructor.
+        /////////////////////
+
+        /// <summary>
+        /// Private constructor that creates the manager when requested for the very first time.
+        /// </summary>
+        private CameraManager()
+        {
+            CameraManager.instance = this;
+        }
+
+        #endregion
+        
+        #region Data Members
+
+        #region Fields.
+
+        /////////////////////
+        // Fields.
+        /////////////////////
+
+        /// <summary>
+        /// Wrapping object that will be shook to get the camera shake effect.
+        /// </summary>
+        private ArcanaObject m_cameraWrap = null;
+
+        /// <summary>
+        /// Reference to the camera.
+        /// </summary>
+        private CameraSettings m_camera = null;
+
+        /// <summary>
+        /// Position of the camera when not shaking.
+        /// </summary>
+        private Vector3 m_noShakePosition;
+
+        /// <summary>
+        /// Position of the camera when shaking it.
+        /// </summary>
+        private Vector3 m_currentShakePosition;
+
+        /// <summary>
+        /// Current position of the camera shaker.
+        /// </summary>
+        private Vector3 m_currentPosition;
+
+        /// <summary>
+        /// Decay tracker allowing timer for the entire shake.
+        /// </summary>
+        private DecayTracker m_cameraShake = null;
+
+        /// <summary>
+        /// Decay tracker allowing strength to decline over time.
+        /// </summary>
+        private DecayTracker m_cameraShakeStrength = null;
+
+        #endregion
+
+        #region Properties.
+
+        /////////////////////
+        // Properties.
+        /////////////////////
+
+        /// <summary>
+        /// Returns true if the shaker exists.
+        /// </summary>
+        public bool HasShaker
+        {
+            get { return (this.m_cameraWrap != null); }
         }
 
         /// <summary>
-        /// Delete the instance of the CameraManager.
+        /// Returns true if a reference to a UnityEngine.Camera exists.
         /// </summary>
-        public static void Release()
+        public bool HasCamera
         {
-            if (HasManagerInstance())
+            get { return (this.m_camera != null && this.m_camera.HasCamera); }
+        }
+
+        /// <summary>
+        /// Returns true if a reference to the camera wrapper exists.
+        /// </summary>
+        public bool HasCameraWrapper
+        {
+            get { return (this.m_cameraWrap != null); }
+        }
+
+        /// <summary>
+        /// Returns reference to camera wrapper's game object.
+        /// </summary>
+        public GameObject CameraWrapper
+        {
+            get
             {
-                UnityEngine.Object.Destroy(manager);
+                return this.m_cameraWrap.Self;
+            }
+        }
+
+        /// <summary>
+        /// Returns shaker 
+        /// </summary>
+        public DecayTracker CameraShaker
+        {
+            get
+            {
+                if (!HasShaker)
+                {
+                    this.m_cameraShake = this.gameObject.GetComponent<DecayTracker>();
+                }
+
+                if (!HasShaker)
+                {
+                    this.m_cameraShake = this.gameObject.AddComponent<DecayTracker>();
+                    this.m_cameraShake.Initialize();
+                }
+
+                return this.m_cameraShake;
+            }
+        }
+
+
+        #endregion
+
+        #endregion
+
+        #region Initialization Methods.
+
+        /// <summary>
+        /// Initialize the various components and place them in the proper locations.
+        /// </summary>
+        public override void Initialize()
+        {
+            if (!this.Initialized)
+            {
+                // Base initialization.
+                base.Initialize();
+
+                // Set this name.
+                this.Name = "Camera Manager";
+
+                // Initialize the camera manager.
+                Debugger.Print("Initializing camera manager.", this.Self.name);
+                
+                // Set up parenting.
+                this.m_cameraWrap = Services.CreateEmptyObject("Camera Shaker").AddComponent<ArcanaObject>();
+                this.m_cameraWrap.Name = "Camera Shaker";
+                
+                this.m_camera = CameraSettings.Create(this.m_cameraWrap);
+                this.m_cameraShake = this.m_cameraWrap.Self.AddComponent<DecayTracker>();
+                this.m_cameraShakeStrength = this.m_cameraWrap.Self.AddComponent<DecayTracker>();
+
+                // Add children.
+                // this.m_cameraWrap.AddChild(this.m_camera);
+                this.m_cameraWrap.AddChild(this.m_cameraShake);
+                this.m_cameraWrap.AddChild(this.m_cameraShakeStrength);
+                // Services.AddChild(this.m_cameraWrap.Self, this.m_camera.Self);
+                Services.AddChild(this.m_cameraWrap.Self, this.m_cameraShake.Self);
+                Services.AddChild(this.m_cameraWrap.Self, this.m_cameraShakeStrength.Self);
+
+                // Make the wrapper object a child of this manager's GameObject.
+                Services.AddChild(this.Self, this.m_cameraWrap.Self);
+            }
+        }
+
+        #endregion
+
+        #region Accessor Methods.
+
+        /// <summary>
+        /// Returns the time left in the shaker.
+        /// </summary>
+        /// <returns>Returns time in seconds.</returns>
+        public float ShakeTimeLeft()
+        {
+            if (HasShaker)
+            {
+                return this.m_cameraShake.Value;
+            }
+
+            return 0.0f;
+        }
+
+        /// <summary>
+        /// Returns true if time left to shake is greater than zero.
+        /// </summary>
+        /// <returns>Returns </returns>
+        public bool IsShaking()
+        {
+            return (ShakeTimeLeft() > 0.0f);
+        }
+
+        #endregion
+
+        #region Mutator Methods.
+        
+        /// <summary>
+        /// Change the color of the camera.
+        /// </summary>
+        /// <param name="_color">Color to set the background of the viewport to.</param>
+        public void ChangeBackground(Color _color)
+        {
+            if (HasCamera)
+            {
+                this.m_camera.CurrentConfiguration.Background = _color;
+            }
+        }
+
+        /// <summary>
+        /// Set the camera free.
+        /// </summary>
+        public void SetCameraFree()
+        {
+            CameraConfiguration config = null;
+            this.m_camera.SetMode(CameraMode.Free);
+            this.m_camera.ResetCamera();
+
+            // Check if configuration has been made.
+            if (!this.m_camera.HasConfiguration(this.m_camera.Mode))
+            {
+                // Build the configuration for this mode.
+                config = this.m_camera.CurrentConfiguration;
+            }
+
+            config = this.m_camera.CurrentConfiguration;
+
+            // Set up initial values.
+            config.Orthographic = false;
+            config.InitialBackground = Constants.CORNFLOWER_BLUE;
+            config.InitialPosition = this.m_camera.OriginalPosition;
+
+            // Initialize the config again.
+            config.Initialize();
+
+            // Set up target values.
+            config.TargetFOV = 12.5f;
+            config.SetOffsetRange(config.GetZOffset(), -50.0f);
+            config.TargetBackground = Constants.CORNFLOWER_BLUE;
+
+        }
+
+        /// <summary>
+        /// Set the Camera as fixed.
+        /// </summary>
+        public void SetCameraFixed()
+        {
+            CameraConfiguration config = null;
+            CameraSettings cam = this.m_camera;
+            cam.SetMode(CameraMode.Fixed);
+            cam.ResetCamera();
+
+            // Check if configuration has been made.
+            if (!cam.HasConfiguration(cam.Mode))
+            {
+                // Build the configuration for this mode.
+                config = cam.CurrentConfiguration;
+
+            }
+
+            config = cam.CurrentConfiguration;
+
+            // Set up initial values.
+            config.Orthographic = true;
+            config.InitialBackground = Constants.CORNFLOWER_BLUE;
+            config.InitialPosition = cam.OriginalPosition;
+
+            // Initialize the config again.
+            config.Initialize();
+
+            // Set up target values.
+            config.TargetFOV = 12.5f;
+            config.SetOffsetRange(0.0f, -10.0f);
+            config.TargetBackground = Color.red;
+        }
+
+        /// <summary>
+        /// Set the camera into one of the target modes.
+        /// </summary>
+        public void SetCameraTargetOne()
+        {
+            CameraConfiguration config = null;
+            CameraSettings cam = this.m_camera;
+            cam.SetMode(CameraMode.TargetOne);
+
+            // Check if configuration has been made.
+            if (!cam.HasConfiguration(cam.Mode))
+            {
+                // Build the configuration for this mode.
+                config = cam.CurrentConfiguration;
+
+            }
+
+            config = cam.CurrentConfiguration;
+
+            // Set up initial values.
+            config.Orthographic = false;
+            config.InitialBackground = Color.red;
+            config.InitialPosition = cam.OriginalPosition;
+
+            // Initialize the config again.
+            config.Initialize();
+
+            // Set up target values.
+            config.TargetFOV = 20f;
+            config.SetOffsetRange(config.GetZOffset(), -50.0f);
+            config.TargetBackground = Color.white;
+
+            // Add any targets for the target collection.
+            if (!config.HasTargets)
+            {
+                this.AddTargets(this.Self.GetComponentsInChildren<CameraTarget>().ToList());
+            }
+            
+        }
+
+
+        /// <summary>
+        /// Set the camera into one of the target modes.
+        /// </summary>
+        public void SetCameraTargetAll()
+        {
+            CameraConfiguration config = null;
+            CameraSettings cam = this.m_camera;
+            cam.SetMode(CameraMode.TargetAll);
+
+            // Check if configuration has been made.
+            if (!cam.HasConfiguration(cam.Mode))
+            {
+                // Build the configuration for this mode.
+                config = cam.CurrentConfiguration;
+
+            }
+
+            config = cam.CurrentConfiguration;
+
+            // Set up initial values.
+            config.Orthographic = false;
+            config.InitialBackground = Color.white;
+            config.InitialPosition = cam.OriginalPosition;
+
+            // Initialize the config again.
+            config.Initialize();
+
+            // Set up target values.
+            config.TargetFOV = 10.0f;
+            config.SetOffsetRange(config.GetZOffset(), -65.0f);
+            config.TargetBackground = Color.green;
+
+            // Add any targets for the target collection.
+            if (!config.HasTargets)
+            {
+                this.AddTargets(this.Self.GetComponentsInChildren<CameraTarget>().ToList());
+            }
+            
+        }
+
+
+        /// <summary>
+        /// Add targets to the camera.
+        /// </summary>
+        /// <param name="_targets">Targets to add.</param>
+        public void AddTargets(List<CameraTarget> _targets)
+        {
+            foreach (CameraTarget target in _targets)
+            {
+                this.m_camera.AddTarget(target, CameraMode.TargetOne, CameraMode.TargetAll);
             }
         }
 
@@ -220,396 +509,17 @@ namespace Arcana.Cameras
 
     #endregion
 
-    #region // Class: CameraManager class.
-
-    /////////////////////
-    // Blueprint class.
-    /////////////////////
+    #region Enum: CameraMode
 
     /// <summary>
-    /// Handles all functionality related to the camera users see from.
+    /// Determines the mode of the camera. Defaults to free.
     /// </summary>
-    public class CameraManager : MonoBehaviour, IFactoryElement
+    public enum CameraMode
     {
-
-        #region Static Members
-
-        /////////////////////
-        // Static members.
-        /////////////////////
-
-        /// <summary>
-        /// Returns the instance of the manager.
-        /// </summary>
-        public static CameraManager Instance
-        {
-            get { return CameraManagerFactory.GetManagerInstance(); }
-        }
-
-        /// <summary>
-        /// Return true if instance exists.
-        /// </summary>
-        /// <returns>Returns a boolean value.</returns>
-        public static bool HasInstance()
-        {
-            return (CameraManager.Instance != null);
-        }
-
-        #endregion
-
-        #region Data Members
-        
-        /////////////////////
-        // Fields.
-        /////////////////////
-
-        /// <summary>
-        /// Reference to the GameObject containing the camera.
-        /// </summary>
-        private GameObject m_camera_object;
-
-        /// <summary>
-        /// CameraSettings reference.
-        /// </summary>
-        private CameraSettings m_camera;
-
-        /// <summary>
-        /// Position of the camera; stored for when camera shakes occur.
-        /// </summary>
-        private Vector2 m_stopPosition;
-    
-        /// <summary>
-        /// Determines length of time of in which camera shaking should occur, time of active shaking.
-        /// </summary>
-        private DecayTracker<float> m_cameraShake;
-
-        /// <summary>
-        /// Tracks camera shaking strength.
-        /// </summary>
-        private DecayTracker<float> m_cameraShakeStrength;
-        
-        /////////////////////
-        // Properties.
-        /////////////////////
-
-        /// <summary>
-        /// Returns the time currently left on the shake timer.
-        /// </summary>
-        public float ShakeTimeLeft
-        {
-            get { return this.m_cameraShake.CurrentValue; }
-        }
-
-        /// <summary>
-        /// Returns the current strength of the shake, that should get weaker as we go on.
-        /// </summary>
-        public float ShakeStrength
-        {
-            get { return this.m_cameraShakeStrength.CurrentValue; }
-        }
-
-        /// <summary>
-        /// Determines if the camera is currently shaking.
-        /// </summary>
-        public bool IsShaking
-        {
-            get { return (ShakeTimeLeft > 0.0f); }
-        }
-        
-        /// <summary>
-        /// Check if CameraManager has a reference to its camera object.
-        /// </summary>
-        public bool HasCameraObject
-        {
-            get { return (this.m_camera != null); }
-        }
-
-        /// <summary>
-        /// Determine if there is a camera to begin with.
-        /// </summary>
-        public bool HasCamera
-        {
-            get { return (this.HasCameraObject && (this.m_camera.gameObject.GetComponent<UnityEngine.Camera>() != null)); }
-        }
-
-        /// <summary>
-        /// Return a reference to the UnityEngine.Camera component.
-        /// </summary>
-        public UnityCamera Viewport
-        {
-            get { return this.m_camera.gameObject.GetComponent<UnityEngine.Camera>(); }
-        }
-
-        #endregion
-
-        #region Service Methods
-
-        /////////////////////
-        // Service methods.
-        /////////////////////
-
-        #region Initialization Methods
-
-        /// <summary>
-        /// Initialize the CameraManager.
-        /// </summary>
-        /// <param name="_camera">Optional object containing the camera.</param>
-        internal void Initialize(GameObject _camera = null,
-            GameObject _unityCamera = null,
-            Color? _color = null,
-            float _shakeDecayFactor = Constants.DEFAULT_DECAY_FACTOR,
-            float _shakeCycle = 0.0f,
-            float _shakePeriod = Constants.DEFAULT_SHAKE_PERIOD,
-            float _shakeStrength = Constants.DEFAULT_SHAKE_STRENGTH)
-        {
-            InitializeCameraObject(_camera);
-            InitializeCamera(_unityCamera); // Even if there is no child, the function will properly handle this.
-            InitializeProperties(_color, _shakeDecayFactor, _shakeCycle, _shakePeriod, _shakeStrength);
-        }
-
-        /// <summary>
-        /// Initialize the properties and data members of the manager.
-        /// </summary>
-        private void InitializeProperties(
-            Color? _color = null,
-            float _shakeDecayFactor = Constants.DEFAULT_DECAY_FACTOR,
-            float _shakeCycle = 0.0f,
-            float _shakePeriod = Constants.DEFAULT_SHAKE_PERIOD,
-            float _shakeStrength = Constants.DEFAULT_SHAKE_STRENGTH)
-        {
-            Debugger.Print("Initializing camera manager properties.");
-
-            // Set the stopped position.
-            this.m_stopPosition = Services.ToVector2(this.m_camera_object.transform.position);
-
-            // Set the defaults.
-            this.m_cameraShake = new DecayTracker<float>(0.0f, _shakePeriod, _shakeDecayFactor, _shakeCycle);
-            this.m_cameraShakeStrength = new DecayTracker<float>(0.005f, _shakeStrength, _shakeDecayFactor, _shakeCycle);
-
-            // Change the color.
-            if (_color.HasValue) { ChangeBackground(_color.Value); } else { ChangeBackground(Color.black); }
-        }
-        
-        /// <summary>
-        /// Set the value of a property.
-        /// </summary>
-        /// <param name="parameter">Switch trigger that determines which property is set.</param>
-        public virtual void Initialize(string parameter, object value)
-        {
-            switch (parameter)
-            {
-                case Constants.PARAM_BACKGROUND:
-                    Debugger.Print("Setting background by parameter: " + ((Color)value));
-                    ChangeBackground((Color)value);
-                    break;
-                case Constants.PARAM_CAMERA_SHAKE:
-                    Debugger.Print("Setting camera shake delay tracker by parameter: " + ((DecayTracker<float>)value));
-                    this.m_cameraShake = ((DecayTracker<float>)value);
-                    break;
-                case Constants.PARAM_CAMERA_STRENGTH:
-                    Debugger.Print("Setting camera strength delay tracker by parameter: " + ((DecayTracker<float>)value));
-                    this.m_cameraShakeStrength = ((DecayTracker<float>)value);
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Initializes the Camera's parent.
-        /// </summary>
-        private void InitializeCameraObject(GameObject _cameraObject = null)
-        {
-            Debugger.Print("Initializing Camera Object.");
-
-            // If there is no camera and parameter isn't null.
-            if (!HasCameraObject && _cameraObject != null)
-            {
-                this.m_camera_object = Services.AddChild(gameObject, _cameraObject);
-            }
-            else
-            {
-                // Create a new, empty game object, and parent it to this instance of the CameraManager's gameObject.
-                this.m_camera_object = Services.AddChild(gameObject, Services.CreateEmptyObject("Camera Object"));
-            }
-
-            this.m_camera_object.name = "Camera Object";
-        }
-
-        /// <summary>
-        /// Initializes the Camera object's child Camera.
-        /// </summary>
-        private void InitializeCamera(GameObject _camera = null)
-        {
-            Debugger.Print("Initializing Camera object and UnityEngine.Camera component.");
-
-            // 1. Get the Camera's GameObject.
-            GameObject temp_object = _camera;
-
-            if (temp_object == null)
-            {
-                // If the Camera's GameObject is null and a main camera still doesn't exist.
-                // 1b. Create a new one.
-                temp_object = Services.CreateEmptyObject("Camera");
-            }
-            
-            // 2. Make it a child of the camera object data member.
-            temp_object = Services.AddChild(this.m_camera_object, temp_object);
-
-            // 3. Get the Camera component.
-            UnityCamera temp_component = temp_object.GetComponent<UnityEngine.Camera>();
-
-            if (temp_component == null)
-            {
-                // If the component is null:
-                // 3b. create a new one.          
-                temp_object.AddComponent<UnityEngine.Camera>();
-            }
-
-            // 4. Get the CameraSettings component.
-            this.m_camera = temp_object.GetComponent<CameraSettings>();
-
-            if (this.m_camera == null)
-            {
-                // If the component is null:
-                // 3b. create a new one.          
-                this.m_camera = CameraFactory.Instance().CreateComponent(temp_object);
-            }
-            
-            // Since we know our references are hooked properly, we can change the name to reflect this.
-            this.m_camera.gameObject.name = "Camera";
-        }
-
-        #endregion
-
-        #region UnityEngine Methods
-
-        /// <summary>
-        /// Update in the UnityEngine loop.
-        /// </summary>
-        public void Update()
-        {
-            // If the camera is sahking.
-            if (IsShaking)
-            {
-                // Shake the camera if need be.
-                ShakeCamera(Time.deltaTime);
-
-                // Update decay trackers.
-                this.m_cameraShake.Update(Time.deltaTime);
-                this.m_cameraShakeStrength.Update(Time.deltaTime);
-            }
-            else
-            {
-                // Stop shaking if it's shaking.
-                this.StopShaking();
-            }
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Move the camera object.
-        /// </summary>
-        /// <param name="position">Place to move camera object to.</param>
-        public void MoveCameraObject(Vector2 position)
-        {
-            this.m_camera_object.transform.position = Services.ToVector3(position, this.m_camera_object.transform.position.z);
-            this.m_stopPosition = position;
-        }
-
-        /// <summary>
-        /// This will offset the shake camera based on the camera shaking settings.
-        /// </summary>
-        private void ShakeCamera(float deltaTime)
-        {
-            if (IsShaking)
-            {
-                Debugger.Print("Shaking camera...");
-                if (!Services.IsEmpty((Vector2?) this.m_stopPosition))
-                {
-                    // Only shake if the decay isn't paused.
-                    if (!this.m_cameraShake.IsPaused)
-                    {
-                        float minX = this.m_stopPosition.x - this.m_cameraShake.CurrentValue;
-                        float maxX = this.m_stopPosition.x + this.m_cameraShake.CurrentValue;
-                        float minY = this.m_stopPosition.y - this.m_cameraShake.CurrentValue;
-                        float maxY = this.m_stopPosition.y + this.m_cameraShake.CurrentValue;
-
-                        float x = Services.NextFloat(minX, maxX) * this.m_cameraShakeStrength.CurrentValue;
-                        float y = Services.NextFloat(minY, maxY) * this.m_cameraShakeStrength.CurrentValue;
-
-                        this.m_camera_object.transform.position = Services.ToVector3(Services.ToVector2(x, y), this.m_camera_object.transform.position.z);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Resets Camera position after a shake.
-        /// </summary>
-        public void StopShaking()
-        {
-            if (IsShaking)
-            {
-                Debugger.Print("Stopping camera...");
-                if (!Services.IsEmpty((Vector2?)this.m_stopPosition))
-                {
-                    this.m_camera_object.transform.position = this.m_stopPosition;
-                }
-
-                StopCameraShake();
-            }
-        }
-
-        /// <summary>
-        /// Trigger the camera shake functionality.
-        /// </summary>
-        public void TriggerCameraShake()
-        {
-            // Reset the strength and shaker.
-            this.m_cameraShake.Start(); // Set to maximum and start count down.
-            this.m_cameraShakeStrength.Start(); // Set to maximum and start count down.
-        }
-
-        /// <summary>
-        /// Stop the camera shake and reset it to zero.
-        /// </summary>
-        private void StopCameraShake()
-        {
-            // Stop the shaking.
-            this.m_cameraShake.Reset();
-            this.m_cameraShakeStrength.Reset();
-        }
-
-        /// <summary>
-        /// Pause the camera shaking.
-        /// </summary>
-        public void PauseCameraShake()
-        {
-            // Pause the camera shake.
-            this.m_cameraShake.Pause();
-            this.m_cameraShakeStrength.Pause();
-        }
-
-        /// <summary>
-        /// Resume the camera shaking.
-        /// </summary>
-        public void ResumeCameraShake()
-        {
-            this.m_cameraShake.Resume();
-            this.m_cameraShakeStrength.Resume();
-        }
-
-        /// <summary>
-        /// Change the color of the camera.
-        /// </summary>
-        /// <param name="_color">Color to set the background of the viewport to.</param>
-        public void ChangeBackground(Color _color)
-        {
-            Viewport.backgroundColor = _color;
-        }
-
-        #endregion
-
+        TargetAll,
+        TargetOne,
+        Fixed,
+        Free
     }
 
     #endregion

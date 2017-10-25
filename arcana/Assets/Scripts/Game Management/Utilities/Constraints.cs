@@ -1,5 +1,5 @@
 ﻿/************************************************
- * Constraints.cs
+ * Constraints.cs (Deprecated)
  * 
  * Holds implementation for the Constraints collection
  * class and Constraint class.
@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Arcana
+namespace Arcana.Utilities
 {
 
     #region // Class: Constraints (Collection)
@@ -23,7 +23,7 @@ namespace Arcana
     /////////////////////
 
     /// <summary>
-    /// The Constraints class allows rules to be passed into Component factories.
+    /// (Deprecated) The Constraints class allows rules to be passed into Component factories.
     /// </summary>
     public class Constraints
     {
@@ -478,7 +478,7 @@ namespace Arcana
     /////////////////////
 
     /// <summary>
-    /// Represents a constraint object. Used to pass a setting into component factories.
+    /// (Deprecated) Represents a constraint object. Used to pass a setting into component factories.
     /// </summary>
     public class Constraint
     {

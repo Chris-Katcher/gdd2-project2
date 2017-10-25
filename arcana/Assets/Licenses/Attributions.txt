@@ -1,0 +1,23 @@
+References {
+	
+	Stone HUD (border_base.png)
+	(CC-BY 3.0, GPL 3.0, GPL 2.0)
+	Silver IV, Ivan Voirol
+	[https://opengameart.org/content/stone-hud]
+	
+	Borderdecoration (border_decoration.png)
+	(GPL 2.0, GPL 3.0, CC-BY-SA 3.0)
+	JAP
+	[https://opengameart.org/content/borderdecoration]
+	
+	10 Basic Message Boxes (message_boxes.png)
+	(CC-BY 3.0)
+	CharlesGabriel, CGArtsenal
+	[https://opengameart.org/content/10-basic-message-boxes]
+	
+	Pixel UI Pack (tan.png, tan_inlay.png, tan_pressed.png)
+	(CC0)
+	Kenney
+	[https://opengameart.org/content/pixel-ui-pack-750-assets]
+	
+}

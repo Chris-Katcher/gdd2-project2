@@ -2,8 +2,7 @@
  * GameOverState.cs
  * 
  * This file contains:
- * - The GameOverFactory factory.
- * - The GameOverState class (State sub-class).
+ * - The GameOverState class. (Child of State).
  ************************************************/
 
 /////////////////////
@@ -14,105 +13,36 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Arcana.Entities;
+using Arcana.Utilities;
 using Arcana.UI.Screens;
 
 namespace Arcana.States
 {
 
-    #region Factory: GameOverFactory declaration.
-
-    /////////////////////
-    // Factory declaration.
-    /////////////////////
-
-    /// <summary>
-    /// Create the Game Over state.
-    /// </summary>
-    public class GameOverFactory : StateFactory<GameOverState>
-    {
-
-        #region Static Methods.
-
-        public static GameOverFactory Instance()
-        {
-            if (instance == null)
-            {
-                instance = new GameOverFactory();
-            }
-
-            return (GameOverFactory)instance;
-        }
-
-        #endregion
-
-        #region Factory methods.
-
-        /// <summary>
-        /// Get the instance of this factory.
-        /// </summary>
-        /// <returns>Return the factory.</returns>
-        public override StateFactory<GameOverState> GetInstance()
-        {
-            if (instance == null)
-            {
-                instance = new GameOverFactory();
-            }
-
-            return instance;
-        }
-
-        /// <summary>
-        /// Adds a new component to the parent game objec.
-        /// </summary>
-        /// <param name="parent">GameObject to add component to.</param>
-        /// <returns>Return newly created component.</returns>
-        public override State CreateComponent(GameObject parent)
-        {
-            // Check game object.
-            if (parent == null)
-            {
-                // If the parent itself is null, do not return a component.
-                Debugger.Print("Tried to add a component but parent GameObject is null.", "NULL_REFERENCE");
-                return null;
-            }
-
-            // Get reference to it from the existing script if it already exists.
-            State state = parent.GetComponent<GameOverState>();
-
-            // If the state is still null.
-            if (state == null)
-            {
-                // If it doesn't exist, create a new one.
-                Debugger.Print("Create and add the Game Over state.");
-                state = Services.AddChild(parent, Services.CreateEmptyObject("State (Game Over)")).AddComponent<GameOverState>();
-            }
-
-            // Assign non-optional information.
-            state.Initialize(StateID.GameOverState);
-
-            return state;
-        }
-
-        #endregion
-
-    }
-
-    #endregion
-
     #region Class: GameOverState class.
 
     /////////////////////
-    // Class declaration.
+    // State declaration.
     /////////////////////
 
     /// <summary>
     /// <para>Implements the end of game state.</para>
     ///  It will display a screen object called "GameoverScreen" and update frames as needed. When inputs are triggered to change the state of the StageManager this screen will stop being displayed.
     /// </summary>
+    [AddComponentMenu("Arcana/States/Game Over")]
     public class GameOverState : State
     {
 
+        #region Static Members.
+
+        // TODO: Create component maker.
+
+        #endregion
+
         #region Data Members
+
+        #region Properties
 
         /////////////////////
         // Properties.
@@ -132,22 +62,46 @@ namespace Arcana.States
 
         #endregion
 
-        #region Service Methods
+        #endregion
 
+        #region UnityEngine Methods.
+
+        /// <summary>
+        /// The main menu should handle some input functionality.
+        /// </summary>
+        public override void Update()
+        {
+            // Call base method.
+            base.Update();
+
+            // Update when running.
+            if (this.Status.IsRunning())
+            {
+                // Handle input.
+            }
+        }
+
+        #endregion
+        
         #region Initialization Methods.
 
         /// <summary>
-        /// General initialization of the state.
+        /// Add (and request) the screens for the GameOver state.
         /// </summary>
-        public sealed override void Initialize(StateID _state)
+        public sealed override void Initialize()
         {
-            base.Initialize(_state);
-            // TODO: Initialize all the state's properties.
-            // throw new NotImplementedException();
+            // Initialize base data members.
+            base.Initialize();
+
+            // Set the state ID.
+            this.InitializeState(StateID.GameOverState);
+
+            // TODO: Add the screen IDs.
         }
 
         #endregion
 
+        /*
         #region Input Methods.
 
         protected override void HandleInput()
@@ -163,8 +117,7 @@ namespace Arcana.States
         }
 
         #endregion
-
-        #endregion
+        */
 
         #region Accessor Methods
 

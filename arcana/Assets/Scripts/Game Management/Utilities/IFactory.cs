@@ -1,16 +1,24 @@
-﻿using System;
+﻿// This
+// file
+// is
+// no
+// longer
+// in
+// use... (Deprecated).
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Arcana
+namespace Arcana.Utilities
 {
 
     #region // Interface: IFactory
 
     /// <summary>
-    /// Represents a Factory schema for creating Monobehavior/GameObjects, and returning them.
+    /// (Deprecated) Represents a Factory schema for creating Monobehavior/GameObjects, and returning them.
     /// </summary>
     public interface IFactory<T> where T: MonoBehaviour, IFactoryElement
     {

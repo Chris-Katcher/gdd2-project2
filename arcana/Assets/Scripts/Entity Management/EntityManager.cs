@@ -1,311 +1,383 @@
-﻿using System;
+﻿/************************************************
+ * EntityManager.cs
+ * 
+ * This file contains:
+ * - The EntityManager class. (Child of ArcanaObject).
+ * - The EntityType enum.
+ ************************************************/
+
+/////////////////////
+// Using statements.
+/////////////////////
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Arcana.Entities.Attributes;
-
+using Arcana.Utilities;
 
 namespace Arcana.Entities
 {
 
-    #region // Class: EntityManagerFactory class.
+    #region Class: EntityManager class.
 
     /////////////////////
-    // Factory class.
+    // Manager class.
     /////////////////////
 
     /// <summary>
-    /// Factory that fabricates EntityManager objects, and, keeps track of its instancing.
+    /// Manager responsible for the Entity items.
     /// </summary>
-    public class EntityManagerFactory : IFactory<EntityManager> {
+    [AddComponentMenu("Arcana/Managers/EntityManager")]
+    public class EntityManager : ArcanaObject
+    {
 
-        #region // Static Members.
+        #region Static Methods.
+
+        #region Enum Parsing Methods.
+
+        /// <summary>
+        /// Parse the type as a string using the EntityType.
+        /// </summary>
+        /// <param name="_type">Type of Entity to parse.</param>
+        /// <returns>Returns a string.</returns>
+        public static string Parse(EntityType _type)
+        {
+            string result = "";
+
+            switch (_type)
+            {
+                case EntityType.Projectile:
+                    result = "(Projectile)";
+                    break;
+                case EntityType.Wall:
+                    result = "(Wall)";
+                    break;
+                case EntityType.Platform:
+                    result = "(Platform)";
+                    break;
+                case EntityType.Player:
+                    result = "(Player)";
+                    break;
+                case EntityType.Entity:
+                    result = "(Entity)";
+                    break;
+                case EntityType.Environment:
+                    result = "(Environment)";
+                    break;
+                case EntityType.NULL:
+                default:
+                    result = "";
+                    break;
+            }
+
+            return result;
+        }
+
+        #endregion
+
+        #region Instancing Methods.
 
         /////////////////////
-        // Static members.
+        // Static methods for instancing.
         /////////////////////
 
         /// <summary>
-        /// Instance of the factory.
+        /// Static instance of the class. (We only want one).
         /// </summary>
-        private static EntityManagerFactory instance = null;
+        public static EntityManager instance = null;
 
         /// <summary>
-        /// Instance of the manager.
+        /// Returns the single instance of the class.
         /// </summary>
-        private static EntityManager manager = null;
-
-        /// <summary>
-        /// Returns EntityManagerFactory instance.
-        /// </summary>
-        /// <returns>Returns reference to manager factory instance.</returns>
-        public static EntityManagerFactory Instance()
+        /// <returns>Returns a component.</returns>
+        public static EntityManager GetInstance()
         {
             if (instance == null)
             {
-                instance = new EntityManagerFactory();
+                Debugger.Print("Creating new instance of EntityManager.");
+                instance = Services.CreateEmptyObject("Entity Manager").AddComponent<EntityManager>();
             }
 
             return instance;
         }
 
         /// <summary>
-        /// Get reference to the manager.
+        /// Returns true if instance exists.
         /// </summary>
-        /// <returns>Returns a single manager.</returns>
-        public static EntityManager GetManagerInstance()
-        {
-            return manager;
-        }
-        
-        /// <summary>
-        /// On creation, set this to be the instance.
-        /// </summary>
-        private EntityManagerFactory()
-        {
-            instance = this;
-        }
-
-        #endregion
-
-        #region // Factory Methods.
-
-        /////////////////////
-        // Factory methods.
-        /////////////////////
-
-        /// <summary>
-        /// Get (or create) the single instance of the factory.
-        /// </summary>
-        /// <returns>Returns a single factory instance.</returns>
-        public IFactory<EntityManager> GetInstance()
-        {
-            return Instance();
-        }
-
-        /// <summary>
-        /// Create component on new empty object with default settings.
-        /// </summary>
-        /// <returns>Returns newly created component.</returns>
-        public EntityManager CreateComponent()
-        {
-            if (!HasManagerInstance())
-            {
-                Debugger.Print("Create EntityManager on an empty game object, with the default settings.");
-                manager = CreateComponent(Services.CreateEmptyObject("Entity Manager"), CreateSettings());
-            }
-
-            return manager;
-        }
-        
-        /// <summary>
-        /// Adds a new component to the parent game object, with parameters.
-        /// </summary>
-        /// <param name="parent">GameObject to add component to.</param>
-        /// <param name="parameters">Settings to apply to the new Entity.</param>
-        /// <returns>Return newly created component.</returns>
-        public EntityManager CreateComponent(GameObject parent, Constraints parameters)
-        {
-            // Check if there is already an instance of the EntityManager component.
-            if (!HasManagerInstance())
-            {
-                // Check game object.
-                if (parent == null)
-                {
-                    // If the parent itself is null, do not return a component.
-                    Debugger.Print("Tried to add a component but parent GameObject is null.", "NULL_REFERENCE");
-                    return null;
-                }
-
-                // Get reference to existing script if it already exists on this parent.
-                manager = parent.GetComponent<EntityManager>();
-
-                // If the manager is null.
-                if (manager == null)
-                {
-                    // If the manager instance is null, then create the component.
-                    Debugger.Print("Create and add the EntityManager component.");
-                    manager = parent.AddComponent<EntityManager>();
-                }
-
-                // Assign non-optional information.
-                manager.Initialize();
-
-                // Initialize the entity.
-                foreach (string key in parameters.ValidEntries)
-                {
-                    manager.Initialize(key, parameters.GetEntry(key).Value);
-                }
-            }
-
-            return manager;
-        }
-
-        /// <summary>
-        /// Create component on the parent object with default settings.
-        /// </summary>
-        /// <param name="parent">Parent receiving the component.</param>
-        /// <returns>Returns newly created component.</returns>
-        public EntityManager CreateComponent(GameObject parent)
-        {
-            if (!HasManagerInstance())
-            {
-                manager = CreateComponent(parent, CreateSettings());
-            }
-
-            return manager;
-        }
-        
-        /// <summary>
-        /// Create the Constraints for initialization of the fabricated class.
-        /// </summary>
-        /// <returns>Returns one Constraints object.</returns>
-        public Constraints CreateSettings()
-        {
-            // Create the collection.
-            Debugger.Print("Creating settings for EntityManager initialization.");
-            Constraints parameters = new Constraints();
-
-            // TODO: Add non-nulllable types.
-            // parameters.AddValue<T>(Constants., ); // Parameter.
-
-            return parameters;
-        }
-
-        #endregion
-
-        #region // Service Methods.
-
-        /////////////////////
-        // Service methods.
-        /////////////////////
-
-        /// <summary>
-        /// Returns true if there is a manager instance.
-        /// </summary>
-        /// <returns>Returns flag defining instance state.</returns>
-        public static bool HasManagerInstance()
-        {
-            return (GetManagerInstance() != null);
-        }
-
-        /// <summary>
-        /// Delete the instance of the EntityManager.
-        /// </summary>
-        public static void Release()
-        {
-            if (HasManagerInstance())
-            {
-                UnityEngine.Object.Destroy(manager);
-            }
-        }
-
-        #endregion
-
-    }
-
-    #endregion
-
-    #region // Class: EntityManager class.
-
-    /////////////////////
-    // Blueprint class.
-    /////////////////////
-
-    /// <summary>
-    /// EntityManager contains references to all the entities in the scene.
-    /// </summary>
-    public class EntityManager : MonoBehaviour, IFactoryElement
-    {
-
-        #region // Static Members.
-
-        /////////////////////
-        // Static members.
-        /////////////////////
-
-        /// <summary>
-        /// Return reference to the instance of the EntityManager.
-        /// </summary>
-        public static EntityManager Instance
-        {
-            get { return EntityManagerFactory.GetManagerInstance(); }
-        }
-
-        /// <summary>
-        /// Return true if instance exists.
-        /// </summary>
-        /// <returns>Returns a boolean value.</returns>
+        /// <returns>Returns boolean indicating instance existence.</returns>
         public static bool HasInstance()
         {
-            return (EntityManager.Instance != null);
+            return (instance != null);
+        }
+
+
+        #endregion
+        
+        #region Component Factory Methods.
+
+        /// <summary>
+        /// Creates a new component.
+        /// </summary>
+        /// <returns>Creates a new component and adds it to the parent.</returns>
+        public static EntityManager Create(ArcanaObject _parent)
+        {
+            if (!HasInstance())
+            {
+                instance = _parent.GetComponent<EntityManager>();
+            }
+
+            if (!HasInstance())
+            {
+                instance = ComponentFactory.Create<EntityManager>(_parent);
+            }
+
+            return instance;
         }
 
         #endregion
 
-        #region // Data Members.
+        #region Entity ID Naming Methods.
+
+        /// <summary>
+        /// Global collection mapping names to entities.
+        /// </summary>
+        private static Dictionary<string, Entity> s_collection = null;
+
+        /// <summary>
+        /// Collection of used names.
+        /// </summary>
+        private static List<string> s_usedNames = null;
+
+        /// <summary>
+        /// Return all named entities.
+        /// </summary>
+        public static Dictionary<string, Entity> AllEntities
+        {
+            get
+            {
+                if (s_collection == null)
+                {
+                    s_collection = new Dictionary<string, Entity>();
+                }
+
+                return s_collection;
+            }
+        }
+
+        /// <summary>
+        /// Reference to collection of used names.
+        /// </summary>
+        public static List<string> EntityNames
+        {
+            get
+            {
+                if (s_usedNames == null)
+                {
+                    s_usedNames = new List<string>();
+                }
+
+                return s_usedNames;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if names are in the collection.
+        /// </summary>
+        public static bool HasNames
+        {
+            get { return (s_usedNames != null && s_usedNames.Count > 0); }
+        }
+
+        /// <summary>
+        /// Check if an Entity already has the input name. Case insensitive.
+        /// </summary>
+        /// <param name="_name">Name to check.</param>
+        /// <returns>Returns true if the name is already in the collection.</returns>
+        public static bool IsTaken(string _name)
+        {
+            if (HasNames)
+            {
+                // Check if the collection has the name (trimmed of whitespace).
+                return EntityNames.Contains(_name.ToUpper().Trim());
+            }
+
+            // If there are no names, return false. (It can't be taken if empty).
+            return false;
+        }
+
+        /// <summary>
+        /// Unregister, and register, Entity, to update name changes.
+        /// </summary>
+        /// <param name="e">Entity to reregister</param>
+        public static void UpdateRegistry(Entity e, bool overwrite = true)
+        {
+            UnregisterEntity(e);
+            RegisterEntity(e, overwrite);
+        }
+
+        /// <summary>
+        /// Add the Entity to the collection.
+        /// </summary>
+        /// <param name="e">Entity to add.</param>
+        public static void RegisterEntity(Entity e, bool overwrite = true)
+        {
+            // If you don't want to overwrite an existing Entity. (On by default).
+            if (!overwrite)
+            {
+                // Verify the name.
+                e.SetID(VerifyName(e.EntityID));
+            }
+
+            // If it isn't contained within the dictionary.
+            if (AllEntities.ContainsKey(e.EntityID))
+            {
+                // Overwrite entry.
+                AllEntities[e.EntityID] = e;
+            }
+            else
+            {
+                // Add the entity.
+                AllEntities.Add(e.EntityID, e);
+            }
+        }
+
+        /// <summary>
+        /// Removes entity key-pair if it already exists.
+        /// </summary>
+        /// <param name="e">Entity to remove.</param>
+        public static void UnregisterEntity(Entity e)
+        {
+            // If there are entities to deregister:
+            if (HasNames && AllEntities.Count > 0)
+            {
+                // We only want to remove entities that are already registered,
+                // not just entities that may share names.
+                if (AllEntities.ContainsValue(e))
+                {
+                    RemoveName(e.EntityID);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns verified name, and, adds it to the collection.
+        /// </summary>
+        /// <param name="_name">Name to add.</param>
+        /// <returns>Returns verified name.</returns>
+        private static string VerifyName(string _name)
+        {
+            // Get the available, verified name.
+            string v_name = GetAvailableName(_name);
+
+            // Add the verified name to the collection.
+            EntityNames.Add(v_name);
+
+            // Return the v_name.
+            return v_name;
+        }
+        
+        /// <summary>
+        /// Remove the name from the collections.
+        /// </summary>
+        /// <param name="_name">Name of entity to remove.</param>
+        private static void RemoveName(string _name)
+        {
+            if (HasNames)
+            {
+                // Remove the name.
+                if (EntityNames.Contains(_name))
+                {
+                    EntityNames.Remove(_name);
+                }
+
+                // Remove the map.
+                if (AllEntities.ContainsKey(_name))
+                {
+                    AllEntities.Remove(_name);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns input name, as long as it isn't in the collection, modifying it should it already exist.
+        /// </summary>
+        /// <param name="_name">Name to modify, should it be unavailable.</param>
+        /// <returns>Returns the final form of the name.</returns>
+        private static string GetAvailableName(string _name, int level = 0)
+        {
+            // Storage for name.
+            string name = _name.Trim();
+
+            // If name is empty, give it the default name.
+            if (name.Length == 0)
+            {
+                name = "Untitled Entity";
+            }
+
+            // Check recursion level.
+            if (level > 0)
+            {
+                // Append clone number should it be applicable.
+                name = name + " (" + level.ToString() + ")";
+            }
+            
+            // If the input name is not taken, 
+            if (!IsTaken(name))
+            {
+                // If not taken, we can return it.
+                return name;
+            }
+
+            // If current name is taken, enter another level of recursion.
+            return GetAvailableName(_name, level + 1);
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Data Members.
+
+        #region Fields.
 
         /////////////////////
         // Fields.
         /////////////////////
 
         /// <summary>
-        /// Manager status tracking for all entities.
+        /// List of Entities.
         /// </summary>
-        private Status m_status;
+        private List<Entity> m_entities = null;
 
-        /// <summary>
-        /// Reference to all entities in the environment.
-        /// </summary>
-        private List<Entity> m_entities;
-        
-        /// <summary>
-        /// Stores cache of GameObjects with entity components. Only updates when requested.
-        /// </summary>
-        private List<GameObject> m_objects;
+        #endregion
 
-        /// <summary>
-        /// Tracks initialization internally.
-        /// </summary>
-        private bool m_initialized = false;
+        #region Properties.
 
         /////////////////////
         // Properties.
         /////////////////////
 
         /// <summary>
-        /// Returns a list of all the GameObjects with Entity components, handled by this manager.
+        /// Reference to objects with Entity components.
         /// </summary>
-        public List<GameObject> Entities
+        public List<Entity> Entities
         {
             get
             {
-                if (m_objects == null || m_objects.Count != m_entities.Count)
+                if (this.m_entities != null)
                 {
-                    m_objects = new List<GameObject>();
-                    
-                    if (m_entities.Count > 0)
-                    {
-                        foreach (Entity e in m_entities)
-                        {
-                            m_objects.Add(e.Self);
-                        }
-                    }
+                    return this.m_entities;
                 }
-                
-                return m_objects;
+
+                // Give entities an empty list.
+                this.m_entities = new List<Entity>();
+
+                // Return an empty list if internal storage is null.
+                return this.m_entities;
             }
         }
 
-        /// <summary>
-        /// Reference to component's current state.
-        /// </summary>
-        public Status Status
-        {
-            get { return this.m_status; }
-        }
-        
         /// <summary>
         /// Determine if the manager is empty.
         /// </summary>
@@ -313,88 +385,50 @@ namespace Arcana.Entities
         {
             get
             {
-                return((m_entities == null) || (m_entities.Count == 0));
+                return ((this.m_entities == null) || (this.m_entities.Count == 0));
             }
         }
+        
+        #endregion
 
         #endregion
 
-        #region // Service Methods.
-
-        /////////////////////
-        // Service methods.
-        /////////////////////
-
-        #region // // UnityEngine methods.
+        #region Initialization Methods.
 
         /// <summary>
-        /// Run when the EntityManager is created for the very first time.
+        /// Create the data members for the EntityManager.
         /// </summary>
-        public void Start()
-        { 
-            // Start method.
-        }
-
-        /// <summary>
-        /// Update references to entities in this manager.
-        /// </summary>
-        public void Update()
+        public override void Initialize()
         {
-            // Update method.
-        }
-
-        #endregion
-
-        #region // // Initialization methods.
-
-        /// <summary>
-        /// Initialize is run after the component is constructed.
-        /// </summary>
-        internal void Initialize()
-        {
-            if (!this.m_initialized)
+            if (this.Initialized)
             {
+                // Initialize the base values.
+                base.Initialize();
+
+                // Set this name.
+                this.Name = "Entity Manager";
+
                 // Initialize the entity manager.
-                Debugger.Print("Initializing entity manager.", gameObject.name);
+                Debugger.Print("Initializing entity manager.", this.Self.name);
 
-                // Ensure no movement.
-                this.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
-
-                // Create the status.
-                this.m_status = gameObject.GetComponent<Status>();
-                if (this.m_status == null)
-                {
-                    this.m_status = gameObject.AddComponent<Status>();
-                    this.m_status.Initialize();
-                }
-
-                // Create the lists.
-                this.m_objects = new List<GameObject>();
+                // Make the new list.
                 this.m_entities = new List<Entity>();
 
-                // Initialization flag.
-                this.m_initialized = true;
-
-                // Start the status object.
-                this.m_status.Start();
+                // In the context of a manager ArcanaObject,
+                // This means that we can pool the objects
+                // that it manages,
+                // so long as its Entities are poolable, themselves.
+                this.IsPoolable = true;
             }
         }
 
-        /// <summary>
-        /// Initialize individual properties, assigned by select cases.
-        /// </summary>
-        /// <param name="parameter">Parameter to assign value to.</param>
-        /// <param name="value">Value to assign.</param>
-        public void Initialize(string parameter, object value)
-        {
-            return; // No implementation necessary for this interface method.
-        }
-
         #endregion
 
-        #endregion
+        #region Service Methods.
 
-        #region // Accessor Methods.
+        /////////////////////
+        // Service Methods.
+        /////////////////////
 
         /// <summary>
         /// Checks if entity already exists in list.
@@ -416,25 +450,29 @@ namespace Arcana.Entities
             // When an element is marked as inactive, it's available to be reused.
             return (e.IsAvailable());
         }
-
+        
         /// <summary>
         /// Get next available will return the first inactive Entity in the list it can find.
         /// If it is unavailable, it will create a new Entity.
         /// </summary>
         /// <param name="_type">Type of Entity to request.</param>
         /// <returns>Returns entity of given type if it is available.</returns>
-        public Entity GetNextAvailable(EntityType _type)
+        public Entity GetNextAvailable(ArcanaObject _parent, EntityType _type)
         {
             // Temp value.
             Entity available = null;
 
-            // Find the first available entity in the list.
-            foreach (Entity e in this.m_entities)
+            // Only return an available entity if object pooling is on.
+            if (this.IsPoolable)
             {
-                if (IsAvailable(e))
+                // Find the first available entity in the list.
+                foreach (Entity e in this.m_entities)
                 {
-                    available = e;
-                    break; // Break out the for loop.
+                    if (IsAvailable(e))
+                    {
+                        available = e;
+                        break; // Break out the for loop.
+                    }
                 }
             }
 
@@ -442,8 +480,11 @@ namespace Arcana.Entities
             if (available == null)
             {
                 // Creates default entity.
-                available = MakeEntity(_type, null);
+                available = MakeEntity(_parent, _type);
             }
+
+            // Run the make available function on the entity.
+            available.MakeAvailable();
 
             // Return available.
             return available;
@@ -451,51 +492,136 @@ namespace Arcana.Entities
 
         #endregion
 
-        #region // Mutator methods.
+        #region Mutator Methods.
+
+        /////////////////////
+        // Mutator Methods.
+        /////////////////////
 
         /// <summary>
-        /// Creates a new Entity and adds it to the list.
+        /// Makes an entity component and adds it to this manager's list.
         /// </summary>
-        /// <returns>Returns the newly created Entity.</returns>
-        public Entity MakeEntity(EntityType _type = EntityType.NULL, GameObject _parent = null, Constraints _parameters = null)
+        /// <param name="_parent">Parent to add the Entity component to.</param>
+        /// <param name="_type">Type of Entity to add.</param>
+        /// <returns>Returns an Entity component.</returns>
+        public Entity MakeEntity(ArcanaObject _parent, EntityType _type)
         {
-            Entity e = null;
-            GameObject p = _parent;
-            Constraints c = _parameters;
+            // Get a container to return the component.
+            Entity component = null;
+            ArcanaObject parent = _parent;
 
-            if(p == null)
+            // Check if the parent is null.
+            if (parent == null || parent.IsNull)
             {
-                p = Services.CreateEmptyObject("Entity");
+                Debugger.Print("Creating new parent due to null input...", this.Name, this.Debug);
+
+                // Create a new, empty object and add a new arcana object component to it.
+                parent = Services.CreateEmptyObject().AddComponent<ArcanaObject>();
+
+                // Initialize the parent object.
+                parent.Initialize();
             }
 
-            if (c == null)
+            // Checking against all of the components currently in the parent.
+            foreach (Entity entity in parent.GetComponents<Entity>())
             {
-                c = EntityFactory.Instance().CreateSettings(_type);
+                // Check if parent has an Entity on it already.
+                component = parent.GetComponent<Entity>();
+
+                // If the Entity matches the input type, we can return it.
+                if (component.IsType(_type))
+                {
+                    Debugger.Print("Component of input type " + Parse(_type) + " already exists on parent " + parent.Name + ".", this.Name, this.Debug);
+
+                    // Add if it doesn't exist already to the collection.
+                    AddEntity(component);
+
+                    // Leave the loop, with data in hand.
+                    break;
+                }
             }
 
-            // Create and add the entity.
-            e = EntityFactory.Instance().CreateComponent(p, c);
-            this.m_entities.Add(e);
+            // If the Entity doesn't match the input type, we can create a new Entity component of said type.
+            if (component == null)
+            {
+                Debugger.Print("Adding new " + Parse(_type) + " Entity component to parent " + parent.Name + ".", this.Name, this.Debug);
+                component = parent.Self.AddComponent<Entity>();
+                component.SetType(_type);
+            }
 
-            return e;
+            // Add the component.
+            AddEntity(component);
+
+            // Return the entity.
+            return component;
         }
 
         /// <summary>
-        /// Make available will call the entity's MakeAvailable function.
+        /// Pauses a selection of entities.
         /// </summary>
-        /// <param name="e">Entity to make available.</param>
-        private void MakeAvailable(Entity e)
+        /// <param name="entities">List of entities to pause.</param>
+        public void Pause(List<Entity> entities)
         {
-            e.MakeAvailable();
+            // Pause entities.
+            if (!IsEmpty)
+            {
+                foreach (Entity e in entities)
+                {
+                    Pause(e);
+                }
+            }
         }
 
+        /// <summary>
+        /// Pause a single entity.
+        /// </summary>
+        /// <param name="e">Entity to pause.</param>
+        public void Pause(Entity e)
+        {
+            if (e != null && HasEntity(e))
+            {
+                e.Pause();
+            }
+        }
+
+        /// <summary>
+        /// Resume a selection of entities.
+        /// </summary>
+        /// <param name="entities">List of entities to resume.</param>
+        public void Resume(List<Entity> entities)
+        {
+            // Resume entities.
+            if (!IsEmpty)
+            {
+                foreach (Entity e in entities)
+                {
+                    Resume(e);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Resume a single entity.
+        /// </summary>
+        /// <param name="e">Entity to resume.</param>
+        public void Resume(Entity e)
+        {
+            if (e != null && HasEntity(e))
+            {
+                e.Resume();
+            }
+        }
+        
         /// <summary>
         /// Entity is added to the list.
         /// </summary>
         /// <param name="e">Entity to add.</param>
         private void AddEntity(Entity e)
         {
-            this.m_entities.Add(e);
+            if (!HasEntity(e))
+            {
+                this.m_entities.Add(e);
+            }
         }
 
         /// <summary>
@@ -510,54 +636,31 @@ namespace Arcana.Entities
             }
         }
 
-        /// <summary>
-        /// Pauses the entire manager.
-        /// </summary>
-        public void Pause()
-        {
-            this.m_status.Pause();
-        }
-
-        /// <summary>
-        /// Pauses a selection of entities.
-        /// </summary>
-        /// <param name="entities">List of entities to pause.</param>
-        public void Pause(List<Entity> entities)
-        {
-            if (!IsEmpty)
-            {
-                foreach (Entity e in entities)
-                {
-                    e.Pause();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Unpauses the entire manager.
-        /// </summary>
-        public void Resume()
-        {
-            this.m_status.Resume();
-        }
-
-        /// <summary>
-        /// Unpauses a selection of entities.
-        /// </summary>
-        /// <param name="entities">List of entities to unpause.</param>
-        public void Resume(List<Entity> entities)
-        {
-            if (!IsEmpty)
-            {
-                foreach (Entity e in entities)
-                {
-                    e.Resume();
-                }
-            }
-        }
-
         #endregion
 
+    }
+
+    #endregion
+
+    #region Enum: EntityType.
+
+    /////////////////////
+    // Enum declaration for entity types.
+    /////////////////////
+
+    /// <summary>
+    /// Entity type should reflect all its different implementations, 
+    /// so it can be easily referenced.
+    /// </summary>
+    public enum EntityType
+    {
+        NULL,
+        Entity,
+        Environment,
+        Projectile,
+        Player,
+        Platform,
+        Wall
     }
 
     #endregion

@@ -2,8 +2,7 @@
  * MainMenuState.cs
  * 
  * This file contains:
- * - The MainMenuFactory factory.
- * - The MainMenuState class (State sub-class).
+ * - The MainMenuState class. (Child of State).
  ************************************************/
 
 /////////////////////
@@ -14,86 +13,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Arcana.Entities.Attributes;
+using Arcana.Entities;
+using Arcana.Utilities;
 using Arcana.UI.Screens;
 
 namespace Arcana.States
 {
-
-    #region Factory: MainMenuFactory declaration.
-
-    /////////////////////
-    // Factory declaration.
-    /////////////////////
-
-    /// <summary>
-    /// Create the main menu state.
-    /// </summary>
-    public class MainMenuFactory : StateFactory<MainMenuState>
-    {
-
-        #region Static Methods.
-
-        public static MainMenuFactory Instance()
-        {
-            if (instance == null)
-            {
-                instance = new MainMenuFactory();
-            }
-
-            return (MainMenuFactory)instance;
-        }
-
-        #endregion
-
-        #region Factory methods.
-
-        /// <summary>
-        /// Get the instance of this factory.
-        /// </summary>
-        /// <returns>Return the MainMenuFactory.</returns>
-        public override StateFactory<MainMenuState> GetInstance()
-        {
-            return Instance();
-        }
-        
-        /// <summary>
-        /// Adds a new component to the parent game objec.
-        /// </summary>
-        /// <param name="parent">GameObject to add component to.</param>
-        /// <returns>Return newly created component.</returns>
-        public override State CreateComponent(GameObject parent)
-        {
-            // Check game object.
-            if (parent == null)
-            {
-                // If the parent itself is null, do not return a component.
-                Debugger.Print("Tried to add a component but parent GameObject is null.", "NULL_REFERENCE");
-                return null;
-            }
-
-            // Get reference to it from the existing script if it already exists.
-            State mainMenu = parent.GetComponent<MainMenuState>();
-
-            // If the state is still null.
-            if (mainMenu == null)
-            {
-                // If it doesn't exist, create a new one.
-                Debugger.Print("Create and add the Main Menu state.");
-                mainMenu = Services.AddChild(parent, Services.CreateEmptyObject("State (Main Menu)")).AddComponent<MainMenuState>();
-            }
-
-            // Assign non-optional information.
-            mainMenu.Initialize(StateID.MainMenuState);
-
-            return mainMenu;
-        }
-
-        #endregion
-
-    }
-
-    #endregion
 
     #region Class: MainMenuState class.
 
@@ -102,13 +27,21 @@ namespace Arcana.States
     /////////////////////
 
     /// <summary>
-    /// <para>Implements the state run at the start of the game.</para>
-    /// It will display a screen object called "MainMenuScreen" and update frames as needed. When inputs are triggered to change the state of the StageManager this screen will stop being displayed.
+    /// Main Menu state displays screens for the main menu of the game.
     /// </summary>
+    [AddComponentMenu("Arcana/States/Main Menu")]
     public class MainMenuState : State
     {
 
+        #region Static Members.
+
+        // TODO: Create component maker.
+
+        #endregion
+
         #region Data Members
+
+        #region Properties
 
         /////////////////////
         // Properties.
@@ -128,41 +61,46 @@ namespace Arcana.States
 
         #endregion
 
-        #region Service Methods.
+        #endregion
+
+        #region UnityEngine Methods.
+
+        /// <summary>
+        /// The main menu should handle some input functionality.
+        /// </summary>
+        public override void Update()
+        {
+            // Call base method.
+            base.Update();
+
+            // Update when running.
+            if (this.Status.IsRunning())
+            {
+                // Handle input.
+            }
+        }
+
+        #endregion
 
         #region Initialization Methods.
 
         /// <summary>
-        /// General initialization of the state.
+        /// Add (and request) the screens for the Main Menu.
         /// </summary>
-        public sealed override void Initialize(StateID _state)
+        public sealed override void Initialize()
         {
-            base.Initialize(_state);
-            // TODO: Initialize all the state's properties.
-            // throw new NotImplementedException();
+            // Initialize base data members.
+            base.Initialize();
+
+            // Set the state ID.
+            this.InitializeState(StateID.MainMenuState);
+
+            // TODO: Add the screen IDs to the main menu.
         }
 
         #endregion
 
-        #region Input Methods.
-
-        protected override void HandleInput()
-        {
-            // TODO: Implement action handling.
-            throw new NotImplementedException();
-        }
-
-        protected override void InitializeControls()
-        {
-            // TODO: Implement controls for the main menu controls.
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
-        #endregion
-
-        #region Accesor Methods.
+        #region Accessor Methods.
 
         /// <summary>
         /// Return the requested Screen object.
@@ -174,11 +112,10 @@ namespace Arcana.States
             // TODO: Implement wrapper function.
             throw new NotImplementedException();
         }
-        
+
         #endregion
 
     }
 
     #endregion
-
 }
