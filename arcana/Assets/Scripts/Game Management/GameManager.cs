@@ -51,6 +51,11 @@ namespace Arcana
 
             //wizzard1.transform.Translate(translate, 0, 0);
 
+            if(wizzard1_rb.velocity.y <= 0.0f)
+            {
+                wizzard1.layer = 0;
+            }
+
             if(translation * wizzard1_rb.velocity.x < max_speed)
             {
             
@@ -68,6 +73,8 @@ namespace Arcana
                 wizzard1_rb.AddForce(new Vector2(0f, jumpForce));
                 grounded = true;
                 charMovement.jump_enabled = false;
+
+                wizzard1.layer = 8;
             }
 
             if(translation > 0 && !isFacingRight)
@@ -113,7 +120,7 @@ namespace Arcana
 
             charMovement = wizzard1.GetComponent<CharacterMovement>();
 
-            Instantiate(wizzard1, new Vector3(1, 0, 0), Quaternion.identity);
+            //Instantiate(wizzard1, new Vector3(1, 0, 0), Quaternion.identity);
 
             wizzard1_rb = wizzard1.GetComponent<Rigidbody2D>();
             wizzard_sr = wizzard1.GetComponent<SpriteRenderer>();

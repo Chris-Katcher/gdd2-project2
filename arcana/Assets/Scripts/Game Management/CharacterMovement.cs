@@ -11,16 +11,27 @@ namespace Arcana.Physics
 
         public bool jump_enabled = true;
 
-        void OnCollisionStay2D(Collision2D coll)
+        //void OnCollisionStay2D(Collision2D coll)
+        //{
+        //    //if(coll.transform.name != "Wizzard1(Clone)" && coll.transform.name != "Ceiling")
+        //    //{
+        //    //    jump_enabled = true;
+        //    //} else
+        //    //{
+        //    //    jump_enabled = false;
+        //    //}
+            
+        //}
+
+        void OnCollisionStay2D(Collision2D collision)
         {
-            if(coll.transform.name != "Wizzard1(Clone)" && coll.transform.name != "Ceiling")
+            if(collision.contacts[0].normal.y > 0)
             {
                 jump_enabled = true;
             } else
             {
                 jump_enabled = false;
             }
-            
         }
     }
 }
