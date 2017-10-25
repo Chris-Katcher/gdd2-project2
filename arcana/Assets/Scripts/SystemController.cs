@@ -44,7 +44,7 @@ public class SystemController : MonoBehaviour {
     private bool m_initialized = false;
 
     // Set up the managers.
-
+    
     /// <summary>
     /// The controller calling input actions.
     /// </summary>
@@ -105,6 +105,22 @@ public class SystemController : MonoBehaviour {
     }
 
     /// <summary>
+    /// Returns reference to the InputManager.
+    /// </summary>
+    public InputManager InputController
+    {
+        get { return this.m_inputManager; }
+    }
+
+    /// <summary>
+    /// Returns reference to the StateManager.
+    /// </summary>
+    public StateManager StateController
+    {
+        get { return this.m_stateManager; }
+    }
+
+    /// <summary>
     /// Returns reference to the CameraManager.
     /// </summary>
     public CameraManager CameraController
@@ -124,7 +140,7 @@ public class SystemController : MonoBehaviour {
     
     #region Service Methods
 
-    #region MonoBehavior Methods
+    #region UnityEngine Methods
 
     /// <summary>
     /// Entry point for the program.
@@ -140,12 +156,7 @@ public class SystemController : MonoBehaviour {
     /// </summary>
     void Update()
     {
-        // This is the format for getting key input.
-        if (this.GetAction(Actions.ChangeCameraBackground))
-        {
-            this.m_cameraManager.ChangeBackground(Services.GetRandomColor());
-        }
-        
+        // If the system controller hasn't been initialized:
         if (!Initialized)
         {
             // Initialize the controller if it hasn't been initialized.
@@ -153,29 +164,33 @@ public class SystemController : MonoBehaviour {
         }
         else
         {
+            // If the system controller has been initialized, perform these actions.
 
-        }
+            // Handle user input.
+            HandleInput();
 
-        /*
-        //gets translation of player one
-        float translation = m_inputManager.getPlayer1Translation();
-        //gets bool of whether plyaer1 has jumped
-        bool jump_pressed = m_inputManager.getPlayer1Jump();
-        //gets bool of whether fire button has been pressed
-        bool fire1_pressed = m_inputManager.getProjectileFire();
 
-        
-        //updates the wizard position and jump
-        m_gameManager.UpdatePosWizzard1(translation);
-        m_gameManager.UpdateJumpStatus(jump_pressed);
-        
-        //fires a projectile
-        m_gameManager.fireProjPlayer1(fire1_pressed);
+            /*
+            //gets translation of player one
+            float translation = m_inputManager.getPlayer1Translation();
+            //gets bool of whether plyaer1 has jumped
+            bool jump_pressed = m_inputManager.getPlayer1Jump();
+            //gets bool of whether fire button has been pressed
+            bool fire1_pressed = m_inputManager.getProjectileFire();
 
-        // TODO: Stub code.*/
 
+            //updates the wizard position and jump
+            m_gameManager.UpdatePosWizzard1(translation);
+            m_gameManager.UpdateJumpStatus(jump_pressed);
+
+            //fires a projectile
+            m_gameManager.fireProjPlayer1(fire1_pressed);
+
+            // TODO: Stub code.*/
+            
+        }        
     }
-
+    
     #endregion
 
     #region Initialization Methods.
@@ -211,8 +226,11 @@ public class SystemController : MonoBehaviour {
         // Build the manager object. //
         Debugger.Print("Build the manager.");
 
+        // Ensure no movement.
+        this.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
+
         // Create the game manager component.
-        this.m_managers = Services.CreateEmptyObject("Game Managers");
+        this.m_managers = Services.CreateEmptyObject("System Managers");
 
         // Make the system controller object the parent.
         Services.AddChild(gameObject, this.m_managers);
@@ -260,16 +278,20 @@ public class SystemController : MonoBehaviour {
         this.m_inputManager = factory.CreateComponent(this.Managers, managerSettings);
 
         // Add the system control scheme.
-        this.m_inputManager.AddControlScheme(m_controller, BuildControlScheme());
+        BuildControlScheme();
     }
 
     /// <summary>
     /// Create a ControlScheme for system level actions.
     /// </summary>
-    /// <returns></returns>
-    private ControlScheme BuildControlScheme()
+    private void BuildControlScheme()
     {
-        return new ControlScheme();
+        // If a scheme doesn't exist, build a new one.
+        if (GetScheme() == null)
+        {
+           Debugger.Print("Creating the control scheme for " + this.Name);
+           this.m_inputManager.AddControlScheme(this.m_controller, new ControlScheme());
+        }
     }
 
     /// <summary>
@@ -279,11 +301,20 @@ public class SystemController : MonoBehaviour {
     {
         Debugger.Print("Adding controls to the control scheme for Controller: " + this.m_controller);
 
-        AddHandle("Mouse X", CommandTypes.MouseMovement);
-        AddHandle("Mouse Y", CommandTypes.Axis);
+        // AddHandle("Mouse X", CommandTypes.MouseMovement);
+        // AddHandle("Mouse Y", CommandTypes.Axis);
 
         // Creates an "A" button command that triggers on release.
-        AddHandle(Actions.ChangeCameraBackground, new Command(KeyCode.A), CommandResponseMode.Release);
+        RegisterAction(Actions.ChangeCameraBackground, new Command(KeyCode.A), CommandResponseMode.Release);
+        
+        // Creates an "S" button command that triggers on press.
+        RegisterAction(Actions.ChangeCameraBackground, new Command(KeyCode.S), CommandResponseMode.Press);
+
+        // Creates an "D" button command that triggers on held.
+        RegisterAction(Actions.ChangeCameraBackground, new Command(KeyCode.D), CommandResponseMode.Held);
+
+        // Add a left moust button click.
+        RegisterAction(Actions.Click, new Command(_mouse: 0), CommandResponseMode.Press);
 
 
         /* *
@@ -301,7 +332,7 @@ public class SystemController : MonoBehaviour {
         
         // Creates an axis detection for whenever Mouse moves.
         AddHandle(Actions.ChangeCameraBackground, new Command("Mouse X", CommandTypes.MouseMovement), CommandResponseMode.NonZero);
-       
+
          * */
 
     }
@@ -377,6 +408,28 @@ public class SystemController : MonoBehaviour {
     #region Input Methods.
 
     /// <summary>
+    /// Handles all the registered actions.
+    /// </summary>
+    private void HandleInput()
+    {
+        // This is the format for getting key input.
+
+        // If GetAction(Action) --> Perform functionality.
+        if (this.GetAction(Actions.ChangeCameraBackground))
+        {
+            this.m_cameraManager.ChangeBackground(Services.GetRandomColor());
+        }
+
+        // Handle the actions.
+        if (this.GetAction(Actions.Click))
+        {
+            Vector2 mouse = Services.ToVector2(Input.mousePosition);
+            Debugger.Print("Left mouse button was clicked: " + mouse);
+        }
+
+    }
+
+    /// <summary>
     /// Wrapper function for handling input.
     /// </summary>
     /// <param name="_action">Action to check for.</param>
@@ -421,13 +474,13 @@ public class SystemController : MonoBehaviour {
     /// <param name="_action">Action to perform.</param>
     /// <param name="_command">Binding that will cause action.</param>
     /// <param name="_response">Response type that will trigger action.</param>
-    public void AddHandle(Actions _action, Command _command, CommandResponseMode _response)
+    public void RegisterAction(Actions _action, Command _command, CommandResponseMode _response)
     {
         CommandResponse response = new CommandResponse(_command, _response);
         CommandSequence sequence = new CommandSequence();
         sequence.Push(response);
 
-        AddActionHandle(_action, sequence);
+        AddControl(_action, sequence);
     }
 
     /// <summary>
@@ -436,10 +489,10 @@ public class SystemController : MonoBehaviour {
     /// <param name="_axis">Name of the axis-trigger pair.</param>
     /// <param name="_command">Axis read by trigger.</param>
     /// <param name="_response">Trigger.</param>
-    public void AddHandle(string _axis, CommandTypes _type = CommandTypes.Axis)
+    public void RegisterAxis(string _axis, CommandTypes _type = CommandTypes.Axis)
     {
         CommandResponse response = new CommandResponse(new Command(_axis, _type), CommandResponseMode.NonZero);
-        AddAxisHandle(_axis, response);
+        AddControl(_axis, response);
     }
     
     /// <summary>
@@ -447,7 +500,7 @@ public class SystemController : MonoBehaviour {
     /// </summary>
     /// <param name="_action">Action to perform.</param>
     /// <param name="_sequence">Series of responses needed to activate action.</param>
-    public void AddActionHandle(Actions _action, CommandSequence _sequence)
+    public void AddControl(Actions _action, CommandSequence _sequence)
     {
         // Add the control to the existing scheme.
         GetScheme().AddControl(_action, _sequence);
@@ -458,27 +511,13 @@ public class SystemController : MonoBehaviour {
     /// </summary>
     /// <param name="_axis">Axis name.</param>
     /// <param name="_response">Response triggering axis value.</param>
-    public void AddAxisHandle(string _axis, CommandResponse _response)
+    public void AddControl(string _axis, CommandResponse _response)
     {
         // Add tracking information for the axis in question.
         GetScheme().AddAxis(_axis, _response);
     }
 
     #endregion
-
-    #endregion
-
-    #region Accessor Methods
-
-    // TODO: Stub.
-
-    #endregion
-
-    #region Mutator Methods
-
-
-    // TODO: Stub.
-
 
     #endregion
 

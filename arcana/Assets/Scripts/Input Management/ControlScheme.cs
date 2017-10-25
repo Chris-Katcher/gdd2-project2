@@ -15,6 +15,7 @@ namespace Arcana.InputManagement
     public enum Actions
     {
         ChangeCameraBackground,
+        Click,
         Idle,
         Fire,
         Jump,
@@ -528,12 +529,20 @@ namespace Arcana.InputManagement
         {
             if (CommandType == CommandTypes.Key || CommandType == CommandTypes.Button)
             {
-                return Input.GetKey(this.m_keyCode);
+                if(Input.GetKey(this.m_keyCode))
+                {
+                    Debugger.Print("Key/Gamepad Button " + m_keyCode + " is being held.");
+                    return true;
+                }               
             }
 
             if (CommandType == CommandTypes.MouseButton)
             {
-                return Input.GetMouseButton(this.m_mouseButton);
+                if (Input.GetMouseButton(this.m_mouseButton))
+                {
+                    Debugger.Print("Mouse Button of index " + m_mouseButton + " is being held.");
+                    return true;
+                }
             }
 
             return false;
@@ -547,12 +556,20 @@ namespace Arcana.InputManagement
         {
             if (CommandType == CommandTypes.Key || CommandType == CommandTypes.Button)
             {
-                return Input.GetKeyUp(this.m_keyCode);
+                if (Input.GetKeyUp(this.m_keyCode))
+                {
+                    Debugger.Print("Key/Gamepad Button " + m_keyCode + " was just released.");
+                    return true;
+                }
             }
 
             if (CommandType == CommandTypes.MouseButton)
             {
-                return Input.GetMouseButtonUp(this.m_mouseButton);
+                if (Input.GetMouseButtonUp(this.m_mouseButton))
+                {
+                    Debugger.Print("Mouse Button of index " + m_mouseButton + " was just released.");
+                    return true;
+                }
             }
 
             return false;
@@ -567,12 +584,20 @@ namespace Arcana.InputManagement
         {
             if (CommandType == CommandTypes.Key || CommandType == CommandTypes.Button)
             {
-                return Input.GetKeyDown(this.m_keyCode);
+                if (Input.GetKeyDown(this.m_keyCode))
+                {
+                    Debugger.Print("Key/Gamepad Button " + m_keyCode + " was just pressed.");
+                    return true;
+                }
             }
 
             if (CommandType == CommandTypes.MouseButton)
             {
-                return Input.GetMouseButtonDown(this.m_mouseButton);
+                if (Input.GetMouseButtonDown(this.m_mouseButton))
+                {
+                    Debugger.Print("Mouse Button of index " + m_mouseButton + " was just pressed.");
+                    return true;
+                }
             }
 
             return false;
@@ -604,7 +629,9 @@ namespace Arcana.InputManagement
         {
             if (this.IsAxis)
             {
-                return Input.GetAxisRaw(this.m_name);
+                float response = Input.GetAxisRaw(this.m_name);
+                Debugger.Print("Requested raw axis value for " + m_name + ": " + response);
+                return response;
             }
             else
             {
@@ -620,7 +647,9 @@ namespace Arcana.InputManagement
         {
             if (this.IsAxis)
             {
-                return Input.GetAxis(this.m_name);
+                float response = Input.GetAxis(this.m_name);
+                Debugger.Print("Requested axis value for " + m_name + ": " + response);
+                return response;
             }
             else
             {
@@ -638,10 +667,8 @@ namespace Arcana.InputManagement
             {
                 return !IsAxisMoved();
             }
-            else
-            {
-                return true;
-            }
+
+            return true;            
         }
 
         /// <summary>
@@ -652,12 +679,14 @@ namespace Arcana.InputManagement
         {
             if (this.IsAxis)
             {
-                return (Services.Abs(GetAxis()) > this.m_deadzone);
+                if (Services.Abs(GetAxis()) > this.m_deadzone)
+                {
+                    Debugger.Print("Axis " + m_name + " has moved beyond the " + m_deadzone + " deadzone (" + GetAxis() + ").");
+                    return true;
+                }
             }
-            else
-            {
-                return false;
-            }
+
+            return false;            
         }
 
         #endregion

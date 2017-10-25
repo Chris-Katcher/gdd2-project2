@@ -1,7 +1,9 @@
 ﻿/************************************************
  * MainMenuState.cs
  * 
- * This file contains implementation for the IState subclass: MainMenuState.
+ * This file contains:
+ * - The MainMenuFactory factory.
+ * - The MainMenuState class (State sub-class).
  ************************************************/
 
 /////////////////////
@@ -11,97 +13,172 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
+using Arcana.Entities.Attributes;
 using Arcana.UI.Screens;
 
 namespace Arcana.States
 {
+
+    #region Factory: MainMenuFactory declaration.
+
     /////////////////////
-    // Class declaration.
+    // Factory declaration.
+    /////////////////////
+
+    /// <summary>
+    /// Create the main menu state.
+    /// </summary>
+    public class MainMenuFactory : StateFactory<MainMenuState>
+    {
+
+        #region Static Methods.
+
+        public static MainMenuFactory Instance()
+        {
+            if (instance == null)
+            {
+                instance = new MainMenuFactory();
+            }
+
+            return (MainMenuFactory)instance;
+        }
+
+        #endregion
+
+        #region Factory methods.
+
+        /// <summary>
+        /// Get the instance of this factory.
+        /// </summary>
+        /// <returns>Return the MainMenuFactory.</returns>
+        public override StateFactory<MainMenuState> GetInstance()
+        {
+            return Instance();
+        }
+        
+        /// <summary>
+        /// Adds a new component to the parent game objec.
+        /// </summary>
+        /// <param name="parent">GameObject to add component to.</param>
+        /// <returns>Return newly created component.</returns>
+        public override State CreateComponent(GameObject parent)
+        {
+            // Check game object.
+            if (parent == null)
+            {
+                // If the parent itself is null, do not return a component.
+                Debugger.Print("Tried to add a component but parent GameObject is null.", "NULL_REFERENCE");
+                return null;
+            }
+
+            // Get reference to it from the existing script if it already exists.
+            State mainMenu = parent.GetComponent<MainMenuState>();
+
+            // If the state is still null.
+            if (mainMenu == null)
+            {
+                // If it doesn't exist, create a new one.
+                Debugger.Print("Create and add the Main Menu state.");
+                mainMenu = Services.AddChild(parent, Services.CreateEmptyObject("State (Main Menu)")).AddComponent<MainMenuState>();
+            }
+
+            // Assign non-optional information.
+            mainMenu.Initialize(StateID.MainMenuState);
+
+            return mainMenu;
+        }
+
+        #endregion
+
+    }
+
+    #endregion
+
+    #region Class: MainMenuState class.
+
+    /////////////////////
+    // State declaration.
     /////////////////////
 
     /// <summary>
     /// <para>Implements the state run at the start of the game.</para>
     /// It will display a screen object called "MainMenuScreen" and update frames as needed. When inputs are triggered to change the state of the StageManager this screen will stop being displayed.
     /// </summary>
-    public class MainMenuState : IState
+    public class MainMenuState : State
     {
+
         #region Data Members
 
+        /////////////////////
+        // Properties.
+        /////////////////////
+
         /// <summary>
-        /// Reference to the state manager.
+        /// Return the current screen.
         /// </summary>
-        public StateManager m_stateManager { get; set; }
-
-        /// <summary>
-        /// This IState's ID.
-        /// </summary>
-        public StateID m_stateID { get; set; }
-
-        /// <summary>
-        /// Flag checks if this state has finished loading.
-        /// </summary>
-        public bool m_stateLoaded { get; set; }
-
-        /// <summary>
-        /// Ordered list of IScreen ID's used for this state.
-        /// </summary>
-        public List<ScreenID> m_screenIds { get; set; }
-
-        /// <summary>
-        /// Reference to the current screen.
-        /// </summary>
-        public IScreen m_currentScreen { get; set; }
-
-        #endregion
-
-        #region Service Methods
-
-        /// <summary>
-        /// Initialize the MainMenuState with its respective screen and game objects.
-        /// </summary>    
-        public void Initialize()
+        public sealed override IScreen CurrentScreen
         {
-            // TODO: Stub.
-        }
-
-        /// <summary>
-        /// Load the MainMenuState and its IScreen.
-        /// </summary>
-        public void Load()
-        {
-            // TODO: Stub.
-        }
-
-        /// <summary>
-        /// Update MainMenuState dependencies.
-        /// </summary>
-        /// <param name="delta">Elapsed time since last frame (in seconds).</param>
-        public void Update(float delta)
-        {
-            // TODO: Stub.
+            get
+            {
+                // TODO: Fix this implementation in the base class.
+                throw new NotImplementedException();
+            }
         }
 
         #endregion
 
-        #region Mutator Methods
+        #region Service Methods.
 
-        // TODO: Stub.
-
-        #endregion
-
-        #region Accessor Methods
+        #region Initialization Methods.
 
         /// <summary>
-        /// Get IScreen returns the screen at the specified index. Since this is not the StateManager this method will not be needed.
+        /// General initialization of the state.
         /// </summary>
-        /// <param name="id">IScreen ID associated with desired IScreen object.</param>
-        /// <returns></returns>
-        public IScreen GetScreen(ScreenID id)
+        public sealed override void Initialize(StateID _state)
         {
-            // TODO: Stub.
-            return null;
+            base.Initialize(_state);
+            // TODO: Initialize all the state's properties.
+            // throw new NotImplementedException();
         }
 
         #endregion
+
+        #region Input Methods.
+
+        protected override void HandleInput()
+        {
+            // TODO: Implement action handling.
+            throw new NotImplementedException();
+        }
+
+        protected override void InitializeControls()
+        {
+            // TODO: Implement controls for the main menu controls.
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Accesor Methods.
+
+        /// <summary>
+        /// Return the requested Screen object.
+        /// </summary>
+        /// <param name="id">Screen ID associated with requested screen.</param>
+        /// <returns>Returns a screen object.</returns>
+        public sealed override IScreen GetScreen(ScreenID id)
+        {
+            // TODO: Implement wrapper function.
+            throw new NotImplementedException();
+        }
+        
+        #endregion
+
     }
+
+    #endregion
+
 }

@@ -14,7 +14,6 @@ namespace Arcana.Entities.Attributes
     {
         NULL,
         Init,
-        Loading,
         Start,
         Run,
         Pause,
@@ -189,7 +188,8 @@ namespace Arcana.Entities.Attributes
         /// <returns>Returns flag current status is Active.</returns>
         public bool IsActive()
         {
-            return (this.m_currentStatus == ComponentStatus.Active);
+            return (this.m_currentStatus != ComponentStatus.Inactive &&
+                this.m_currentStatus != ComponentStatus.NULL);
         }
 
         /// <summary>
@@ -308,7 +308,6 @@ namespace Arcana.Entities.Attributes
         {
             return (IsReleasing() && StatusChanged());
         }
-
 
         #endregion
 

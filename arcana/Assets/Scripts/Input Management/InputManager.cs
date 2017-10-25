@@ -25,7 +25,8 @@ namespace Arcana.InputManagement
     /// </summary>
     public enum Controller
     {
-        System, 
+        System,
+        State,
         Debug,
         Player1,
         Player2
@@ -331,6 +332,9 @@ namespace Arcana.InputManagement
             {
                 // Initialize the entity manager.
                 Debugger.Print("Initializing input manager.", gameObject.name);
+
+                // Ensure no movement.
+                this.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
 
                 // Initialize control scheme.
                 this.m_schemes = new Dictionary<Controller, ControlScheme>();

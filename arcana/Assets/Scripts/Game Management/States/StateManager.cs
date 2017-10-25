@@ -29,7 +29,7 @@ namespace Arcana.States
         LoadingState = 0,
         MainMenuState = 1,
         ArenaState = 2,
-        GameoverState = 3,
+        GameOverState = 3,
         ScoreState = 4,
         NULL_STATE = 5
     }
@@ -269,6 +269,32 @@ namespace Arcana.States
             return (StateManager.Instance != null);
         }
 
+        /// <summary>
+        /// Get the name of the state.
+        /// </summary>
+        /// <param name="_id">ID of the state.</param>
+        /// <returns>Returns string containing the name of the state.</returns>
+        public static string Parse(StateID _id)
+        {
+            switch (_id)
+            {
+                case StateID.ArenaState:
+                    return "Arena State";
+                case StateID.GameOverState:
+                    return "Gameover State";
+                case StateID.LoadingState:
+                    return "Loading State";
+                case StateID.MainMenuState:
+                    return "Main Menu State";
+                case StateID.ScoreState:
+                    return "Score State";
+                case StateID.NULL_STATE:
+                    return "NULL State";
+            }
+
+            return "ID cannot be parsed.";
+        }
+
         #endregion
 
         #region Data Members
@@ -278,54 +304,74 @@ namespace Arcana.States
         /////////////////////
 
         /// <summary>
-        /// Status component holds informationa about the class's state.
-        /// </summary>
-        private Status m_status = null;
-
-        /// <summary>
-        /// Map of all IState instances, with their associated ID's.
-        /// </summary>
-        private Dictionary<StateID, IState> m_states = null;
-
-        /// <summary>
-        /// Tracks the active state.
-        /// </summary>
-        private IState m_currentState = null;
-
-        /// <summary>
         /// Flag tracks if class has been initialized.
         /// </summary>
         private bool m_initialized = false;
 
+        /// <summary>
+        /// Status of the StateManager.
+        /// </summary>
+        private Status m_status = null;
+
+        /// <summary>
+        /// Holds the states as components.
+        /// </summary>
+        private GameObject m_container = null;
+        
+        /// <summary>
+        /// Reference map of all IState instances, paired with their associated ID's.
+        /// </summary>
+        private Dictionary<StateID, State> m_states = null;
+
+        /// <summary>
+        /// Tracks the current state.
+        /// </summary>
+        private StateID m_currentStateID = StateID.NULL_STATE;
+        
         /////////////////////
         // Properties.
         /////////////////////
 
         /// <summary>
+        /// Returns initialization flag.
+        /// </summary>
+        public bool Initialized
+        {
+            get { return (this.m_initialized); }
+        }
+
+        /// <summary>
+        /// Returns active flag.
+        /// </summary>
+        public bool Active
+        {
+            get { return (this.Status.IsActive()); }
+        }
+
+        /// <summary>
         /// Map of all IState instances, with their associated ID's.
         /// </summary>
-        public Dictionary<StateID, IState> States
+        public Dictionary<StateID, State> States
         {
             get { return this.m_states; }
         }
 
         /// <summary>
-        /// Tracks the active state.
+        /// Reference to the currently active state.
         /// </summary>
-        public IState CurrentState
+        public StateID CurrentStateID
         {
-            get { return this.m_currentState; }
+            get { return this.m_currentStateID; }
         }
 
         /// <summary>
-        /// Keeps track of the loading state, when loading needs to occur.
+        /// Tracks the active state.
         /// </summary>
-        public IState LoadingState
+        public State CurrentState
         {
-            get;
-            set;
+            get { return this.m_states[this.m_currentStateID]; }
         }
-
+        
         /// <summary>
         /// Reference to component's current state.
         /// </summary>
@@ -349,7 +395,10 @@ namespace Arcana.States
         /// </summary>
         public void Start()
         {
-            // Start method.
+            if (!Initialized)
+            {
+                this.Initialize();
+            }
         }
 
         /// <summary>
@@ -357,7 +406,11 @@ namespace Arcana.States
         /// </summary>
         public void Update()
         {
-            // Update.
+            if (Initialized && Active)
+            {
+                // If initialized.
+                // TODO: StateManager update functionality.
+            }
         }
 
         #endregion
@@ -374,25 +427,79 @@ namespace Arcana.States
                 // Initialize the entity manager.
                 Debugger.Print("Initializing state manager.", gameObject.name);
 
-                // Create the status.
-                this.m_status = gameObject.GetComponent<Status>();
-                if (this.m_status == null)
-                {
-                    this.m_status = gameObject.AddComponent<Status>();
-                    this.m_status.Initialize();
-                }
+                // Ensure no movement.
+                this.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
 
-                // Initialize data members.
-                this.m_states = new Dictionary<StateID, IState>();
-                
+                // Create the status.
+                BuildStatus();
+
+                // Create the states.
+                BuildStates();
+
+                // Set current state.
+                this.m_currentStateID = StateID.MainMenuState;
+
                 // Initialization flag.
                 this.m_initialized = true;
-
-                // Start the status object.
-                this.m_status.Start();
             }
         }
-        
+
+        #region Build Property Methods.
+
+        /// <summary>
+        /// Creates the Status object.
+        /// </summary>
+        private void BuildStatus()
+        {
+            // Create the status.
+            this.m_status = gameObject.GetComponent<Status>();
+            if (this.m_status == null)
+            {
+                this.m_status = gameObject.AddComponent<Status>();
+                this.m_status.Initialize();
+            }
+
+            // Activate the status object.
+            this.m_status.Activate();
+        }
+
+        /// <summary>
+        /// Builds the states.
+        /// </summary>
+        private void BuildStates()
+        {
+            // Initialize data members.
+            this.m_states = new Dictionary<StateID, State>();
+
+            // Initialize other properties.
+            this.m_currentStateID = StateID.NULL_STATE;
+
+            // Create the container.
+            this.m_container = Services.AddChild(gameObject, Services.CreateEmptyObject("States"));
+
+            // Create the individual states.
+            this.CreateState(StateID.MainMenuState, MainMenuFactory.Instance().CreateComponent(this.m_container));
+            this.CreateState(StateID.ArenaState, ArenaFactory.Instance().CreateComponent(this.m_container));
+            this.CreateState(StateID.GameOverState, GameOverFactory.Instance().CreateComponent(this.m_container));
+        }
+
+        /// <summary>
+        /// Create and add state to reference map.
+        /// </summary>
+        /// <param name="_stateID">ID of the state being added.</param>
+        /// <param name="_state">State component.</param>
+        private void CreateState(StateID _stateID, State _state)
+        {
+            if (!this.m_states.ContainsKey(_stateID))
+            {
+                // Deactivate newly added states.
+                _state.Deactivate();
+                this.m_states.Add(_stateID, _state);
+            }
+        }
+
+        #endregion
+
         /// <summary>
         /// Initialize individual properties, assigned by select cases.
         /// </summary>
@@ -400,39 +507,21 @@ namespace Arcana.States
         /// <param name="value">Value to assign.</param>
         public void Initialize(string parameter, object value)
         {
-            switch (parameter)
-            {
-                // TODO.
-            }
+            // TODO: Set up initialization pathway.
+            return; // No parameters actually get passed in to the state.
         }
 
         #endregion
 
         #region State Methods.
-
-        /// <summary>
-        /// Load resources for the current state.
-        /// </summary>
-        public void LoadState()
-        {
-            // TODO: Stub.
-        }
-
-        /// <summary>
-        /// Load resources for the input state.
-        /// </summary>
-        /// <param name="_state"></param>
-        public void LoadState(IState _state)
-        {
-            // TODO: Stub.
-        }
-
+        
         /// <summary>
         /// Pause the current state.
         /// </summary>
         public void Pause()
         {
-            // TODO: Stub.
+            Debugger.Print("Pausing current state.");
+            this.CurrentState.Pause();
         }
 
         /// <summary>
@@ -440,7 +529,8 @@ namespace Arcana.States
         /// </summary>
         public void Resume()
         {
-            // TODO: Stub.
+            Debugger.Print("Resuming current state.");
+            this.CurrentState.Resume();
         }
 
         /// <summary>
@@ -448,37 +538,35 @@ namespace Arcana.States
         /// </summary>
         public void ResetState()
         {
-            // TODO: Stub.
+            Debugger.Print("Resetting the state.");
+            this.CurrentState.ResetState();
         }
 
         /// <summary>
         /// Assign current state to input state.
         /// </summary>
         /// <param name="_state">State to change to.</param>
-        public void ChangeStates(IState _state)
+        public void ChangeStates(StateID _stateID)
         {
-            if (this.m_currentState != _state)
+            if (Active)
             {
-                this.m_currentState = _state;
+                if (this.m_currentStateID != _stateID)
+                {
+                    // Deactivate the previous state.
+                    this.CurrentState.Deactivate();
+
+                    // Activate the current state.
+                    this.m_currentStateID = _stateID;
+                    this.CurrentState.Activate();
+
+                }
             }
         }
 
         #endregion
         
         #endregion
-
-        #region Mutator Methods
-
-        // TODO: Stub.
-
-        #endregion
-
-        #region Accessor Methods
         
-        // TODO: Stub.
-
-        #endregion
-
     }
 
     #endregion

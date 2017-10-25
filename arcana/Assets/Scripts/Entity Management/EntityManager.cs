@@ -357,6 +357,9 @@ namespace Arcana.Entities
                 // Initialize the entity manager.
                 Debugger.Print("Initializing entity manager.", gameObject.name);
 
+                // Ensure no movement.
+                this.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
+
                 // Create the status.
                 this.m_status = gameObject.GetComponent<Status>();
                 if (this.m_status == null)
