@@ -87,13 +87,16 @@ public class SystemController : MonoBehaviour {
         bool fire1_pressed = m_inputManager.getProjectileFire();
 		bool fire2_pressed = m_inputManager.getProjectileFire2();
 		bool fire3_pressed = m_inputManager.getProjectileFire3();
+        //bool of whether either the right or left trigger has been pressed
+        bool rightTrigger = m_inputManager.getRightTrigger();
+        bool leftTrigger = m_inputManager.getLeftTrigger();
 
         //updates the wizard position and jump
         m_gameManager.UpdatePosWizzard1(translation);
         m_gameManager.UpdateJumpStatus(jump_pressed);
 
         //fires a projectile
-        m_player.fireProjPlayer(fire1_pressed, fire2_pressed, fire3_pressed);
+        m_player.fireProjPlayer(fire1_pressed, fire2_pressed, fire3_pressed, rightTrigger);
 		//TODO: implement other projectiles
 		//m_player.fire
 

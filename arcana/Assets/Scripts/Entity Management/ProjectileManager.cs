@@ -9,6 +9,19 @@ namespace Arcana.Entities
     class ProjectileManager : MonoBehaviour
     {
 
+        private int spellValue = 0;
+        private int inputCount = 0;
+
+        private enum curCast
+        {
+
+            oneSpell = 1,
+            twoSpell = 2,
+            fullSpell = 3
+
+        }
+        private curCast current;
+
         public List<Projectile> projectiles = new List<Projectile>();
 
         /// <summary>
@@ -34,22 +47,65 @@ namespace Arcana.Entities
         /// </summary>
         /// <param name="fire1">Bool == Whether or no the fire button has been pressed</param>
         /// <param name="position">Position to be created at</param>
-        public void fireProjectile1(bool fire1, Vector3 position)
+        public void fireProjectile(bool fire1, bool fire2, bool fire3, bool rightTrigger, Vector3 position)
         {
 
-            //if fire has been pressed, create a projectile
-            if (fire1 == true)
+            determineCast();
+
+            //if rigth trigger has been pressed and three spells have been inputed, then create a projectile and reset variables
+            if (rightTrigger == true && current == curCast.fullSpell)
+            {
+
+                createProjectile(position.x, position.y, new Vector3(4.0f, 0.0f, 0.0f), spellValue);
+                spellValue = 0;
+                inputCount = 0;
+
+            }
+            else if (fire1 == true && inputCount < 3)
             {
 
                 //creates a projectile of type 'Fire'
-                createProjectile(position.x,position.y,new Vector3(4.0f,0.0f,0), 100);
+                inputCount += 1;
+                spellValue += 100;
+
+            }
+            else if(fire2 == true && inputCount < 3)
+            {
+
+                inputCount += 1;
+                spellValue += 10;
+
+            }
+            else if(fire3 == true && inputCount < 3)
+            {
+
+                inputCount += 1;
+                spellValue += 1;
+
+            }
+           
+        }
+        public void determineCast()
+        {
+
+            switch (inputCount)
+            {
+
+                case 1:
+                    current = curCast.oneSpell;
+                    break;
+                case 2:
+                    current = curCast.twoSpell;
+                    break;
+                case 3:
+                    current = curCast.fullSpell;
+                    break;
 
             }
 
-           
-        }
 
-		public void fireProjectile2(bool fire2, Vector3 position)
+        }
+		/*public void fireProjectile(bool fire2, Vector3 position)
 		{
 
 			//if fire has been pressed, create a projectile
@@ -63,7 +119,7 @@ namespace Arcana.Entities
 
 
 		}
-		public void fireProjectile3(bool fire3, Vector3 position)
+		public void fireProjectile(bool fire3, Vector3 position)
 		{
 
 			//if fire has been pressed, create a projectile
@@ -76,7 +132,7 @@ namespace Arcana.Entities
 			}
 
 
-		}
+		}*/
 
 	}
 }

@@ -33,22 +33,24 @@ namespace Arcana.Entities
         public float m_maxSpeed;
         public float m_initialSpeed;
 
-        //enum
+        //enumeration for each spell
         public enum Spell
         {
 
-            fireW = 12,
-            fireE = 102,
-            fireP = 3,
-            waterF = 21,
-            waterE = 120,
-            waterP = 30,
-            earthF = 201,
-            earthW = 210,
-            earthP = 300
+            comboS,//one of each
+            fireW,//2 FIRE AND 1 WATER
+            fireE,//2 FIRE AND 1 EARTH
+            fireP,//3 FIRE
+            waterF,//2 WATER AND 1 FIRE
+            waterE,//2 WATER AND 1 EARTH
+            waterP,//3 WATER
+            earthF,//2 EARTH AND 1 FIRE
+            earthW,//2 EARTH AND 1 WATER
+            earthP//3 EARTH
 
         };
 
+        //public accesable version of current enumeration
         public Spell spell;
 
         //initial velocity to be used in testing
@@ -69,19 +71,56 @@ namespace Arcana.Entities
         {
 
             //instantiates the projectile_go and adds it to the scene
-            // if char = F, make fire
 
-			if (type == 100)
-			{
+            //switch statement that passes in the type and then sets the correct enumeration to use
+            switch (type)
+            {
+                case 111:
+                    spell = Spell.comboS;
+                    break;
+                case 300:
+                    spell = Spell.fireP;
+                    break;
+                case 210:
+                    spell = Spell.fireW;
+                    break;
+                case 201:
+                    spell = Spell.fireE;
+                    break;
+                case 30:
+                    spell = Spell.waterP;
+                    break;
+                case 120:
+                    spell = Spell.waterF;
+                    break;
+                case 21:
+                    spell = Spell.waterE;
+                    break;
+                case 3:
+                    spell = Spell.earthP;
+                    break;
+                case 12:
+                    spell = Spell.earthW;
+                    break;
+                case 102:
+                    spell = Spell.earthF;
+                    break;
+
+            }
+
+            //PLACEHOLDER CODE: Takes the curent enumeration and creates the apporopriate projectile. Only 3 atm
+            //fire projectiles
+			if (this.spell == Spell.comboS || this.spell == Spell.fireE || this.spell == Spell.fireW || this.spell == Spell.fireP)
+            {
 				projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;
 			}
-			// if char = W, make water
-			else if (type == 10)
-			{
+			//water projectiles
+			else if (this.spell == Spell.waterF || this.spell == Spell.waterE || this.spell == Spell.waterP)
+            {
 				projectile_go = UnityEngine.Resources.Load("Water") as GameObject;
 			}
-			// if char = G, make grass
-			else if (type == 1)
+			//earth projectiles
+			else if (this.spell == Spell.earthF || this.spell == Spell.earthW || this.spell == Spell.earthP)
 			{
 				projectile_go = UnityEngine.Resources.Load("Grass") as GameObject;
 			}

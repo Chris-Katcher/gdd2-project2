@@ -71,6 +71,22 @@ namespace Arcana.InputManagement
 		{
 			return (bool)Input.GetButtonDown("Fire1");
 		}
+        
+        //returns a boolean of whether the right trigger has been pressed down
+        public bool getRightTrigger()
+        {
+
+            return (bool)Input.GetButtonDown("RightTrigger");
+
+        }
+        //returns a boolean of whether the right trigger has been presed down
+        public bool getLeftTrigger()
+        {
+
+            return (bool)Input.GetButtonDown("LeftTrigger");
+
+        }
+
     }
 
     
