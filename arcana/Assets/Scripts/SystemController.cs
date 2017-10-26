@@ -85,7 +85,7 @@ public class SystemController : MonoBehaviour {
         bool jump_pressed = m_inputManager.getPlayer1Jump();
         //gets bool of whether fire button has been pressed
         bool fire1_pressed = m_inputManager.getProjectileFire();
-
+        bool player_drop = m_inputManager.getPlayerDrop();
         
         //updates the wizard position and jump
         m_gameManager.UpdatePosWizzard1(translation);
@@ -93,7 +93,7 @@ public class SystemController : MonoBehaviour {
         
         //fires a projectile
         m_gameManager.fireProjPlayer1(fire1_pressed);
-
+        m_gameManager.UpdateDropStatus(player_drop);
         // TODO: Stub code.
 
 	}

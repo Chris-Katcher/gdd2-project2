@@ -61,6 +61,11 @@ namespace Arcana.InputManagement
             }
             return (bool)Input.GetButtonDown("Fire1");
         }
+
+        public bool getPlayerDrop()
+        {
+            return (bool)Input.GetButtonDown("Drop");
+        }
     }
 
     

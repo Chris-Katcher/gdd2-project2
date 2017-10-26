@@ -29,8 +29,8 @@ namespace Arcana
         private bool grounded = true;
         private Rigidbody2D wizzard1_rb;
 
-        private float jumpForce = 6000f;
-        private float moveForce = 500f;
+        private float jumpForce = 110000f;
+        private float moveForce = 7000f;
 
         public bool fly_mode = false;
 
@@ -42,6 +42,8 @@ namespace Arcana
 
         private SpriteRenderer wizzard_sr;
 
+        private bool dropping = false;
+        private float droppingPos = 0.0f;
         // TODO: Stub.
 
         public void UpdatePosWizzard1(float translation)
@@ -51,8 +53,22 @@ namespace Arcana
 
             //wizzard1.transform.Translate(translate, 0, 0);
 
-            if(wizzard1_rb.velocity.y <= 0.0f)
+            if(wizzard1_rb.velocity.y <= 0.0f && !dropping)
             {
+                wizzard1.layer = 0;
+            }
+            else if( wizzard1_rb.velocity.y <= 0.0f && dropping && droppingPos == 0.0f)
+            {
+                wizzard1.layer = 8;
+                droppingPos = wizzard1_rb.position.y;
+                grounded = true;
+                charMovement.jump_enabled = false;
+                //dropping = false;
+            }
+            else if(droppingPos > wizzard1_rb.position.y + 1.6f && dropping)
+            {
+                dropping = false;
+                droppingPos = 0.0f;
                 wizzard1.layer = 0;
             }
 
@@ -111,6 +127,22 @@ namespace Arcana
         public void fireProjPlayer1(bool fire1_pressed)
         {
             m_player1.fireProjPlayer(fire1_pressed, wizzard1.transform.position, this.isFacingRight);
+        }
+
+        public void UpdateDropStatus(bool player_drop)
+        {
+            if (player_drop)
+            {
+                charMovement.dropping = true;
+                dropping = true;
+            }
+            //else if(!wizzard1.GetComponent<CharacterMovement>().dropping)
+            //{
+            //    dropping = false;
+            //}
+                
+            //else
+                //wizzard1.layer = 0;
         }
 
         public void Initialize()
