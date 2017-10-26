@@ -109,11 +109,13 @@ namespace Arcana.Entities
             }
 
             //PLACEHOLDER CODE: Takes the curent enumeration and creates the apporopriate projectile. Only 3 atm
-            //fire projectiles
+            //combo projectile
 			if (this.spell == Spell.comboS)
             {
 				projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;
 			}
+
+            //fire projectiles
             else if (this.spell == Spell.fireE)
             {
                 projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;

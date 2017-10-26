@@ -107,6 +107,15 @@ namespace Arcana.Entities
 
 
         }
+
+        public void resetSpell()
+        {
+
+            inputCount = 0;
+            spellValue = 0;
+            current = curCast.noSpell;
+
+        }
 		/*public void fireProjectile(bool fire2, Vector3 position)
 		{
 
