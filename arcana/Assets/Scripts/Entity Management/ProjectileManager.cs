@@ -15,6 +15,7 @@ namespace Arcana.Entities
         private enum curCast
         {
 
+            noSpell = 0,
             oneSpell = 1,
             twoSpell = 2,
             fullSpell = 3
@@ -59,6 +60,7 @@ namespace Arcana.Entities
                 createProjectile(position.x, position.y, new Vector3(4.0f, 0.0f, 0.0f), spellValue);
                 spellValue = 0;
                 inputCount = 0;
+                current = curCast.noSpell;
 
             }
             else if (fire1 == true && inputCount < 3)

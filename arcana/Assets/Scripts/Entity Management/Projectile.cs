@@ -110,22 +110,52 @@ namespace Arcana.Entities
 
             //PLACEHOLDER CODE: Takes the curent enumeration and creates the apporopriate projectile. Only 3 atm
             //fire projectiles
-			if (this.spell == Spell.comboS || this.spell == Spell.fireE || this.spell == Spell.fireW || this.spell == Spell.fireP)
+			if (this.spell == Spell.comboS)
             {
 				projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;
 			}
-			//water projectiles
-			else if (this.spell == Spell.waterF || this.spell == Spell.waterE || this.spell == Spell.waterP)
+            else if (this.spell == Spell.fireE)
+            {
+                projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;
+            }
+            else if(this.spell == Spell.fireW)
+            {
+                projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;
+            }
+            else if(this.spell == Spell.fireP)
+            {
+                projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;
+            }
+
+            //water projectiles
+            else if (this.spell == Spell.waterF)
             {
 				projectile_go = UnityEngine.Resources.Load("Water") as GameObject;
 			}
-			//earth projectiles
-			else if (this.spell == Spell.earthF || this.spell == Spell.earthW || this.spell == Spell.earthP)
+            else if (this.spell == Spell.waterE)
+            {
+                projectile_go = UnityEngine.Resources.Load("Water") as GameObject;
+            }
+            else if (this.spell == Spell.waterP)
+            {
+                projectile_go = UnityEngine.Resources.Load("Water") as GameObject;
+            }
+
+            //earth projectiles
+            else if (this.spell == Spell.earthF)
 			{
 				projectile_go = UnityEngine.Resources.Load("Grass") as GameObject;
 			}
-			// else debug log that incorrect char was set
-			else
+            else if (this.spell == Spell.earthW)
+            {
+                projectile_go = UnityEngine.Resources.Load("Grass") as GameObject;
+            }
+            else if (this.spell == Spell.earthP)
+            {
+                projectile_go = UnityEngine.Resources.Load("Grass") as GameObject;
+            }
+            // else debug log that incorrect char was set
+            else
 			{
 				Debug.Log("Type '" + type + "' not recgonized. Please check the projectile manager script");
 				return;
