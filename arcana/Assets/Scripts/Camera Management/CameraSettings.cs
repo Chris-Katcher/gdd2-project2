@@ -478,34 +478,41 @@ namespace Arcana.Cameras
                     // When index is in range, target only a single target.
                     CurrentConfiguration.TargetPosition = CurrentConfiguration.Targets[_index].Location;
 
+                    Debugger.Print("Targeting index: " + _index + " " + CurrentConfiguration.Targets[_index].Name + " || May be " + CurrentConfiguration.SelectedTarget.Name + ".");
+
                     // Keep track of the target.
-                    CurrentConfiguration.SetOffsetRange(CurrentConfiguration.InitialOffset.z, CurrentConfiguration.Targets[_index].Radius);
+                    CurrentConfiguration.SetOffsetRange(CurrentConfiguration.InitialOffset.z, -CurrentConfiguration.InitialOffset.z + CurrentConfiguration.Targets[_index].Radius);
                 }
                 else
                 {
                     // When index is out of range, this means there is no single target selected.
                     Vector3 centerOfTargets = Vector3.zero;
+                    float radii = 0.0f;
 
                     foreach (CameraTarget target in CurrentConfiguration.Targets)
                     {
                         centerOfTargets += target.Location;
+                        radii += target.Radius;
                     }
 
                     // Get the average.
                     centerOfTargets /= CurrentConfiguration.Targets.Count;
+                    radii /= CurrentConfiguration.Targets.Count;
 
                     // Get the largest distance.
-                    float largestDistance = GetLargestDistance();
+                    float largestDistance = Services.Clamp(Math.Abs(GetLargestDistance()), 15.0f, 100.0f);
 
                     // Set the target position.
                     CurrentConfiguration.TargetPosition = centerOfTargets;
-
-                    // Set the offset.
-                    CurrentConfiguration.TargetOffsetZ = -Mathf.Abs(largestDistance * 2.0f);
+                    
+                    // Multiple targets end up with this offset amount.
+                    CurrentConfiguration.TargetOffsetZ = -((largestDistance + radii) * (CurrentConfiguration.Targets.Count + 1));
                 }
             }
             else
             {
+                Debugger.Print("No targets at all.");
+
                 // If there are no targets, set the center of the screen as the target.
                 CurrentConfiguration.TargetPosition = new Vector3(0.0f, 0.0f, 0.0f);
 

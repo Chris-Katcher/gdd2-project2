@@ -260,6 +260,26 @@ namespace Arcana.Cameras
 
         #endregion
 
+        #region UniyEngine
+
+        /// <summary>
+        /// Update the camera manager.
+        /// </summary>
+        public override void Update()
+        {
+            // The base update is called here.
+            base.Update();
+
+            // If active:
+            if (this.m_camera.Status.IsActive())
+            {
+                // Update the target lists based on those in the scene.
+                this.AddTargets(this.Self.GetComponentsInChildren<CameraTarget>().ToList());
+            }
+        }
+
+        #endregion
+
         #region Initialization Methods.
 
         /// <summary>
@@ -440,13 +460,8 @@ namespace Arcana.Cameras
             config.TargetFOV = 20f;
             config.SetOffsetRange(config.GetZOffset(), -50.0f);
             config.TargetBackground = Color.white;
-
-            // Add any targets for the target collection.
-            if (!config.HasTargets)
-            {
-                this.AddTargets(this.Self.GetComponentsInChildren<CameraTarget>().ToList());
-            }
-            
+            config.SelectedTargetIndex = 0;
+                        
         }
 
 
@@ -481,13 +496,8 @@ namespace Arcana.Cameras
             config.TargetFOV = 10.0f;
             config.SetOffsetRange(config.GetZOffset(), -65.0f);
             config.TargetBackground = Color.green;
-
-            // Add any targets for the target collection.
-            if (!config.HasTargets)
-            {
-                this.AddTargets(this.Self.GetComponentsInChildren<CameraTarget>().ToList());
-            }
-            
+            config.SelectedTargetIndex = -1;
+                        
         }
 
 
@@ -499,7 +509,10 @@ namespace Arcana.Cameras
         {
             foreach (CameraTarget target in _targets)
             {
-                this.m_camera.AddTarget(target, CameraMode.TargetOne, CameraMode.TargetAll);
+                if (target.Status.IsActive())
+                {
+                    this.m_camera.AddTarget(target, CameraMode.TargetOne, CameraMode.TargetAll);
+                }
             }
         }
 

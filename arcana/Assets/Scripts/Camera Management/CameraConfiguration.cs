@@ -496,17 +496,7 @@ namespace Arcana.Cameras
         public int SelectedTargetIndex
         {
             get { return this.m_targetIndex; }
-            set
-            {
-                if (HasTargets)
-                {
-                    this.m_targetIndex = Services.Clamp(value, 0, Targets.Count);
-                }
-                else
-                {
-                    this.m_targetIndex = -1;
-                }
-            }
+            set { this.m_targetIndex = Services.Clamp(value, -1, Targets.Count); }
         }
 
         #endregion
@@ -755,6 +745,21 @@ namespace Arcana.Cameras
         {
             if (settings != null && settings.Camera != null)
             {
+                // List<CameraTarget> queue = new List<CameraTarget>();
+
+                // Remove targets that no longer are active.
+                for(int t = 0; t < Targets.Count; t++)
+                {
+                    if (t < Targets.Count)
+                    {
+                        if (Targets[t].Status.IsInactive())
+                        {
+                            Targets.RemoveAt(t);
+                            // queue.Add(Targets[t]);
+                        }
+                    }
+                }
+
                 // Update background.
                 UpdateBackground();
                 settings.Camera.backgroundColor = Background;
