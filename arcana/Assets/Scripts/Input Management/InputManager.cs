@@ -52,17 +52,43 @@ namespace Arcana.InputManagement
             return (bool)Input.GetButtonDown("Jump");
         }
 
-        //returns whether or not the player has pressed the fire button
-        public bool getProjectileFire()
-        {
-            if(Input.GetAxis("Fire1Controller") != 0)
-            {
-                return true;
-            }
-            return (bool)Input.GetButtonDown("Fire1");
-        }
+		//returns whether or not the player has pressed the fire button
+		//returns whether or not the player has pressed the fire button
+		// The Green element is mapped to the green button (A)
+		public bool getProjectileFire()
+		{
+			return (bool)Input.GetButtonDown("Fire2");
+		}
 
-        public bool getPlayerDrop()
+		// The Blue element is mapped to the blue button (X)
+		public bool getProjectileFire2()
+		{
+			return (bool)Input.GetButtonDown("Fire3");
+
+		}
+
+		// The red element is mapped to the red button (B)
+		public bool getProjectileFire3()
+		{
+			return (bool)Input.GetButtonDown("Fire1");
+		}
+
+		//returns a boolean of whether the right trigger has been pressed down
+		public bool getRightTrigger()
+		{
+
+			return (bool)Input.GetButtonDown("RightBumper");
+
+		}
+		//returns a boolean of whether the right trigger has been presed down
+		public bool getLeftTrigger()
+		{
+
+			return (bool)Input.GetButtonDown("LeftBumper");
+
+		}
+
+		public bool getPlayerDrop()
         {
             return (bool)Input.GetButtonDown("Drop");
         }

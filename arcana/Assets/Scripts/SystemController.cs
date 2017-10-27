@@ -85,14 +85,20 @@ public class SystemController : MonoBehaviour {
         bool jump_pressed = m_inputManager.getPlayer1Jump();
         //gets bool of whether fire button has been pressed
         bool fire1_pressed = m_inputManager.getProjectileFire();
-        bool player_drop = m_inputManager.getPlayerDrop();
+		bool fire2_pressed = m_inputManager.getProjectileFire2();
+		bool fire3_pressed = m_inputManager.getProjectileFire3();
+		//bool of whether either the right or left trigger has been pressed
+		bool rightTrigger = m_inputManager.getRightTrigger();
+		bool leftTrigger = m_inputManager.getLeftTrigger();
+
+		bool player_drop = m_inputManager.getPlayerDrop();
         
         //updates the wizard position and jump
         m_gameManager.UpdatePosWizzard1(translation);
         m_gameManager.UpdateJumpStatus(jump_pressed);
         
         //fires a projectile
-        m_gameManager.fireProjPlayer1(fire1_pressed);
+        m_gameManager.fireProjPlayer1(fire1_pressed, fire2_pressed, fire3_pressed, rightTrigger);
         m_gameManager.UpdateDropStatus(player_drop);
         // TODO: Stub code.
 

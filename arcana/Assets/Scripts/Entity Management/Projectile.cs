@@ -30,50 +30,36 @@ namespace Arcana.Entities
 
         //floats
         public float m_mass;
-        public float m_maxSpeed = 5.0f;
+        public float m_maxSpeed;
         public float m_initialSpeed = 1.0f;
 
-        //initial velocity to be used in testing
-        //private Vector3 initalVelocity = new Vector3(0.0f, -1.0f, 0.0f);
+		float Testx;
 
-        // Reference to projectile Launcher
-        //public GameObject projectile_go;
+		//initial velocity to be used in testing
+		//private Vector3 initalVelocity = new Vector3(0.0f, -1.0f, 0.0f);
 
-        private Rigidbody2D proj_rb;
 
-        /// <summary>
-        /// Projectile Constructor
-        /// </summary>
-        /// <param name="x">X position</param>
-        /// <param name="y">Y position</param>
-        /// <param name="force">Force to be applied to the projectil||Direction of travel</param>
-        /// <param name="position"></param>
-        public void init_projectile(float x, float y, Vector3 force)
+		//initial velocity to be used in testing
+		private Vector3 initalVelocity;
+
+		private Rigidbody2D proj_rb;
+
+		public GameObject projectile_go;
+
+		
+
+
+		/// <summary>
+		/// Base Constructor
+		/// Use to set specific ammounts
+		/// </summary>
+		void Start()
         {
 
-            //instantiates the projectile_go and adds it to the scene
-            //GameObject projectile_go = UnityEngine.Resources.Load("FireBall") as GameObject;
-            //Instantiate(projectile_go, new Vector3(x+1,y+1,0), Quaternion.identity);
+			Testx += 1;
 
-            //proj_rb = this.GetComponent<Rigidbody2D>();
-
-            float speed = 1.0f;
-            float proj_force = 1000f;
-            //* speed * proj_force
-            //sets force for now UNUSED
-            //proj_rb.AddForce(new Vector2(1000f, 0 ));
-
-        }
-
-        /// <summary>
-        /// Base Constructor
-        /// Use to set specific ammounts
-        /// </summary>
-        void Start()
-        {
-
-            //sets velocity
-            //m_velocity = new Vector3(m_direction.x, m_direction.y, m_direction.z);
+			//sets velocity
+			m_velocity = m_direction;
 
             //sets mass
             m_mass = 1.0f;
@@ -89,10 +75,10 @@ namespace Arcana.Entities
         {
 
             //Updates the velocity
-            //this.UpdatePostition();
+            this.UpdatePostition();
             //proj_rb.velocity = Vector2.right * 1.0f * 100000f;
             //Updates the position
-            //this.SetTransform();
+            this.SetTransform();
 
         }
 
@@ -128,7 +114,7 @@ namespace Arcana.Entities
         {
 
             //applys a force to get acceleration
-            ApplyForce(new Vector3(1.0f,1.0f,0.0f));
+            ApplyForce(m_direction);
 
             //divides final acceleration by mass
             Vector3 scaleAcceleration = m_acceleration / m_mass;
