@@ -114,9 +114,9 @@ namespace Arcana.Cameras
         /// </summary>
         public override void Initialize()
         {
-            if (!Initialized)
+            if (!this.Initialized)
             {
-
+                
                 // Set the default radius.
                 this.m_radius = 0.0f;
 

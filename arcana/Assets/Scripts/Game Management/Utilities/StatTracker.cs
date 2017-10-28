@@ -330,10 +330,7 @@ namespace Arcana.Utilities
         public void SetValue(float _value)
         {
             // Make sure input is above the minimum...
-            this.m_value = Services.Max(this.m_minimum, _value);
-
-            // ...and below the maximum.
-            this.m_value = Services.Min(this.m_maximum, _value);
+            this.m_value = Services.Clamp(_value, this.m_minimum, this.m_maximum);
         }
 
         /// <summary>

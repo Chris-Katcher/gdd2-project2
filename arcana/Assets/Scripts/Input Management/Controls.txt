@@ -1,0 +1,144 @@
+Thinking about the commands that we will need.
+
+1. While UnityEngine allows us to use KeyCodes and the like,it's not so useful when it comes down to Gamepads.
+2. In most cases, the Gamepad buttons can all be approached through the Input Manager's axis system.
+3. Keyboard commands can be handled as a separate edge case.
+
+The Commands in question.
+
+Debug Commands 	
+These are all commands that will be moved around and deactivated.	
+These should all be activated by keystrokes on the keyboard.
+These will be handled by manager level classes as they need to.
+
+[ToggleDebugMode]
+// Should toggle the debug mode for an element, given the context.
+ON KEY RELEASE, 'Alpha1'
+
+[ToggleActive]
+// Should toggle the active mode for an element, given the context.
+ON KEY RELEASE, 'Alpha2'
+
+[ResetApplication]
+// Should reset the game loop and begin a new.
+ON KEY RELEASE, 'Alpha3'
+
+[CycleCameraTargets]
+// Should cycle through a camera's targets.
+ON KEY RELEASE, 'Alpha4'
+
+[ExitApplication]
+// Should exit the game loop and close the application.
+ON KEY RELEASE, 'Alpha0'
+
+Player Commands
+These are all commands that can be activated by gamepads.
+Gamepad [0] is Player 1's.
+Gamepad [1] is Player 2's.
+
+{XInput} // Xbox controllers.
+(DInput) // Logitech and other misc. controllers.
+
+[Pause]
+// Should pause the main game, (or resume it, if already paused).
+ON BUTTON PRESS, '{7}' // The start button on an XInput controller.
+ON BUTTON PRESS, '(10)' // The start button on a Logitech controller.
+ON KEY PRESS, 'ESCAPE'
+
+[Jump]
+// Should cause the player's avatar to jump.
+ON BUTTON PRESS, '{A}'
+ON BUTTON PRESS, '(2)'
+ON KEY PRESS, 'SPACEBAR'
+
+[Cast]
+// The cast action will finalize a cast.
+ON BUTTON PRESS, '{RB}'
+ON BUTTON PRESS, '(6)'
+ON KEY PRESS, 'R'
+
+[AddFire]
+// This will add a fire element to the cast, if possible.
+ON BUTTON HOLD, '{B}', FOR DURATION OF 1 SECOND.
+ON BUTTON HOLD, '(3)', FOR DURATION OF 1 SECOND.
+ON KEY HOLD, 'F', FOR DURATION OF 1 SECOND.
+
+[AddEarth]
+// This will add a fire element to the cast, if possible.
+ON BUTTON HOLD, '{Y}', FOR DURATION OF 1 SECOND.
+ON BUTTON HOLD, '(4)', FOR DURATION OF 1 SECOND.
+ON KEY HOLD, 'E', FOR DURATION OF 1 SECOND.
+
+[AddWater]
+// This will add a fire element to the cast, if possible.
+ON BUTTON HOLD, '{X}', FOR DURATION OF 1 SECOND.
+ON BUTTON HOLD, '(1)', FOR DURATION OF 1 SECOND.
+ON KEY HOLD, 'Q', FOR DURATION OF 1 SECOND.
+
+[FireSpell]
+// If a spell has been casted, players are able to fire.
+ON AXIS, '{RT}'
+ON BUTTON HOLD, '(8)',
+ON BUTTON HOLD, 'Mouse 0'
+
+[Reticle]
+// The sights for a player to aim with.
+ON AXIS, '{RightJoystick}'
+ON AXIS, '(RightJoystick)'
+ON MOUSE MOVE, 'Mouse X', for Player 1.
+// Player 2 don't have a fair fight.
+
+[VerticalMovement]
+// Controls menu selection (up/down).
+ON Y AXIS, '{LeftJoystick}'
+	ON Y AXIS, '{DPAD}'
+ON Y AXIS, '(LeftJoystick)'
+	ON Y AXIS, '(DPAD)'
+ON KEY PRESS, 'Up'
+	ON KEY PRESS, 'Down'
+ON KEY PRESS, 'W'
+	ON KEY PRESS, 'S'
+	
+[HorizontalMovement]
+// Controls menu selection (left/right) and controls movement of players.
+ON X AXIS, '{LeftJoystick}'
+	ON X AXIS, '{DPAD}'
+ON X AXIS, '(LeftJoystick)'
+	ON X AXIS, '(DPAD)'
+ON KEY PRESS, 'Left'
+	ON KEY PRESS, 'Right'
+ON KEY PRESS, 'A'
+	ON KEY PRESS 'D'
+
+[Confirmation]
+// Confirms user input.
+ON BUTTON PRESS, '{A}'
+ON BUTTON PRESS, '(2)'
+ON KEY PRESS, 'ENTER'
+
+[Decline]
+// Declines user input.
+ON BUTTON PRESS, '{B}'
+ON BUTTON PRESS, '{6}' // Back button.
+ON BUTTON PRESS, '(3)'
+ON BUTTON PRESS, '(9)'
+ON KEY PRESS, 'ESCAPE'
+
+[Crouch]
+// Lets the player 'crouch' while on the ground.
+ON -Y AXIS, '{LeftJoystick}'
+ON -Y AXIS, '{DPAD}'
+ON -Y AXIS, '(LeftJoystick)'
+ON -Y AXIS, '(DPAD)'
+ON KEY HOLD, 'Down'
+ON KEY HOLD, 'S'
+
+
+
+
+
+
+
+
+
+

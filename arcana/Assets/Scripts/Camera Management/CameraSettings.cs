@@ -317,7 +317,7 @@ namespace Arcana.Cameras
         /// </summary>
         public override void Initialize()
         {
-            if (!Initialized)
+            if (!this.Initialized)
             {
                 // Create the status, set the name, and children collection.
                 base.Initialize();
@@ -338,6 +338,7 @@ namespace Arcana.Cameras
                 this.Name = "Arcana Camera";
 
                 Debugger.Print("Reset camera.", this.Self.name, this.Debug);
+
                 // Reset camera when in free mode.
                 ResetCamera();
 
