@@ -1,4 +1,18 @@
-﻿using System;
+﻿/************************************************
+ * ControlScheme.cs
+ * 
+ * This file contains:
+ * - The ControlScheme class.
+ * - The Actions enum.
+ * - The Command class.
+ * - The CommandResponse class.
+ * - The CommandSequence class.
+ ************************************************/
+
+/////////////////////
+// Using statements.
+/////////////////////
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,37 +21,6 @@ using UnityEngine;
 namespace Arcana.InputManagement
 {
 
-    #region Enum: Actions.
-
-    /// <summary>
-    /// Enum keeps track of possible in-game commands.
-    /// </summary>
-    public enum Actions
-    {
-        ChangeCameraBackground,
-        Click,
-        Idle,
-        Fire,
-        Jump,
-        Crouch,
-        MoveLeft,
-        MoveRight,
-        Left,
-        Right,
-        Up,
-        Down,
-        Select,
-        Back,
-        Escape,
-        Pause,
-        Resume,
-        CastFire,
-        CastWater,
-        CastEarth
-    }
-
-    #endregion
-        
     #region Class: ControlScheme class.
 
     /// <summary>
@@ -45,8 +28,9 @@ namespace Arcana.InputManagement
     /// </summary>
     public class ControlScheme
     {
-
         #region Data Members
+
+        #region Fields.
 
         /////////////////////
         // Fields.
@@ -61,7 +45,11 @@ namespace Arcana.InputManagement
         /// List of axes that should be tracked.
         /// </summary>
         private Dictionary<string, CommandResponse> m_axes = null;
-                
+
+        #endregion
+
+        #region Properties.
+
         /////////////////////
         // Properties.
         /////////////////////
@@ -84,6 +72,8 @@ namespace Arcana.InputManagement
 
         #endregion
 
+        #endregion
+
         #region Constructor.
 
         /// <summary>
@@ -96,7 +86,7 @@ namespace Arcana.InputManagement
         }
 
         #endregion
-
+        
         #region Accessor Methods.
 
         /// <summary>
@@ -212,7 +202,7 @@ namespace Arcana.InputManagement
         public void AddControl(Actions _action, CommandSequence _input)
         {
             if (!this.m_controls.ContainsKey(_action))
-            {                
+            {
                 // Add a new scheme, if it doesn't already exist.
                 this.m_controls.Add(_action, new List<CommandSequence>());
             }
@@ -239,13 +229,44 @@ namespace Arcana.InputManagement
                 this.m_axes[_axis] = _axisTrigger;
             }
         }
-        
+
         #endregion
 
     }
 
     #endregion
 
+    #region Enum: Actions.
+
+    /// <summary>
+    /// Enum keeps track of possible in-game commands.
+    /// </summary>
+    public enum Actions
+    {
+        ChangeCameraBackground,
+        Click,
+        Idle,
+        Fire,
+        Jump,
+        Crouch,
+        MoveLeft,
+        MoveRight,
+        Left,
+        Right,
+        Up,
+        Down,
+        Select,
+        Back,
+        Escape,
+        Pause,
+        Resume,
+        AddFire,
+        AddWater,
+        AddEarth
+    }
+
+    #endregion
+        
     #region Class: Command class.
 
     /// <summary>

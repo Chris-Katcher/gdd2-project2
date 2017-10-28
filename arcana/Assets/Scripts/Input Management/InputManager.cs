@@ -281,6 +281,21 @@ namespace Arcana.InputManagement
 
         // TODO: Handle a queue of commands.
 
+        /// <summary>
+        /// Number of controllers plugged into the system.
+        /// </summary>
+        private int m_controllerCount;
+
+        /// <summary>
+        /// Timer in place for controller check updates.
+        /// </summary>
+        private StatTracker m_tracker;
+
+        /// <summary>
+        /// Creates control schemse for each player.
+        /// </summary>
+        private Dictionary<Director, ControlScheme> m_schemes;
+
         #endregion
 
         #region Properties.
@@ -289,20 +304,95 @@ namespace Arcana.InputManagement
         // Properities.
         /////////////////////
 
-        // TODO: Handle a queue of commands.
+        /// <summary>
+        /// Returns collection of all control schemes.
+        /// </summary>
+        public Dictionary<Director, ControlScheme> ControlSchemes
+        {
+            get { return this.m_schemes; }
+        }
 
         #endregion
+
+        #endregion
+
+        #region UnityEngine Methods.
+
+        /// <summary>
+        /// Have input management in the late update.
+        /// </summary>
+        public override void Update()
+        {
+            // Call the base update.
+            base.Update();
+
+            // Update the tracker.
+            UpdateCounter();
+
+            // Check if the tracker is expired.
+            if (m_tracker.IsMinimum())
+            {
+                // Perform the update that needs to be done.
+                UpdateControllerStates();
+
+                // Reset the counter.
+                this.m_tracker.Reset();
+            }
+        }
+
+        #endregion
+
+        #region Update Methods.
+
+        /// <summary>
+        /// Update the tracker.
+        /// </summary>
+        public void UpdateCounter()
+        {
+            // Decrement by the change in time.
+            this.m_tracker.Decrement(Time.deltaTime);
+        }
+
+        /// <summary>
+        /// Update the controller states.
+        /// </summary>
+        public void UpdateControllerStates()
+        {
+            // Get the array of joystick names.
+            string[] joys = Input.GetJoystickNames();
+
+            // Check controller count.
+            if (this.m_controllerCount != joys.Length)
+            {
+                // Change in the number of controllers has occured.
+                Debugger.Print("There are " + joys.Length + " controllers.", this.Name, this.Debug);
+                this.m_controllerCount = Input.GetJoystickNames().Length;
+
+                // Print out each of the joysticks in the array.
+                for (int i = 0; i < joys.Length; i++)
+                {
+                    // Print statement made for each controller.
+                    Debugger.Print("[" + i + "] Controller " + (i + 1).ToString() + ": \'" + joys[i] + "\'.", this.Name, this.Debug);
+                }
+            }
+
+            // If there are no controllers, then there are none.
+            if (this.m_controllerCount == 0)
+            {
+                Debugger.Print("There are no controllers.", this.Name, this.Debug);
+            }            
+        }
 
         #endregion
 
         #region Initialization Methods.
-                    
+
         /// <summary>
         /// Create the data members for the InputManager.
         /// </summary>
         public override void Initialize()
         {
-            if (this.Initialized)
+            if (!this.Initialized)
             {
                 // Initialize the base values.
                 base.Initialize();
@@ -312,9 +402,15 @@ namespace Arcana.InputManagement
 
                 // Initialize the input manager.
                 Debugger.Print("Initializing input manager.", this.Self.name);
-                
-                // Make the new list.
-                // TODO: make basic collections.
+
+                // Make the timer.
+                this.m_tracker = new StatTracker("Controller Connection Check", 3.0f, 0.0f, 4.0f, -1.0f, -1.0f);
+
+                // Set up the tracker for the start.
+                this.m_tracker.Reset();
+
+                // Set the controller count.
+                this.m_controllerCount = 0;
 
                 // This isn't a poolable element.
                 this.IsPoolable = false;
@@ -322,7 +418,43 @@ namespace Arcana.InputManagement
         }
 
         #endregion
-        
+
+        #region Processing Methods.
+
+        /// <summary>
+        /// Process the input joysticks.
+        /// </summary>
+        /// <param name="_joysticks">Joysticks.</param>
+        public void ProcessJoysticks(string[] _joysticks)
+        {
+            // If we have at least one controller, we want to "register" it.
+            if (this.m_controllerCount > 0)
+            {
+                // 
+
+
+            }
+        }
+
+        #endregion
+
+        #region Misc.
+
+        /// <summary>
+        /// Add a director.
+        /// </summary>
+        /// <param name="_director"></param>
+        public void AddDirector(Director _director)
+        {
+            // Add director to collection.
+
+        }
+
+       
+       
+
+        #endregion
+
     }
 
     #endregion
@@ -343,11 +475,6 @@ namespace Arcana.InputManagement
         /////////////////////
 
         /// <summary>
-        /// Creates control schemse for each player.
-        /// </summary>
-        private Dictionary<Director, ControlScheme> m_schemes;
-
-        /// <summary>
         /// Initialization flag.
         /// </summary>
         private bool m_initialized;
@@ -355,14 +482,6 @@ namespace Arcana.InputManagement
         /////////////////////
         // Properties.
         /////////////////////
-
-        /// <summary>
-        /// Returns collection of all control schemes.
-        /// </summary>
-        public Dictionary<Director, ControlScheme> ControlSchemes
-        {
-            get { return this.m_schemes; }
-        }
 
         #endregion
 
@@ -565,82 +684,7 @@ namespace Arcana.InputManagement
     }
 
     #endregion
-
-    #region Enum: InputMethod
-
-    /// <summary>
-    /// Represents the input method that UnityEngine interfaces with.
-    /// </summary>
-    public enum InputMethod
-    {
-        /// <summary>
-        /// General button. (Can encompass Key, MouseButton, JoystickButton, or GamepadButton).
-        /// </summary>
-        Button,
-
-        /// <summary>
-        /// Represents Keyboard keys, with <see cref="KeyCode"/>s from UnityEngine.
-        /// </summary>
-        Key,
-
-        /// <summary>
-        /// Represents mouse buttons.
-        /// </summary>
-        MouseButton,
-
-        /// <summary>
-        /// Represents gamepad buttons. Some may use UnityEngine <see cref="KeyCode"/>s.
-        /// </summary>
-        GamepadButton,
-        
-        /// <summary>
-        /// Represents the joystick buttons.
-        /// </summary>
-        JoystickButton,
-
-        /// <summary>
-        /// Represents the digital pad buttons. (May be treated as axis by certain controllers).
-        /// </summary>
-        DPadButton,
-
-        /// <summary>
-        /// General axis. (Can encompass MouseWheel, JoystickAxis, DPadAxis, TriggerAxis).
-        /// </summary>
-        Axis,
-
-        /// <summary>
-        /// Represents the mouse wheel.
-        /// </summary>
-        MouseWheel,
-
-        /// <summary>
-        /// Represents the digital pad axis. (May be treated as buttons by certain controllers).
-        /// </summary>
-        DPadAxis,
-
-        /// <summary>
-        /// Represents the joystick axis.
-        /// </summary>
-        JoystickAxis,
-
-        /// <summary>
-        /// Represents the trigger axes.
-        /// </summary>
-        TriggerAxis,
-
-        /// <summary>
-        /// Represents the left trigger axis.
-        /// </summary>
-        LeftTriggerAxis,
-
-        /// <summary>
-        /// Represents the right trigger axis.
-        /// </summary>
-        RightTriggerAxis
-    }
-
-    #endregion
-
+    
     #region Enum: OS.
 
     /// <summary>
@@ -691,7 +735,12 @@ namespace Arcana.InputManagement
         /// <summary>
         /// Represents Direct input devices. (Usually non-XInput controllers, eg. Logitech controllers).
         /// </summary>
-        DInput
+        DInput,
+
+        /// <summary>
+        /// Represents the logitech dual action controller.
+        /// </summary>
+        LogitechDualAction
     }
 
     #endregion
@@ -704,13 +753,35 @@ namespace Arcana.InputManagement
     public enum Director
     {
         /// <summary>
-        /// The SystemController 
+        /// The system controller can handle high-level input.
         /// </summary>
-        SystemController,
+        System,
+
+        /// <summary>
+        /// Input specific to a particular state. (eg. It's HUD).
+        /// </summary>
         State,
-        Debug,
+
+        /// <summary>
+        /// Camera controls.
+        /// </summary>
+        Camera,
+
+        /// <summary>
+        /// Any player inputs.
+        /// </summary>
+        Player,
+
+        /// <summary>
+        /// Inputs explicitly for player 1.
+        /// </summary>
         Player1,
+
+        /// <summary>
+        /// Inputs explicitly for player 2.
+        /// </summary>
         Player2
+
     }
 
     #endregion
