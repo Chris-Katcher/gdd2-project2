@@ -64,9 +64,24 @@ namespace Arcana.UI.Elements
             this.image = image;
         }
 
+        public bool IsActive()
+        {
+            return image.activeSelf;
+        }
+
+        public void ChangeImage(Sprite image)
+        {
+            this.image.GetComponent<SpriteRenderer>().sprite = image ;
+        }
+
         public void Destory()
         {
-            GameObject.Destroy(image);
+            image.SetActive(false);
+        }
+
+        public void Reactivate()
+        {
+            image.SetActive(true);
         }
     }
 }

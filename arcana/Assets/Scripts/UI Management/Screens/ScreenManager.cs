@@ -84,6 +84,30 @@ namespace Arcana.UI.Screens
 
         #region Mutator Methods
 
+        public bool IsBackbgoundActive()
+        {
+            return m_bgImage.IsActive();
+        }
+
+        public void ReActivateBg()
+        {
+            m_bgImage.Reactivate();
+        }
+
+        public void DisplayGameOverScreen()
+        {
+            //GameObject splashScreenBg = new GameObject();
+            //SpriteRenderer renderer = splashScreenBg.AddComponent<SpriteRenderer>();
+
+            Sprite sprite = UnityEngine.Resources.Load("Backgrounds/Player1Win", typeof(Sprite)) as Sprite;
+            //splashScreenBg.transform.position = new Vector3(0, 0, -1);
+
+           
+
+            m_bgImage.ChangeImage(sprite);
+            m_bgImage.Reactivate();
+        }
+
         /// <summary>
         /// Display the splash screen.
         /// </summary>
@@ -95,6 +119,7 @@ namespace Arcana.UI.Screens
             renderer.sprite = UnityEngine.Resources.Load("Backgrounds/SplashScreen", typeof(Sprite)) as Sprite;
             splashScreenBg.transform.position = new Vector3(0, 0, -1);
             m_bgImage.Initialize(splashScreenBg);
+            m_bgImage.Reactivate();
         }
 
         public void DestroyBackground()
