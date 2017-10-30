@@ -55,6 +55,18 @@ namespace Arcana.UI.Elements
         /// </summary>
         private List<IGUIElement> m_elements;
 
+        private GameObject image = null;
         #endregion
+
+        public void Initialize(GameObject image)
+        {
+            
+            this.image = image;
+        }
+
+        public void Destory()
+        {
+            GameObject.Destroy(image);
+        }
     }
 }

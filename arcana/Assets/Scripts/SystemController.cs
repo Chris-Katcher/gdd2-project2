@@ -78,6 +78,11 @@ public class SystemController : ArcanaObject {
     /// </summary>
     private EntityManager m_entityManager = null;
 
+    /// <summary>
+    /// The ui manager handles all of the ui in the game.
+    /// </summary>
+    private UIManager m_uiManager = null;
+
     #endregion
 
     #region Properties.
@@ -126,6 +131,13 @@ public class SystemController : ArcanaObject {
         get { return this.m_entityManager; }
     }
 
+    /// <summary>
+    /// The ui manager handles all of the ui in the game.
+    /// </summary>
+    public UIManager UiController
+    {
+        get { return this.m_uiManager; }
+    }
     #endregion
 
     #endregion
@@ -152,8 +164,15 @@ public class SystemController : ArcanaObject {
             
             // Handle user input.
             HandleInput();
+            m_uiManager.UpdateState();
 
-
+          
+            // ***Used to move to the game state once a player presses a key or mouse1.
+            // This needs to be updated once the input management is completed.***
+            if(Input.anyKey || Input.GetMouseButtonDown(0))
+            {
+                m_uiManager.ChangeState(States.Gameplay);
+            }
             /*
             //gets translation of player one
             float translation = m_inputManager.getPlayer1Translation();
@@ -212,6 +231,8 @@ public class SystemController : ArcanaObject {
 
             // Add the controls.
             InitializeControls();
+
+            
         }
     }
 
@@ -279,6 +300,9 @@ public class SystemController : ArcanaObject {
 
         // Build the entity manager.
         BuildEntityManager();
+
+        // Build the ui manager.
+        BuildUiManager();
 
     }
     
@@ -350,6 +374,16 @@ public class SystemController : ArcanaObject {
         // Build the manager.
         Debugger.Print("Create the EntityManager component, add it to the Managers GameObject, and retain the reference.");
         this.m_entityManager = EntityManager.Create(this.Managers);
+    }
+
+    private void BuildUiManager()
+    {
+        // Build the manager.
+        Debugger.Print("Build the ui manager component.");
+
+        // Build the manager.
+        Debugger.Print("Create the UiManager component, add it to the Managers GameObject, and retain the reference.");
+        this.m_uiManager = UIManager.Create(this.Managers);
     }
 
     #endregion

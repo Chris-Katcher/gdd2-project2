@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
+using Arcana.UI.Elements;
 
 namespace Arcana.UI.Screens
 {
@@ -42,6 +44,7 @@ namespace Arcana.UI.Screens
         /// </summary> 
         private Dictionary<ScreenID, IScreen> m_screens { get; set; }
 
+        private GUIImage m_bgImage = new GUIImage();
         #endregion
 
         #region Service Methods
@@ -81,7 +84,23 @@ namespace Arcana.UI.Screens
 
         #region Mutator Methods
 
-        // TODO: Stub.
+        /// <summary>
+        /// Display the splash screen.
+        /// </summary>
+        public void DisplaySplashScreen()
+        {
+            GameObject splashScreenBg = new GameObject();
+            SpriteRenderer renderer = splashScreenBg.AddComponent<SpriteRenderer>();
+
+            renderer.sprite = UnityEngine.Resources.Load("Backgrounds/SplashScreen", typeof(Sprite)) as Sprite;
+            splashScreenBg.transform.position = new Vector3(0, 0, -1);
+            m_bgImage.Initialize(splashScreenBg);
+        }
+
+        public void DestroyBackground()
+        {
+            m_bgImage.Destory();
+        }
 
         #endregion
 
