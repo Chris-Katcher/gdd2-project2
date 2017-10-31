@@ -260,7 +260,7 @@ namespace Arcana.Cameras
 
         #endregion
 
-        #region UniyEngine
+        #region UniyEngine Methods.
 
         /// <summary>
         /// Update the camera manager.
@@ -271,7 +271,7 @@ namespace Arcana.Cameras
             base.Update();
 
             // If active:
-            if (this.m_camera.Status.IsActive())
+            if (this.m_camera != null && this.m_camera.Status.IsActive())
             {
                 // Update the target lists based on those in the scene.
                 this.AddTargets(this.Self.GetComponentsInChildren<CameraTarget>().ToList());
@@ -302,7 +302,10 @@ namespace Arcana.Cameras
                 this.m_cameraWrap = Services.CreateEmptyObject("Camera Shaker").AddComponent<ArcanaObject>();
                 this.m_cameraWrap.Name = "Camera Shaker";
                 
+                // Initialize the camera settings.
                 this.m_camera = CameraSettings.Create(this.m_cameraWrap);
+                this.m_camera.Initialize();
+
                 this.m_cameraShake = this.m_cameraWrap.Self.AddComponent<DecayTracker>();
                 this.m_cameraShakeStrength = this.m_cameraWrap.Self.AddComponent<DecayTracker>();
 
@@ -358,7 +361,7 @@ namespace Arcana.Cameras
         {
             if (HasCamera)
             {
-                this.m_camera.CurrentConfiguration.Background = _color;
+                this.m_camera.CurrentConfiguration.TargetBackground = _color;
             }
         }
 

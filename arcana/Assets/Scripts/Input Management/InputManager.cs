@@ -39,69 +39,7 @@ namespace Arcana.InputManagement
         #region Static Methods.
 
         #region Enum Parsing Methods.
-
-        #region Input Method Parsing Method.
-
-        /// <summary>
-        /// Parse the type of the enum as a string.
-        /// </summary>
-        /// <param name="_method">Enum value to parse.</param>
-        /// <returns>Returns a string.</returns>
-        public static string Parse(InputMethod _method)
-        {
-            string result = "";
-
-            switch (_method)
-            {
-                case InputMethod.Button:
-                    result = "(Button)";
-                    break;
-                case InputMethod.Key:
-                    result = "(Key)";
-                    break;
-                case InputMethod.MouseButton:
-                    result = "(Mouse Button)";
-                    break;
-                case InputMethod.GamepadButton:
-                    result = "(Gamepad Button)";
-                    break;
-                case InputMethod.DPadButton:
-                    result = "(D-Pad Button)";
-                    break;
-                case InputMethod.JoystickButton:
-                    result = "(Joystick Button)";
-                    break;
-                case InputMethod.Axis:
-                    result = "(Axis)";
-                    break;
-                case InputMethod.MouseWheel:
-                    result = "(Mouse Wheel)";
-                    break;
-                case InputMethod.DPadAxis:
-                    result = "(D-Pad Axis)";
-                    break;
-                case InputMethod.JoystickAxis:
-                    result = "(Joystick Axis)";
-                    break;
-                case InputMethod.TriggerAxis:
-                    result = "(Trigger Axis)";
-                    break;
-                case InputMethod.LeftTriggerAxis:
-                    result = "(Left Trigger Axis)";
-                    break;
-                case InputMethod.RightTriggerAxis:
-                    result = "(Right Trigger Axis)";
-                    break;
-                default:
-                    result = "(Unknown Input Method)";
-                    break;
-            }
-
-            return result;
-        }
-
-        #endregion
-
+        
         #region Operating System Parsing Method.
 
         /// <summary>
@@ -185,7 +123,7 @@ namespace Arcana.InputManagement
                 case Director.Debug:
                     result = "(Debugging Director)";
                     break;
-                case Director.SystemController:
+                case Director.System:
                     result = "(System Controller)";
                     break;
                 case Director.Player1:
@@ -309,7 +247,13 @@ namespace Arcana.InputManagement
         /// </summary>
         public Dictionary<Director, ControlScheme> ControlSchemes
         {
-            get { return this.m_schemes; }
+            get {
+                if (this.m_schemes == null)
+                {
+                    this.m_schemes = new Dictionary<Director, ControlScheme>();
+                }
+                return this.m_schemes;
+            }
         }
 
         #endregion
@@ -441,23 +385,181 @@ namespace Arcana.InputManagement
         #region Misc.
 
         /// <summary>
-        /// Add a director.
+        /// Registers a new control scheme, or overwrites an existing one.
         /// </summary>
-        /// <param name="_director"></param>
-        public void AddDirector(Director _director)
+        /// <param name="_director">Director to register control scheme to.</param>
+        /// <param name="_scheme">Register the scheme.</param>
+        public ControlScheme RegisterControlScheme(Director _director, ControlScheme _scheme)
         {
-            // Add director to collection.
-
+            if (!this.ControlSchemes.ContainsKey(_director))
+            {
+                this.ControlSchemes.Add(_director, _scheme);
+            }
+            else
+            {
+                this.ControlSchemes[_director] = _scheme;
+            }
+            
+            return _scheme;
         }
 
-       
-       
+        /// <summary>
+        /// Creates a new control scheme and adds it to the parent.
+        /// </summary>
+        /// <param name="_parent">Parent the scheme is being added to.</param>
+        /// <returns></returns>
+        public ControlScheme AddControlScheme(ArcanaObject _parent)
+        {
+            Director director = Director.System;
+            ControlScheme scheme = null;
+
+            if (_parent != null)
+            {
+                director = _parent.Director;
+            }
+
+            if (director != Director.None)
+            {
+                scheme = ControlScheme.Create(_parent);
+                RegisterControlScheme(director, scheme);
+            }
+
+            return scheme;
+        }
+
+        /// <summary>
+        /// Get the control scheme associated with the director value.
+        /// </summary>
+        /// <param name="_director">Director to return.</param>
+        /// <returns></returns>
+        public ControlScheme GetControlScheme(Director _director)
+        {
+            if (this.ControlSchemes.ContainsKey(_director))
+            {
+                return this.ControlSchemes[_director];
+            }
+
+            return null;
+        }
 
         #endregion
 
     }
 
     #endregion
+
+    #region Enum: OS.
+
+    /// <summary>
+    /// Represents the operating system.
+    /// </summary>
+    public enum OperatingSystem
+    {
+        /// <summary>
+        /// Represents a Windows 10, Windows 7, or Windows 8.1 system.
+        /// </summary>
+        Windows,
+
+        /// <summary>
+        /// Represents a MacOS system.
+        /// </summary>
+        MacOS,
+
+        /// <summary>
+        /// Represents a common UNIX distro.
+        /// </summary>
+        LINUX
+    }
+
+    #endregion
+
+    #region Enum: Device.
+
+    /// <summary>
+    /// Represents the interface a user may be using to 'input' values to the system.
+    /// </summary>
+    public enum Device
+    {
+        /// <summary>
+        /// Represents keyboard inputs.
+        /// </summary>
+        Keyboard,
+
+        /// <summary>
+        /// Represents the mouse buttons.
+        /// </summary>
+        Mouse,
+
+        /// <summary>
+        /// Represents Xbox controllers.
+        /// </summary>
+        XInput,
+
+        /// <summary>
+        /// Represents Direct input devices. (Usually non-XInput controllers, eg. Logitech controllers).
+        /// </summary>
+        DInput,
+
+        /// <summary>
+        /// Represents the logitech dual action controller.
+        /// </summary>
+        LogitechDualAction
+    }
+
+    #endregion
+
+    #region Enum: Director.
+
+    /// <summary>
+    /// Represents the requesting 'director' that may be requesting a certain command.
+    /// </summary>
+    public enum Director
+    {
+        /// <summary>
+        /// The system controller can handle high-level input.
+        /// </summary>
+        System,
+
+        /// <summary>
+        /// Input specific to a particular state. (eg. It's HUD).
+        /// </summary>
+        State,
+
+        /// <summary>
+        /// Camera controls.
+        /// </summary>
+        Camera,
+
+        /// <summary>
+        /// Any player inputs.
+        /// </summary>
+        Player,
+
+        /// <summary>
+        /// Inputs explicitly for player 1.
+        /// </summary>
+        Player1,
+
+        /// <summary>
+        /// Inputs explicitly for player 2.
+        /// </summary>
+        Player2,
+
+        /// <summary>
+        /// Debugger director.
+        /// </summary>
+        Debug,
+
+        /// <summary>
+        /// Null director value.
+        /// </summary>
+        None
+
+    }
+
+    #endregion
+    
+    /*
     
     #region Class: InputManager_d class.
 
@@ -519,7 +621,7 @@ namespace Arcana.InputManagement
         /// <param name="_controller">Controller requesting axis data.</param>
         /// <param name="_axis">Axis to check.</param>
         /// <returns>Returns value.</returns>
-        public float GetAxis(Director _controller = Director.SystemController, string _axis = "")
+        public float GetAxis(Director _controller = Director.System, string _axis = "")
         {
             if (_controller == Director.Debug)
             {
@@ -531,7 +633,7 @@ namespace Arcana.InputManagement
             }
 
             // Check player index compared to control scheme.
-            if (ControlSchemes.ContainsKey(_controller))
+            if (this.ControlSchemes.ContainsKey(_controller))
             {
                 return ControlSchemes[_controller].GetAxis(_axis);
             }
@@ -685,105 +787,6 @@ namespace Arcana.InputManagement
 
     #endregion
     
-    #region Enum: OS.
+    */
 
-    /// <summary>
-    /// Represents the operating system.
-    /// </summary>
-    public enum OperatingSystem
-    {
-        /// <summary>
-        /// Represents a Windows 10, Windows 7, or Windows 8.1 system.
-        /// </summary>
-        Windows,
-
-        /// <summary>
-        /// Represents a MacOS system.
-        /// </summary>
-        MacOS,
-
-        /// <summary>
-        /// Represents a common UNIX distro.
-        /// </summary>
-        LINUX
-    }
-
-    #endregion
-
-    #region Enum: Device.
-
-    /// <summary>
-    /// Represents the interface a user may be using to 'input' values to the system.
-    /// </summary>
-    public enum Device
-    {
-        /// <summary>
-        /// Represents keyboard inputs.
-        /// </summary>
-        Keyboard,
-
-        /// <summary>
-        /// Represents the mouse buttons.
-        /// </summary>
-        Mouse,
-
-        /// <summary>
-        /// Represents Xbox controllers.
-        /// </summary>
-        XInput,
-
-        /// <summary>
-        /// Represents Direct input devices. (Usually non-XInput controllers, eg. Logitech controllers).
-        /// </summary>
-        DInput,
-
-        /// <summary>
-        /// Represents the logitech dual action controller.
-        /// </summary>
-        LogitechDualAction
-    }
-
-    #endregion
-
-    #region Enum: Director.
-
-    /// <summary>
-    /// Represents the requesting 'director' that may be requesting a certain command.
-    /// </summary>
-    public enum Director
-    {
-        /// <summary>
-        /// The system controller can handle high-level input.
-        /// </summary>
-        System,
-
-        /// <summary>
-        /// Input specific to a particular state. (eg. It's HUD).
-        /// </summary>
-        State,
-
-        /// <summary>
-        /// Camera controls.
-        /// </summary>
-        Camera,
-
-        /// <summary>
-        /// Any player inputs.
-        /// </summary>
-        Player,
-
-        /// <summary>
-        /// Inputs explicitly for player 1.
-        /// </summary>
-        Player1,
-
-        /// <summary>
-        /// Inputs explicitly for player 2.
-        /// </summary>
-        Player2
-
-    }
-
-    #endregion
-    
 }

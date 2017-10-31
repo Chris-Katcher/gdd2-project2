@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Arcana.Utilities;
+using Arcana.InputManagement;
 
 namespace Arcana
 {
@@ -63,6 +64,11 @@ namespace Arcana
         /// Children of this object.
         /// </summary>
         private List<ArcanaObject> m_children = null;
+
+        /// <summary>
+        /// Input director associated with this object.
+        /// </summary>
+        private Director m_inputDirector = Director.None;
 
         #endregion
 
@@ -179,6 +185,15 @@ namespace Arcana
             get { return (this.m_status); }
         }
 
+        /// <summary>
+        /// Returns the director value.
+        /// </summary>
+        public Director Director
+        {
+            get { return (this.m_inputDirector); }
+            set { this.m_inputDirector = value; }
+        }
+
         #endregion
 
         #endregion
@@ -217,36 +232,38 @@ namespace Arcana
         /// </summary>
         public virtual void Update()
         {
-
-            // Initialize, if it hasn't been initialized yet.
-            this.Initialize();
-
-            // If this object is set to be destroyed, destroy it.
-            if (this.Status.IsDestroy())
+            if (!this.Initialized)
             {
-                DestroySelf();
-            }
-
-            if (this.Status.IsActive())
-            {
-                Debugger.Print("This object is active.", this.Self.name, _debug);
-            }
-
-            if (this.Status.IsInactive())
-            {
-                Debugger.Print("This object is inactive.", this.Self.name, _debug);
-            }
-
-            if (_active)
-            {
-                this.Status.Activate();
+                // Initialize, if it hasn't been initialized yet.
+                this.Initialize();
             }
             else
             {
-                this.Status.Deactivate();
-            }
+                // If this object is set to be destroyed, destroy it.
+                if (this.Status.IsDestroy())
+                {
+                    DestroySelf();
+                }
 
-            
+                if (this.Status.IsActive())
+                {
+                    Debugger.Print("This object is active.", this.Self.name, _debug);
+                }
+
+                if (this.Status.IsInactive())
+                {
+                    Debugger.Print("This object is inactive.", this.Self.name, _debug);
+                }
+
+                if (_active)
+                {
+                    this.Status.Activate();
+                }
+                else
+                {
+                    this.Status.Deactivate();
+                }
+            }            
         }
 
         #endregion

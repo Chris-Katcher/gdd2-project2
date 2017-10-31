@@ -16,6 +16,8 @@ using UnityEngine;
 
 namespace Arcana.InputManagement
 {
+    /*
+
     /// <summary>
     /// Input device represents a physical controller.
     /// </summary>
@@ -98,4 +100,6 @@ namespace Arcana.InputManagement
 
 
     }
+
+    */
 }

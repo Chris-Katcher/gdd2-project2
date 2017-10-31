@@ -400,7 +400,7 @@ namespace Arcana.Entities
         /// </summary>
         public override void Initialize()
         {
-            if (this.Initialized)
+            if (!this.Initialized)
             {
                 // Initialize the base values.
                 base.Initialize();

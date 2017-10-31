@@ -47,11 +47,6 @@ public class SystemController : ArcanaObject {
     private bool m_initialized = false;
 
     // Set up the managers.
-    
-    /// <summary>
-    /// The controller calling input actions.
-    /// </summary>
-    private Director m_controller = Director.SystemController;
 
     /// <summary>
     /// Empty game object that has all the manager components on it.
@@ -77,6 +72,11 @@ public class SystemController : ArcanaObject {
     /// The entity manager handles all entities in the game.
     /// </summary>
     private EntityManager m_entityManager = null;
+
+    /// <summary>
+    /// Reference to the system's control scheme.
+    /// </summary>
+    private ControlScheme m_scheme = null;
 
     #endregion
 
@@ -124,6 +124,14 @@ public class SystemController : ArcanaObject {
     public EntityManager EntityController
     {
         get { return this.m_entityManager; }
+    }
+
+    /// <summary>
+    /// Returns reference to the control scheme.
+    /// </summary>
+    public ControlScheme Controls
+    {
+        get { return this.m_scheme; }
     }
 
     #endregion
@@ -220,41 +228,45 @@ public class SystemController : ArcanaObject {
     /// </summary>
     private void InitializeControls()
     {
-        Debugger.Print("Adding controls to the control scheme for Controller: " + this.m_controller);
+        // Set the director for the system controller.
+        Debugger.Print("Adding controls to the control scheme for Controller: " + this.Director);
 
         // AddHandle("Mouse X", CommandTypes.MouseMovement);
         // AddHandle("Mouse Y", CommandTypes.Axis);
 
         // Creates an "A" button command that triggers on release.
-        RegisterAction(Actions.ChangeCameraBackground, new Command(KeyCode.A), CommandResponseMode.Release);
+        Action action = Action.CreateAction("Change Camera Background", this.Director);
+        Control control = Control.CreateKey(KeyCode.A);
+        ResponseMode response = ResponseMode.Released;
+        RegisterControl(action, control, response);
+        RegisterControl("A", Control.CreateKey(KeyCode.A), ResponseMode.Pressed);
+        // RegisterAction(Actions.ChangeCameraBackground, new Command(KeyCode.A), CommandResponseMode.Release);
 
         // Creates an "S" button command that triggers on press.
-        RegisterAction(Actions.ChangeCameraBackground, new Command(KeyCode.S), CommandResponseMode.Press);
+        action = Action.CreateAction("Change Camera Background", this.Director);
+        control = Control.CreateKey(KeyCode.S);
+        response = ResponseMode.Pressed;
+        Trigger trigger = ControlScheme.CreateTrigger(control, response);
+        RegisterControl(action, trigger);
+        RegisterControl("S", Control.CreateKey(KeyCode.S), ResponseMode.Pressed);
+        // RegisterAction(Actions.ChangeCameraBackground, new Command(KeyCode.S), CommandResponseMode.Press);
+
 
         // Creates an "D" button command that triggers on held.
-        RegisterAction(Actions.ChangeCameraBackground, new Command(KeyCode.D), CommandResponseMode.Held);
+        action = Action.CreateAction("Change Camera Background", this.Director);
+        trigger = ControlScheme.CreateTrigger(Control.CreateKey(KeyCode.D), ResponseMode.Held);
+        RegisterControl(action, trigger);
+        RegisterControl("D", Control.CreateKey(KeyCode.D), ResponseMode.Pressed);
+        // RegisterAction(Actions.ChangeCameraBackground, new Command(KeyCode.D), CommandResponseMode.Held);
+
+
+        RegisterControl("Joystick1A_RELEASED", Control.CreateKey(KeyCode.Joystick1Button0), ResponseMode.Released);
+        RegisterControl("Joystick1A_PRESSED", Control.CreateKey(KeyCode.Joystick1Button0), ResponseMode.Pressed);
 
         // Add a left moust button click.
-        RegisterAction(Actions.Click, new Command(_mouse: 0), CommandResponseMode.Press);
-
-
-        /* *
-        
-        Tested out functionality: the new input system works!
-
-        // Creates an "A" button command that triggers on release.
-        AddHandle(Actions.ChangeCameraBackground, new Command(KeyCode.A), CommandResponseMode.Release);
-
-        // Creates an "S" button command that triggers on press.
-        AddHandle(Actions.ChangeCameraBackground, new Command(KeyCode.S), CommandResponseMode.Press);
-
-        // Creates an "D" button command that triggers on held.
-        AddHandle(Actions.ChangeCameraBackground, new Command(KeyCode.D), CommandResponseMode.Held);
-        
-        // Creates an axis detection for whenever Mouse moves.
-        AddHandle(Actions.ChangeCameraBackground, new Command("Mouse X", CommandTypes.MouseMovement), CommandResponseMode.NonZero);
-
-         * */
+        RegisterControl("Change Camera Background", Control.CreateMouseButton(MouseButton.LMB), ResponseMode.Pressed);
+        RegisterControl("Mouse Click", Control.CreateMouseButton(MouseButton.LMB), ResponseMode.Pressed);
+        // RegisterAction(Actions.Click, new Command(_mouse: 0), CommandResponseMode.Press);
 
     }
 
@@ -295,7 +307,7 @@ public class SystemController : ArcanaObject {
         this.m_inputManager = InputManager.Create(this.Managers);
 
         // Add the system control scheme.
-        // BuildControlScheme();
+        BuildControlScheme();
     }
 
     /// <summary>
@@ -303,14 +315,12 @@ public class SystemController : ArcanaObject {
     /// </summary>
     private void BuildControlScheme()
     {
-        /*
-        // If a scheme doesn't exist, build a new one.
-        if (GetScheme() == null)
+        if (this.m_scheme == null)
         {
-            Debugger.Print("Creating the control scheme for " + this.Name);
-            // TODO: this.m_inputManager.AddControlScheme(this.m_controller, new ControlScheme());
+            this.Director = Director.System;
+            this.m_scheme = this.InputController.AddControlScheme(this);
+            this.m_scheme.Initialize();
         }
-        */
     }
 
     /// <summary>
@@ -363,113 +373,104 @@ public class SystemController : ArcanaObject {
     /// </summary>
     private void HandleInput()
     {
-        /*
-        // This is the format for getting key input.
-
-        // If GetAction(Action) --> Perform functionality.
-        if (this.GetAction(Actions.ChangeCameraBackground))
+        if (this.Controls.IsActivated(GetAction("Change Camera Background")))
         {
-            this.m_cameraManager.ChangeBackground(Services.GetRandomColor());
+            this.CameraController.ChangeBackground(Services.GetRandomColor());
         }
 
-        // Handle the actions.
-        if (this.GetAction(Actions.Click))
+        if (Controls.IsActivated(GetAction("D")))
+        {
+            Debugger.Print("Pressed the D key.");
+        }
+
+        if (Controls.IsActivated(GetAction("S")))
+        {
+            Debugger.Print("Pressed the S key.");
+        }
+
+        if (Controls.IsActivated(GetAction("A")))
+        {
+            Debugger.Print("Pressed the A key.");
+        }
+
+        if (Controls.IsActivated(GetAction("Mouse Click")))
         {
             Vector2 mouse = Services.ToVector2(Input.mousePosition);
-            Debugger.Print("Left mouse button was clicked: " + mouse);
+            Debugger.Print("Clicked the left mouse button: " + mouse);
         }
-        */
-    }
 
-    /*
-    /// <summary>
-    /// Wrapper function for handling input.
-    /// </summary>
-    /// <param name="_action">Action to check for.</param>
-    /// <returns>Returns true if action should be performed.</returns>
-    public bool GetAction(Actions _action)
-    {
-        // return (this.m_inputManager.GetAction(this.m_controller, _action));
-    }
+        if (Controls.IsActivated(GetAction("Joystick1A_PRESSED")))
+        {
+            Debugger.Print("Joystick 1 A pressed.");
+        }
 
-    /// <summary>
-    /// Returns the value for a tracked axis.
-    /// </summary>
-    /// <param name="_name">Axis being tracked.</param>
-    /// <returns>Returns a value.</returns>
-    public float GetAxis(string _name)
-    {
-       // return (this.m_inputManager.GetAxis(this.m_controller, _name));
+        if (Controls.IsActivated(GetAction("Joystick1A_RELEASED")))
+        {
+            Debugger.Print("Joystick 1 A released.");
+        }
+        
     }
 
     /// <summary>
-    /// Returns the raw value for a tracked axis.
+    /// Return the action from the control scheme.
     /// </summary>
-    /// <param name="_name">Axis being tracked.</param>
-    /// <returns>Returns a value.</returns>
-    public float GetAxisRaw(string _name)
+    /// <param name="_id">ID of the action to request.</param>
+    /// <returns>Returns an action.</returns>
+    private Action GetAction(string _id)
     {
-        // return (this.m_inputManager.GetAxisRaw(this.m_controller, _name));
+        return Action.GetAction(_id, this.Director);
     }
-
-    /// <summary>
-    /// Return the ControlScheme from the input manager.
-    /// </summary>
-    /// <returns>ControlScheme object.</returns>
-    public ControlScheme GetScheme()
-    {
-        // return this.m_inputManager.GetScheme(this.m_controller);
-    }
-    */
-
+    
     /// <summary>
     /// Link an action to perform with a command.
     /// </summary>
     /// <param name="_action">Action to perform.</param>
-    /// <param name="_command">Binding that will cause action.</param>
+    /// <param name="_trigger">Trigger that will cause action.</param>
+    /// <param name="_control">Binding that will cause action.</param>
     /// <param name="_response">Response type that will trigger action.</param>
-    public void RegisterAction(Actions _action, Command _command, CommandResponseMode _response)
+    public void RegisterControl(Action _action, Trigger _trigger)
     {
-        CommandResponse response = new CommandResponse(_command, _response);
-        CommandSequence sequence = new CommandSequence();
-        sequence.Push(response);
-
-        AddControl(_action, sequence);
+        if (this.Controls != null)
+        {
+            this.Controls.AddMap(_action, _trigger);
+        }
     }
-
+    
     /// <summary>
-    /// Link an axis with a name and response trigger.
-    /// </summary>
-    /// <param name="_axis">Name of the axis-trigger pair.</param>
-    /// <param name="_command">Axis read by trigger.</param>
-    /// <param name="_response">Trigger.</param>
-    public void RegisterAxis(string _axis, CommandTypes _type = CommandTypes.Axis)
-    {
-        CommandResponse response = new CommandResponse(new Command(_axis, _type), CommandResponseMode.NonZero);
-        AddControl(_axis, response);
-    }
-
-    /// <summary>
-    /// Link an action to a series of commands.
+    /// Link an action to perform with a command.
     /// </summary>
     /// <param name="_action">Action to perform.</param>
-    /// <param name="_sequence">Series of responses needed to activate action.</param>
-    public void AddControl(Actions _action, CommandSequence _sequence)
+    /// <param name="_control">Binding that will cause action.</param>
+    /// <param name="_response">Response type that will trigger action.</param>
+    public void RegisterControl(Action _action, Control _control, ResponseMode _mode = ResponseMode.None)
     {
-        // Add the control to the existing scheme.
-        // GetScheme().AddControl(_action, _sequence);
-    }
 
-    /// <summary>
-    /// Link the axis to the command response.
-    /// </summary>
-    /// <param name="_axis">Axis name.</param>
-    /// <param name="_response">Response triggering axis value.</param>
-    public void AddControl(string _axis, CommandResponse _response)
-    {
-        // Add tracking information for the axis in question.
-        // GetScheme().AddAxis(_axis, _response);
+        // Set up reference.
+        Trigger trigger;
+
+        if (_mode == ResponseMode.None)
+        {
+            trigger = ControlScheme.CreateTrigger(_control);
+        }
+        else
+        {
+            trigger = ControlScheme.CreateTrigger(_control, _mode);
+        }
+
+        RegisterControl(_action, trigger);
     }
+    
+    /// <summary>
+    /// Link an action to perform with a command.
+    /// </summary>
+    /// <param name="_action">Action to perform.</param>
+    /// <param name="_control">Binding that will cause action.</param>
+    /// <param name="_response">Response type that will trigger action.</param>
+    public void RegisterControl(string _actionID, Control _control, ResponseMode _mode = ResponseMode.None)
+    {
+        Action action = ControlScheme.CreateAction(_actionID, this.Director);
+        RegisterControl(action, _control, _mode);
+    }   
 
     #endregion
     
