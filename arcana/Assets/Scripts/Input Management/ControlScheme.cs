@@ -21,6 +21,438 @@ using UnityEngine;
 namespace Arcana.InputManagement
 {
 
+    /// <summary>
+    /// The ControlScheme links Directors to their commands.
+    /// </summary>
+    public class ControlScheme : ArcanaObject
+    {
+
+        #region Data Members
+
+        #region Fields.
+        
+        private Dictionary<string, KeyCode> controlScheme;
+
+        #endregion
+
+
+        #endregion
+
+
+
+
+
+
+    }
+
+    /// <summary>
+    /// The input action maps a string to an action.
+    /// Actions do not care about the 'type' of input used.
+    /// </summary>
+    public class Action
+    {
+
+        #region Static Members.
+        
+        #region Static Fields.
+        
+        /// <summary>
+        /// Unique action IDs associated with every input action.
+        /// </summary>
+        private static List<string> s_actionIDs = null;
+
+        /// <summary>
+        /// Map of unique identifiers to specified actions.
+        /// </summary>
+        private static Dictionary<string, Action> s_actions = null;
+
+        #endregion
+
+        #region Static Properties.
+
+        /// <summary>
+        /// Returns collection of all IDs.
+        /// </summary>
+        public static List<string> ActionIDs
+        {
+            get
+            {
+                if (s_actionIDs == null)
+                {
+                    s_actionIDs = new List<string>();
+                }
+                return s_actionIDs;
+            }
+        }
+
+        /// <summary>
+        /// Returns map of all the actions.
+        /// </summary>
+        public static Dictionary<string, Action> ActionMap
+        {
+            get
+            {
+                // Check actions map.
+                if (s_actions == null)
+                {
+                    s_actions = new Dictionary<string, Action>();
+                }
+
+                return s_actions;
+            }
+        }
+
+        /// <summary>
+        /// Returns all of the actions as a list.
+        /// </summary>
+        public static List<Action> Actions
+        {
+            get
+            {
+                List<Action> actions = new List<Action>();
+                
+                // Loop through UIDs.
+                foreach (string id in ActionIDs)
+                {
+                    if (ActionMap.ContainsKey(id))
+                    {
+                        actions.Add(ActionMap[id]);
+                    }
+                }
+
+                return actions;
+            }
+        }
+
+        /// <summary>
+        /// Returns total amount of input actions that have been registered.
+        /// </summary>
+        public static int ActionCount
+        {
+            get {
+                if (s_actions == null)
+                {
+                    return 0;
+                }
+                return s_actions.Count;
+            }
+        }
+
+        #endregion
+
+        #region Static Accessor Methods.
+        
+        /// <summary>
+        /// Returns the Action associated with the given ID.
+        /// </summary>
+        /// <param name="_id">Unique ID of an action.</param>
+        /// <returns>Returns an Action struct.</returns>
+        public static Action GetAction(string _id)
+        {
+            // Set up values to check.
+            Action response = null;
+            string key = MakeKey(_id); // Trimmed all uppercase.
+
+            // Check if the key is valid.
+            if (key.Length == 0 || ActionCount == 0)
+            {
+                return null;
+            }
+
+            // Get reference to the key, if it exists in the map.
+            if (ActionMap.ContainsKey(key))
+            {
+                response = ActionMap[key];
+            }
+
+            // Return the sought after action.
+            return response;
+        }
+
+        /// <summary>
+        /// Check if the key exists in the collection.
+        /// </summary>
+        /// <param name="_id">Input ID.</param>
+        /// <returns>Returns true if key exists.</returns>
+        public static bool HasKey(string _id)
+        {
+            // Get key.
+            string key = MakeKey(_id);
+
+            // Check key.
+            if (key.Length == 0 || ActionCount == 0)
+            {
+                return false;
+            }
+
+            return ActionIDs.Contains(key);
+        }
+
+        /// <summary>
+        /// Check if there actually is an action in the collection.
+        /// </summary>
+        /// <param name="_id">Input ID.</param>
+        /// <returns>Returns true if key-value pair exists.</returns>
+        public static bool HasAction(string _id)
+        {
+            // Get key.
+            string key = MakeKey(_id);
+
+            // Check if valid key is in collection.
+            return (HasKey(key)) && (ActionMap.ContainsKey(key));
+        }
+
+        #endregion
+
+        #region Static Mutator Methods
+        
+        /// <summary>
+        /// Takes an input and turns it into a key.
+        /// </summary>
+        /// <param name="_id">Input ID.</param>
+        /// <returns>Returns a trimmed, uppercase string.</returns>
+        public static string MakeKey(string _id)
+        {
+            return _id.Trim().ToUpper();
+        }
+
+        /// <summary>
+        /// Takes an input and adds it as a key.
+        /// </summary>
+        /// <param name="_id">Input ID.</param>
+        /// <returns>Returns a boolean if key was just added.</returns>
+        private static bool RegisterKey(string _id)
+        {
+            // Get key from input.
+            string key = MakeKey(_id);
+
+            // Check if the key is valid and doesn't already exist.
+            if (key.Length > 0 && !HasKey(key))
+            {
+                ActionIDs.Add(key);
+                return true;
+            }
+
+            // Return false by default.
+            return false;
+        }
+
+        /// <summary>
+        /// Unregister a key.
+        /// </summary>
+        /// <param name="_id">ID to remove.</param>
+        private static string RemoveKey(string _id)
+        {
+            // Get key from input.
+            string key = MakeKey(_id);
+
+            // Check if the key is valid and exists.
+            if (key.Length > 0 && HasKey(key))
+            {
+                ActionIDs.Remove(key);
+                return key; // Return the value of the key used.
+            }
+
+            // Return an empty value.
+            return "";
+        }
+
+        /// <summary>
+        /// Registers an action to an ID.
+        /// </summary>
+        /// <param name="_id">ID to map to action.</param>
+        /// <param name="_action">Action to be mapped.</param>
+        /// <returns>Registers action.</returns>
+        public static bool RegisterAction(string _id, Action _action)
+        {
+            // Get key from input.
+            string key = MakeKey(_id);
+
+            // Get the action.
+            Action action = _action;
+
+            // Register the key.
+            RegisterKey(key);
+            
+            // Check if the key is valid and doesn't already exist.
+            if (key.Length > 0 && HasKey(key) && !HasAction(key) && action != null)
+            {
+                ActionMap.Add(key, action);
+                return true;
+            }
+
+            // Return false by default.
+            return false;
+        }
+
+        /// <summary>
+        /// Returns the last removed Action value.
+        /// </summary>
+        /// <param name="_id">Input ID.</param>
+        /// <returns>Returns an Action object.</returns>
+        public static Action RemoveAction(string _id)
+        {
+            // Get key from input.
+            string key = MakeKey(_id);
+
+            // Get the action.
+            Action action = null;
+            
+            // Check if the key is valid and doesn't already exist.
+            if (key.Length > 0 && HasKey(key) && HasAction(key))
+            {
+                action = ActionMap[key];
+                ActionMap.Remove(key);
+            }
+
+            // Return a null by default.
+            return action;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Data Members
+
+        #region Fields.
+
+        /// <summary>
+        /// Unique string associated with an action.
+        /// </summary>
+        private string m_actionName;
+
+        /// <summary>
+        /// List of directors that may call this command.
+        /// </summary>
+        private List<Director> m_directors;
+
+        #endregion
+
+        #region Properties.
+
+        /// <summary>
+        /// Returns the unique name identifying this action.
+        /// </summary>
+        public string ID
+        {
+            get { return this.m_actionName; }
+        }
+
+        /// <summary>
+        /// Returns list of directors that may access this command.
+        /// </summary>
+        public List<Director> ValidDirectors
+        {
+            get
+            {
+                if (this.m_directors == null)
+                {
+                    this.m_directors = new List<Director>();
+                }
+                return this.m_directors;
+            }
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Constructor.
+
+        /// <summary>
+        /// Empty constructor makes an empty action.
+        /// </summary>
+        public Action()
+        {
+            this.m_actionName = "";
+            this.m_directors = new List<Director>();
+        }
+
+        /// <summary>
+        /// Creates an Action, while initializing the action name and initial director.
+        /// </summary>
+        /// <param name="_id">Unique identifier for this action.</param>
+        /// <param name="_director">A director that can access this action.</param>
+        public Action(string _id, Director _director = Director.System)
+        {
+            this.m_actionName = _id;
+            this.m_directors = new List<Director>();
+            RegisterName(_id);
+            RegisterDirector(_director);
+        }
+
+        /// <summary>
+        /// Adds name to list of unique identifiers.
+        /// </summary>
+        /// <param name="id"></param>
+        private RegisterName(string id)
+        {
+
+        }
+
+        #endregion
+
+        #region Accessor Methods.
+        
+        /// <summary>
+        /// Returns the name of this control scheme.
+        /// </summary>
+        /// <returns>Returns string.</returns>
+        public string GetName(string _name)
+        {
+            return this.m_actionName;
+        }
+
+        /// <summary>
+        /// Returns true if has directors.
+        /// </summary>
+        /// <returns>Returns a boolean</returns>
+        public bool HasDirector(Director _director)
+        {
+            if (this.m_directors == null || this.m_directors.Count == 0)
+            {
+                this.m_directors = new List<Director>();
+            }
+
+            return this.m_directors.Contains(_director);
+        }
+
+        #endregion
+
+        #region Mutator Methods.
+
+        /// <summary>
+        /// Set the unique name of the action.
+        /// </summary>
+        /// <param name="_id">Input ID.</param>
+        public void SetName(string _id)
+        {
+            // Check key.
+            string key = MakeKey(_id);
+
+            // Check length of key.
+            if (key.Length > 0 && !HasKey(key))
+            {
+                this.m_actionName = key;
+                RegisterKey(this.m_actionName);
+            }
+        }
+
+        /// <summary>
+        /// Adds and registeres a director to own this particular control scheme.
+        /// </summary>
+        /// <param name="_director">Director to add.</param>
+        public void AddDirector(Director _director)
+        {
+            //
+        }
+        #endregion
+
+    }
+    
+    /*
+
     #region Class: ControlScheme class.
 
     /// <summary>
@@ -1078,5 +1510,7 @@ namespace Arcana.InputManagement
     }
 
     #endregion
+
+    */
 
 }
