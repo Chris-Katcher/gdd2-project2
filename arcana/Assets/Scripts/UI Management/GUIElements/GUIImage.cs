@@ -55,33 +55,36 @@ namespace Arcana.UI.Elements
         /// </summary>
         private List<IGUIElement> m_elements;
 
-        private GameObject image = null;
+        private SpriteRenderer image = null;
         #endregion
 
-        public void Initialize(GameObject image)
+        public void Initialize(SpriteRenderer image)
         {
             
             this.image = image;
+            
         }
 
         public bool IsActive()
         {
-            return image.activeSelf;
+            return image.isVisible;
         }
 
         public void ChangeImage(Sprite image)
         {
-            this.image.GetComponent<SpriteRenderer>().sprite = image ;
+            this.image.sprite = image ;
         }
 
         public void Destory()
         {
-            image.SetActive(false);
+            Debugger.Print("DEactivating GUI");
+            image.enabled = false;
         }
 
         public void Reactivate()
         {
-            image.SetActive(true);
+            Debugger.Print("Reactivating GUI");
+            image.enabled = true;
         }
     }
 }

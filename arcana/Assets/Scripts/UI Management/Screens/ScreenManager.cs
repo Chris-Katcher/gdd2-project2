@@ -94,6 +94,11 @@ namespace Arcana.UI.Screens
             m_bgImage.Reactivate();
         }
 
+        public void DisplayGameplayScreen()
+        {
+            m_bgImage.Destory();
+        }
+
         public void DisplayGameOverScreen()
         {
             //GameObject splashScreenBg = new GameObject();
@@ -102,10 +107,9 @@ namespace Arcana.UI.Screens
             Sprite sprite = UnityEngine.Resources.Load("Backgrounds/Player1Win", typeof(Sprite)) as Sprite;
             //splashScreenBg.transform.position = new Vector3(0, 0, -1);
 
-           
 
-            m_bgImage.ChangeImage(sprite);
             m_bgImage.Reactivate();
+            m_bgImage.ChangeImage(sprite);
         }
 
         /// <summary>
@@ -118,8 +122,8 @@ namespace Arcana.UI.Screens
 
             renderer.sprite = UnityEngine.Resources.Load("Backgrounds/SplashScreen", typeof(Sprite)) as Sprite;
             splashScreenBg.transform.position = new Vector3(0, 0, -1);
-            m_bgImage.Initialize(splashScreenBg);
-            m_bgImage.Reactivate();
+            m_bgImage.Initialize(renderer);
+            
         }
 
         public void DestroyBackground()

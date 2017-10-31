@@ -164,19 +164,22 @@ public class SystemController : ArcanaObject {
             
             // Handle user input.
             HandleInput();
-            m_uiManager.UpdateState();
+           
 
-          
+
             // ***Used to move to the game state once a player presses a key or mouse1.
             // This needs to be updated once the input management is completed.***
-            if((Input.anyKey || Input.GetMouseButtonDown(0)) && !Input.GetKeyDown(KeyCode.Escape))
-            {
-                m_uiManager.ChangeState(States.Gameplay);
-            }
-            if(Input.GetKeyDown(KeyCode.Escape))
+            if (Input.GetKeyDown(KeyCode.Escape))
             {
                 m_uiManager.ChangeState(States.Gameover);
+                Debugger.Print("Changed state to gameover");
             }
+            else if ((Input.anyKeyDown || Input.GetMouseButtonDown(0)) && !Input.GetKeyDown(KeyCode.Escape))
+            {
+                m_uiManager.ChangeState(States.Gameplay);
+                Debugger.Print("Changed state to GAMEPLAY");
+            }
+            m_uiManager.UpdateState();
             /*
             //gets translation of player one
             float translation = m_inputManager.getPlayer1Translation();

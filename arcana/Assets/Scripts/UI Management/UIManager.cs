@@ -106,6 +106,7 @@ namespace Arcana.UI
                 // Update.
                 if (m_screenManager != null && !stateLoaded)
                 {
+                    
                     PerformChangeState();
                     this.stateLoaded = true;
                 }
@@ -114,10 +115,12 @@ namespace Arcana.UI
 
         public void ChangeState(States _state)
         {
-
-            this.state = _state;
-            this.stateLoaded = false;
-            m_screenManager.DestroyBackground();
+            if(this.stateLoaded && _state != this.state)
+            {
+                
+                this.state = _state;
+                this.stateLoaded = false;
+            }
         }
 
         private void PerformChangeState()
@@ -127,15 +130,13 @@ namespace Arcana.UI
                 // Change state to Gameover
                 case States.Gameover:
 
-                    //TODO
-
+                    m_screenManager.DisplayGameOverScreen();
                     break;
 
                 // Change state to GamePlay
                 case States.Gameplay:
 
-                    //TODO
-
+                    m_screenManager.DisplayGameplayScreen();
                     break;
 
                 // Change state to Loading
