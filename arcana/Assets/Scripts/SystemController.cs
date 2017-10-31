@@ -73,10 +73,6 @@ public class SystemController : ArcanaObject {
     /// </summary>
     private EntityManager m_entityManager = null;
 
-    /// <summary>
-    /// Reference to the system's control scheme.
-    /// </summary>
-    private ControlScheme m_scheme = null;
 
     #endregion
 
@@ -126,14 +122,6 @@ public class SystemController : ArcanaObject {
         get { return this.m_entityManager; }
     }
 
-    /// <summary>
-    /// Returns reference to the control scheme.
-    /// </summary>
-    public ControlScheme Controls
-    {
-        get { return this.m_scheme; }
-    }
-
     #endregion
 
     #endregion
@@ -158,8 +146,6 @@ public class SystemController : ArcanaObject {
         {
             // If the system controller has been initialized, perform these actions.
             
-            // Handle user input.
-            HandleInput();
 
 
             /*
@@ -226,8 +212,10 @@ public class SystemController : ArcanaObject {
     /// <summary>
     /// Initialize the system controller's controls.
     /// </summary>
-    private void InitializeControls()
+    protected override void InitializeControls()
     {
+        base.InitializeControls();
+
         // Set the director for the system controller.
         Debugger.Print("Adding controls to the control scheme for Controller: " + this.Director);
 
@@ -313,14 +301,10 @@ public class SystemController : ArcanaObject {
     /// <summary>
     /// Create a ControlScheme for system level actions.
     /// </summary>
-    private void BuildControlScheme()
+    protected override void BuildControlScheme()
     {
-        if (this.m_scheme == null)
-        {
-            this.Director = Director.System;
-            this.m_scheme = this.InputController.AddControlScheme(this);
-            this.m_scheme.Initialize();
-        }
+        this.Director = Director.System;
+        base.BuildControlScheme();    
     }
 
     /// <summary>
@@ -371,7 +355,7 @@ public class SystemController : ArcanaObject {
     /// <summary>
     /// Handles all the registered actions.
     /// </summary>
-    private void HandleInput()
+    protected override void HandleInput()
     {
         if (this.Controls.IsActivated(GetAction("Change Camera Background")))
         {
@@ -411,66 +395,6 @@ public class SystemController : ArcanaObject {
         
     }
 
-    /// <summary>
-    /// Return the action from the control scheme.
-    /// </summary>
-    /// <param name="_id">ID of the action to request.</param>
-    /// <returns>Returns an action.</returns>
-    private Action GetAction(string _id)
-    {
-        return Action.GetAction(_id, this.Director);
-    }
-    
-    /// <summary>
-    /// Link an action to perform with a command.
-    /// </summary>
-    /// <param name="_action">Action to perform.</param>
-    /// <param name="_trigger">Trigger that will cause action.</param>
-    /// <param name="_control">Binding that will cause action.</param>
-    /// <param name="_response">Response type that will trigger action.</param>
-    public void RegisterControl(Action _action, Trigger _trigger)
-    {
-        if (this.Controls != null)
-        {
-            this.Controls.AddMap(_action, _trigger);
-        }
-    }
-    
-    /// <summary>
-    /// Link an action to perform with a command.
-    /// </summary>
-    /// <param name="_action">Action to perform.</param>
-    /// <param name="_control">Binding that will cause action.</param>
-    /// <param name="_response">Response type that will trigger action.</param>
-    public void RegisterControl(Action _action, Control _control, ResponseMode _mode = ResponseMode.None)
-    {
-
-        // Set up reference.
-        Trigger trigger;
-
-        if (_mode == ResponseMode.None)
-        {
-            trigger = ControlScheme.CreateTrigger(_control);
-        }
-        else
-        {
-            trigger = ControlScheme.CreateTrigger(_control, _mode);
-        }
-
-        RegisterControl(_action, trigger);
-    }
-    
-    /// <summary>
-    /// Link an action to perform with a command.
-    /// </summary>
-    /// <param name="_action">Action to perform.</param>
-    /// <param name="_control">Binding that will cause action.</param>
-    /// <param name="_response">Response type that will trigger action.</param>
-    public void RegisterControl(string _actionID, Control _control, ResponseMode _mode = ResponseMode.None)
-    {
-        Action action = ControlScheme.CreateAction(_actionID, this.Director);
-        RegisterControl(action, _control, _mode);
-    }   
 
     #endregion
     

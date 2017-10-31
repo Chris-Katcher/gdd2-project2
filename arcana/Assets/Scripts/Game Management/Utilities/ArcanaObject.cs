@@ -8,7 +8,6 @@
 /////////////////////
 // Using statements.
 /////////////////////
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -69,6 +68,11 @@ namespace Arcana
         /// Input director associated with this object.
         /// </summary>
         private Director m_inputDirector = Director.None;
+
+        /// <summary>
+        /// Reference to the system's control scheme.
+        /// </summary>
+        private ControlScheme m_scheme = null;
 
         #endregion
 
@@ -194,6 +198,14 @@ namespace Arcana
             set { this.m_inputDirector = value; }
         }
 
+        /// <summary>
+        /// Returns reference to the control scheme.
+        /// </summary>
+        public ControlScheme Controls
+        {
+            get { return this.m_scheme; }
+        }
+
         #endregion
 
         #endregion
@@ -239,6 +251,9 @@ namespace Arcana
             }
             else
             {
+                // Handle user input.
+                HandleInput();
+
                 // If this object is set to be destroyed, destroy it.
                 if (this.Status.IsDestroy())
                 {
@@ -309,6 +324,102 @@ namespace Arcana
             }
 
             return this;
+        }
+
+        /// <summary>
+        /// Initialize the object's input controls.
+        /// </summary>
+        protected virtual void InitializeControls()
+        {
+            if (this.m_scheme == null)
+            {
+                this.m_scheme = ControlScheme.Create(this);
+            }
+        }
+
+        #endregion
+
+        #region Input Methods.
+
+        /// <summary>
+        /// Create a control scheme. For system level actions, by default.
+        /// </summary>
+        protected virtual void BuildControlScheme()
+        {
+            if (this.m_scheme == null)
+            {
+                this.m_scheme = InputManager.GetInstance().AddControlScheme(this);
+                this.m_scheme.Initialize();
+            }
+        }
+
+        /// <summary>
+        /// Handle input.
+        /// </summary>
+        protected virtual void HandleInput()
+        {
+            // Do nothing in the base class.
+        }
+
+        /// <summary>
+        /// Return the action from the control scheme.
+        /// </summary>
+        /// <param name="_id">ID of the action to request.</param>
+        /// <returns>Returns an action.</returns>
+        protected Action GetAction(string _id)
+        {
+            return Action.GetAction(_id, this.Director);
+        }
+
+        /// <summary>
+        /// Link an action to perform with a command.
+        /// </summary>
+        /// <param name="_action">Action to perform.</param>
+        /// <param name="_trigger">Trigger that will cause action.</param>
+        /// <param name="_control">Binding that will cause action.</param>
+        /// <param name="_response">Response type that will trigger action.</param>
+        public void RegisterControl(Action _action, Trigger _trigger)
+        {
+            if (this.Controls != null)
+            {
+                this.Controls.AddMap(_action, _trigger);
+            }
+        }
+
+        /// <summary>
+        /// Link an action to perform with a command.
+        /// </summary>
+        /// <param name="_action">Action to perform.</param>
+        /// <param name="_control">Binding that will cause action.</param>
+        /// <param name="_response">Response type that will trigger action.</param>
+        public void RegisterControl(Action _action, Control _control, ResponseMode _mode = ResponseMode.None)
+        {
+
+            // Set up reference.
+            Trigger trigger;
+
+            if (_mode == ResponseMode.None)
+            {
+                trigger = ControlScheme.CreateTrigger(_control);
+            }
+            else
+            {
+                trigger = ControlScheme.CreateTrigger(_control, _mode);
+            }
+
+            RegisterControl(_action, trigger);
+        }
+
+        /// <summary>
+        /// Link an action to perform with a command.
+        /// </summary>
+        /// <param name="_action">Action to perform.</param>
+        /// <param name="_control">Binding that will cause action.</param>
+        /// <param name="_response">Response type that will trigger action.</param>
+        public void RegisterControl(string _actionID, Control _control, ResponseMode _mode = ResponseMode.None)
+        {
+            Action action = ControlScheme.CreateAction(_actionID, this.Director);
+            RegisterControl(action, _control, _mode);
         }
 
         #endregion

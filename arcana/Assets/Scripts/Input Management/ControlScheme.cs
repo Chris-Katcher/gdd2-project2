@@ -1404,6 +1404,33 @@ namespace Arcana.InputManagement
         #region Common Controls
 
         /// <summary>
+        /// Returns a control for the horizontal mouse axis movement.
+        /// </summary>
+        /// <returns>Returns a control object.</returns>
+        public static Control MouseX()
+        {
+            return CreateAxis("Mouse X");
+        }
+
+        /// <summary>
+        /// Returns a control for the vertical mouse axis movement.
+        /// </summary>
+        /// <returns>Returns a control object.</returns>
+        public static Control MouseY()
+        {
+            return CreateAxis("Mouse Y");
+        }
+
+        /// <summary>
+        /// Returns a control for the mouse scrollwheel movement.
+        /// </summary>
+        /// <returns>Returns a control object.</returns>
+        public static Control ScrollWheel()
+        {
+            return CreateAxis("Mouse ScrollWheel");
+        }
+
+        /// <summary>
         /// Returns the A button for specified player.
         /// </summary>
         /// <param name="_playerNum">Player specified.</param>
@@ -1575,14 +1602,211 @@ namespace Arcana.InputManagement
             switch (_playerNum)
             {
                 case 1:
-                    return CreateKey(KeyCode.Joystick1Button8);
+                    return CreateKey(KeyCode.Joystick1Button9);
                 case 2:
-                    return CreateKey(KeyCode.Joystick2Button8);
+                    return CreateKey(KeyCode.Joystick2Button9);
                 default:
-                    return CreateKey(KeyCode.JoystickButton8);
+                    return CreateKey(KeyCode.JoystickButton9);
+            }
+        }
+                
+        /// <summary>
+        /// Returns the left stick x-axis for specified player.
+        /// </summary>
+        /// <param name="_playerNum">Player specified.</param>
+        /// <returns>Control object.</returns>
+        public static Control LeftStickHorizontal(int _playerNum)
+        {
+            switch (_playerNum)
+            {
+                case 1:
+                    return CreateAxis("P1_LSX");
+                case 2:
+                    return CreateAxis("P2_LSX");
+                default:
+                    return CreateAxis("LSX");
             }
         }
 
+        /// <summary>
+        /// Returns the left stick y-axis for specified player.
+        /// </summary>
+        /// <param name="_playerNum">Player specified.</param>
+        /// <returns>Control object.</returns>
+        public static Control LeftStickVertical(int _playerNum)
+        {
+            switch (_playerNum)
+            {
+                case 1:
+                    return CreateAxis("P1_LSY");
+                case 2:
+                    return CreateAxis("P2_LSY");
+                default:
+                    return CreateAxis("LSY");
+            }
+        }
+
+        /// <summary>
+        /// Returns the right stick x-axis for specified player.
+        /// </summary>
+        /// <param name="_playerNum">Player specified.</param>
+        /// <returns>Control object.</returns>
+        public static Control RightStickHorizontal(int _playerNum)
+        {
+            switch (_playerNum)
+            {
+                case 1:
+                    return CreateAxis("P1_RSX");
+                case 2:
+                    return CreateAxis("P2_RSX");
+                default:
+                    return CreateAxis("RSX");
+            }
+        }
+
+        /// <summary>
+        /// Returns the right stick y-axis for specified player.
+        /// </summary>
+        /// <param name="_playerNum">Player specified.</param>
+        /// <returns>Control object.</returns>
+        public static Control RightStickVertical(int _playerNum)
+        {
+            switch (_playerNum)
+            {
+                case 1:
+                    return CreateAxis("P1_RSY");
+                case 2:
+                    return CreateAxis("P2_RSY");
+                default:
+                    return CreateAxis("RSY");
+            }
+        }
+        
+        /// <summary>
+        /// Returns the digital pad x-axis for specified player.
+        /// </summary>
+        /// <param name="_playerNum">Player specified.</param>
+        /// <returns>Control object.</returns>
+        public static Control DPadHorizontal(int _playerNum)
+        {
+            switch (_playerNum)
+            {
+                case 1:
+                    return CreateAxis("P1_DPADX");
+                case 2:
+                    return CreateAxis("P2_DPADX");
+                default:
+                    return CreateAxis("DPADX");
+            }
+        }
+
+        /// <summary>
+        /// Returns the digital pad y-axis for specified player.
+        /// </summary>
+        /// <param name="_playerNum">Player specified.</param>
+        /// <returns>Control object.</returns>
+        public static Control DPadVertical(int _playerNum)
+        {
+            switch (_playerNum)
+            {
+                case 1:
+                    return CreateAxis("P1_DPADY");
+                case 2:
+                    return CreateAxis("P2_DPADY");
+                default:
+                    return CreateAxis("DPADY");
+            }
+        }
+        
+        /// <summary>
+        /// Returns the triggers axis for specified player.
+        /// </summary>
+        /// <param name="_playerNum">Player specified.</param>
+        /// <returns>Control object.</returns>
+        public static Control BothTriggers(int _playerNum)
+        {
+            switch (_playerNum)
+            {
+                case 1:
+                    return CreateAxis("P1_TRIGGERS");
+                case 2:
+                    return CreateAxis("P2_TRIGGERS");
+                default:
+                    return CreateAxis("TRIGGERS");
+            }
+        }
+
+        /// <summary>
+        /// Returns the left trigger axis for specified player.
+        /// </summary>
+        /// <param name="_playerNum">Player specified.</param>
+        /// <returns>Control object.</returns>
+        public static Control LeftTrigger(int _playerNum)
+        {
+            switch (_playerNum)
+            {
+                case 1:
+                    return CreateAxis("P1_LTRIG");
+                case 2:
+                    return CreateAxis("P2_LTRIG");
+                default:
+                    return CreateAxis("LTRIG");
+            }
+        }
+
+        /// <summary>
+        /// Returns the right trigger axis for specified player.
+        /// </summary>
+        /// <param name="_playerNum">Player specified.</param>
+        /// <returns>Control object.</returns>
+        public static Control RightTrigger(int _playerNum)
+        {
+            switch (_playerNum)
+            {
+                case 1:
+                    return CreateAxis("P1_RTRIG");
+                case 2:
+                    return CreateAxis("P2_RTRIG");
+                default:
+                    return CreateAxis("RTRIG");
+            }
+        }
+
+        /// <summary>
+        /// Returns the logo button for specified player.
+        /// </summary>
+        /// <param name="_playerNum">Player specified.</param>
+        /// <returns>Control object.</returns>
+        public static Control LogoButton(int _playerNum)
+        {
+            switch (_playerNum)
+            {
+                case 1:
+                    return CreateKey(KeyCode.Joystick1Button12);
+                case 2:
+                    return CreateKey(KeyCode.Joystick2Button12);
+                default:
+                    return CreateKey(KeyCode.JoystickButton12);
+            }
+        }
+
+        /// <summary>
+        /// Returns the touchpad button for specified player.
+        /// </summary>
+        /// <param name="_playerNum">Player specified.</param>
+        /// <returns>Control object.</returns>
+        public static Control TouchpadButton(int _playerNum)
+        {
+            switch (_playerNum)
+            {
+                case 1:
+                    return CreateKey(KeyCode.Joystick1Button13);
+                case 2:
+                    return CreateKey(KeyCode.Joystick2Button13);
+                default:
+                    return CreateKey(KeyCode.JoystickButton13);
+            }
+        }
 
         #endregion
 
