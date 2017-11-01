@@ -56,6 +56,8 @@ namespace Arcana.UI
         public RectTransform healthBar1;
         public RectTransform healthBar2;
 
+        private int PlayerLostID = 0;
+
         #region UnityEngine Methods.
 
         /// <summary>
@@ -117,13 +119,18 @@ namespace Arcana.UI
             }
         }
 
-        public void ChangeState(States _state)
+        public void ChangeState(States _state, int id)
         {
             if(this.stateLoaded && _state != this.state)
             {
                 
                 this.state = _state;
                 this.stateLoaded = false;
+
+                if(state == States.Gameover)
+                {
+                    PlayerLostID = id;
+                }
             }
         }
 
@@ -134,7 +141,7 @@ namespace Arcana.UI
                 // Change state to Gameover
                 case States.Gameover:
 
-                    m_screenManager.DisplayGameOverScreen();
+                    m_screenManager.DisplayGameOverScreen(PlayerLostID);
                     break;
 
                 // Change state to GamePlay

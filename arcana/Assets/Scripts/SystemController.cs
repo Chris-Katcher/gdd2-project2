@@ -180,12 +180,12 @@ public class SystemController : ArcanaObject {
             // This needs to be updated once the input management is completed.***
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                m_uiManager.ChangeState(States.Gameover);
+                m_uiManager.ChangeState(States.Gameover, 0);
                 Debugger.Print("Changed state to gameover");
             }
             else if ((Input.anyKeyDown || Input.GetMouseButtonDown(0)) && !Input.GetKeyDown(KeyCode.Escape))
             {
-                m_uiManager.ChangeState(States.Gameplay);
+                m_uiManager.ChangeState(States.Gameplay, 0);
                 Debugger.Print("Changed state to GAMEPLAY");
             }
             if(Input.GetMouseButtonDown(0))
@@ -193,6 +193,11 @@ public class SystemController : ArcanaObject {
                 m_gameManager.TakeDamage(1, 10);
             }
             m_uiManager.UpdateState();
+
+            if(m_gameManager.playerLostID != 0)
+            {
+                m_uiManager.ChangeState(States.Gameover, m_gameManager.playerLostID);
+            }
             /*
             //gets translation of player one
             float translation = m_inputManager.getPlayer1Translation();
@@ -200,7 +205,7 @@ public class SystemController : ArcanaObject {
             bool jump_pressed = m_inputManager.getPlayer1Jump();
             //gets bool of whether fire button has been pressed
             bool fire1_pressed = m_inputManager.getProjectileFire();
-
+            
 
             //updates the wizard position and jump
             m_gameManager.UpdatePosWizzard1(translation);

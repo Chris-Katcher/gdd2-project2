@@ -51,6 +51,8 @@ namespace Arcana
 
         public int currentHealth_p2 = maxHealth;
 
+        public int playerLostID = 0;
+
         public void UpdatePosWizzard1(float translation)
         {
             float translate = translation * max_speed;
@@ -122,6 +124,7 @@ namespace Arcana
                 {
                     currentHealth_p1 = 0;
                     // Handle Player Death
+                    this.playerLostID = 1;
                 }
             }
             else if(player_id == 2)
@@ -131,6 +134,7 @@ namespace Arcana
                 {
                     currentHealth_p2 = 0;
                     // Handle Player Death
+                    this.playerLostID = 2;
                 }
             }
         }

@@ -99,12 +99,20 @@ namespace Arcana.UI.Screens
             m_bgImage.Destory();
         }
 
-        public void DisplayGameOverScreen()
+        public void DisplayGameOverScreen(int id)
         {
+            Sprite sprite = null;
             //GameObject splashScreenBg = new GameObject();
             //SpriteRenderer renderer = splashScreenBg.AddComponent<SpriteRenderer>();
-
-            Sprite sprite = UnityEngine.Resources.Load("Backgrounds/Player1Win", typeof(Sprite)) as Sprite;
+            if (id == 1)
+            {
+                sprite = UnityEngine.Resources.Load("Backgrounds/Player2Win", typeof(Sprite)) as Sprite;
+            }
+            else if( id == 2)
+            {
+                sprite = UnityEngine.Resources.Load("Backgrounds/Player1Win", typeof(Sprite)) as Sprite;
+            }
+            
             //splashScreenBg.transform.position = new Vector3(0, 0, -1);
 
 
