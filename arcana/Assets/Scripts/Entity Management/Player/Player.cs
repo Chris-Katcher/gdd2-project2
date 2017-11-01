@@ -20,33 +20,57 @@ public class Player : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
-	}
+       
+
+    }
+
+    private void FixedUpdate()
+    {
+        m_projectile.updateProjectiles();
+    }
 
 
     /// <summary>
     /// fires a projectile based upon a projectile
     /// </summary>
-    /// <param name="fire">whether or not the fire button ahs been pressed</param>
-    public void fireProjPlayer(bool fire1, bool fire2, bool fire3)
+    /// <param name="fire">whether or not the fire button has been pressed</param>
+    public void fireProjPlayer(bool fire1, bool fire2, bool fire3, bool rightTrigger, Vector3 pos, bool facingRight)
     {
-		// if else prevents players from mashing all buttons at once.
-		if (fire1)
+        if (facingRight)
+        {
+            pos.x += .5f;
+            pos.y += .1f;
+        } else
+        {
+            pos.x -= .5f;
+            pos.y += .1f;
+        }
+
+		//passes in bool and player position
+		// if else prevents players from mashing all buttons at once  
+
+		//really janky mehtod to determine whihc button has been presed. NEEDS IMPROVEMENT
+		if (rightTrigger == true)
 		{
-			//passes in bool and player position
-			m_projectile.fireProjectile1(fire1, transform.position);
+
+			m_projectile.fireProjectile(fire1, fire2, fire3, rightTrigger, pos, facingRight);
+
+		}
+		else if (fire1)
+		{
+			m_projectile.fireProjectile(fire1, fire2, fire3, rightTrigger, pos, facingRight);
 		}
 		else if (fire2)
 		{
-			m_projectile.fireProjectile2(fire2, transform.position);
+			m_projectile.fireProjectile(fire1, fire2, fire3, rightTrigger, pos, facingRight);
 		}
 		else if (fire3)
 		{
-			m_projectile.fireProjectile3(fire3, transform.position);
+			m_projectile.fireProjectile(fire1, fire2, fire3, rightTrigger, pos, facingRight);
 		}
 
-    }
-
-	//TODO: add other projectiles 
+	}
 
 }
+
+

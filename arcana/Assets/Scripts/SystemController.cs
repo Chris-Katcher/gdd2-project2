@@ -83,20 +83,23 @@ public class SystemController : MonoBehaviour {
         float translation = m_inputManager.getPlayer1Translation();
         //gets bool of whether plyaer1 has jumped
         bool jump_pressed = m_inputManager.getPlayer1Jump();
-        //gets bool of whether fire button has been pressed of the three types
+        //gets bool of whether fire button has been pressed
         bool fire1_pressed = m_inputManager.getProjectileFire();
 		bool fire2_pressed = m_inputManager.getProjectileFire2();
 		bool fire3_pressed = m_inputManager.getProjectileFire3();
+		//bool of whether either the right or left trigger has been pressed
+		bool rightTrigger = m_inputManager.getRightTrigger();
+		bool leftTrigger = m_inputManager.getLeftTrigger();
 
+		bool player_drop = m_inputManager.getPlayerDrop();
+        
         //updates the wizard position and jump
         m_gameManager.UpdatePosWizzard1(translation);
         m_gameManager.UpdateJumpStatus(jump_pressed);
-
+        
         //fires a projectile
-        m_player.fireProjPlayer(fire1_pressed, fire2_pressed, fire3_pressed);
-		//TODO: implement other projectiles
-		//m_player.fire
-
+        m_gameManager.fireProjPlayer1(fire1_pressed, fire2_pressed, fire3_pressed, rightTrigger);
+        m_gameManager.UpdateDropStatus(player_drop);
         // TODO: Stub code.
 
 	}
@@ -120,7 +123,7 @@ public class SystemController : MonoBehaviour {
         m_uiManager = new UIManager();
         m_gameManager = gameObject.GetComponent<GameManager>();
         m_inputManager = gameObject.GetComponent<InputManager>();
-        m_player = gameObject.GetComponent<Player>();
+        //m_player = gameObject.GetComponent<Player>();
         m_gameManager.Initialize();
 
         // Set initialized.

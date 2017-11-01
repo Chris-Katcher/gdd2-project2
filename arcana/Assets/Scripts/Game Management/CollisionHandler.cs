@@ -15,11 +15,11 @@ using UnityEngine;
 
 namespace Arcana.Physics
 {
-	
-    /// <summary>
-    /// Resolves collisions between entities.
-    /// </summary>
-    public class CollisionHandler: MonoBehaviour
+
+	/// <summary>
+	/// Resolves collisions between entities.
+	/// </summary>
+	public class CollisionHandler : MonoBehaviour
 	{
 		// refrences to interacting objects;
 		public GameObject primiary;
@@ -69,7 +69,7 @@ namespace Arcana.Physics
 				{
 					SetLoseState();
 				}
-				
+
 			}
 		}
 
@@ -97,7 +97,7 @@ namespace Arcana.Physics
 			// TODO: Call Stop
 		}
 
-	
+
 		// Used to cause a player to lose.
 		private void SetLoseState()
 		{
@@ -107,5 +107,5 @@ namespace Arcana.Physics
 
 	}
 
-	
+
 }

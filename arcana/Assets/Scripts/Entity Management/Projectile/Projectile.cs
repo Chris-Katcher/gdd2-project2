@@ -31,72 +31,40 @@ namespace Arcana.Entities
         //floats
         public float m_mass;
         public float m_maxSpeed;
-        public float m_initialSpeed;
+        public float m_initialSpeed = 1.0f;
 
-        //initial velocity to be used in testing
-        private Vector3 initalVelocity;
+		float Testx;
 
-        // Reference to projectile Launcher
-        public GameObject projectile_go;
+		//initial velocity to be used in testing
+		//private Vector3 initalVelocity = new Vector3(0.0f, -1.0f, 0.0f);
 
-        /// <summary>
-        /// Projectile Constructor
-        /// </summary>
-        /// <param name="x">X position</param>
-        /// <param name="y">Y position</param>
-        /// <param name="force">Force to be applied to the projectil||Direction of travel</param>
-        /// <param name="position"></param>
-		/// <param name="type">Char for element 'F' for Fire, 'W' for water, 'G' for grass</param>
-        public Projectile(float x, float y, Vector3 force, char type)
+
+		//initial velocity to be used in testing
+		private Vector3 initalVelocity;
+
+		private Rigidbody2D proj_rb;
+
+		public GameObject projectile_go;
+
+		
+
+
+		/// <summary>
+		/// Base Constructor
+		/// Use to set specific ammounts
+		/// </summary>
+		void Start()
         {
 
-            //instantiates the projectile_go and adds it to the scene
-			// if char = F, make fire
-			if (type == 'F')
-			{
-				projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;
-			}
-			// if char = W, make water
-			else if (type == 'W')
-			{
-				projectile_go = UnityEngine.Resources.Load("Water") as GameObject;
-			}
-			// if char = G, make grass
-			else if (type == 'G')
-			{
-				projectile_go = UnityEngine.Resources.Load("Grass") as GameObject;
-			}
-			// else debug log that incorrect char was set
-			else
-			{
-				Debug.Log("Type '" + type + "' not recgonized. Please check the projectile manager script");
-				return;
-			}
+			Testx += 1;
 
-			
-			
+			//sets velocity
+			m_velocity = m_direction;
+
+            //sets mass
+            m_mass = 1.0f;
             
-            Instantiate(projectile_go, new Vector3(x,y,0), Quaternion.identity);
-
-            //sets force for now UNUSED
-            m_direction += force;
-
-        }
-
-        /// <summary>
-        /// Base Constructor
-        /// Use to set specific ammounts
-        /// </summary>
-        void Start()
-        {
-
-            //sets velocity
-            m_velocity = new Vector3(m_direction.x, m_direction.y, m_direction.z);
-			
-			// Sets initial velocity
-			initalVelocity = new Vector3(m_initialSpeed, m_initialSpeed, 0.0f);
-
-			ApplyForce(initalVelocity);
+            //ApplyForce(initalVelocity);
 
         }
 
@@ -108,10 +76,35 @@ namespace Arcana.Entities
 
             //Updates the velocity
             this.UpdatePostition();
-
+            //proj_rb.velocity = Vector2.right * 1.0f * 100000f;
             //Updates the position
             this.SetTransform();
 
+        }
+
+        void OnCollisionStay2D(Collision2D coll)
+        {
+            if (coll.transform.name != "Wizzard1(Clone)" && coll.transform.name != "FireBall(Clone)") 
+            {
+                //Destroy(gameObject);
+            }
+        }
+
+        public void updatePos()
+        {
+            //proj_rb.velocity = Vector2.right * 1.0f * 100000f;
+
+            //if (1.0f * proj_rb.velocity.x < m_maxSpeed)
+            //{
+
+            //    proj_rb.velocity = Vector2.right * 1.0f * 100000f;
+
+            //}
+
+            //if (Mathf.Abs(proj_rb.velocity.x) > m_maxSpeed)
+            //{
+            //    proj_rb.velocity = new Vector2(Mathf.Sign(proj_rb.velocity.x) * m_maxSpeed, proj_rb.velocity.y);
+            //}
         }
 
         /// <summary>
@@ -120,12 +113,14 @@ namespace Arcana.Entities
         void UpdatePostition()
         {
 
+            //applys a force to get acceleration
+            ApplyForce(m_direction);
+
             //divides final acceleration by mass
             Vector3 scaleAcceleration = m_acceleration / m_mass;
 
-
-			m_velocity += scaleAcceleration * Time.deltaTime;
-
+            //updates velocity based upon acceleration
+            m_velocity += scaleAcceleration * Time.deltaTime;
 
             //resets acceleration to 0
             m_acceleration = Vector3.zero;
@@ -186,8 +181,8 @@ namespace Arcana.Entities
         public void ApplyForce(Vector3 p_force)
         {
 
-			//if acceleration == 0, then set equal to the force. Avoids nulls.
-			if (m_acceleration == Vector3.zero)
+            //if acceleration == 0, then set equal to the force. Avoids nulls.
+            if(m_acceleration == Vector3.zero)
             {
 
                 m_acceleration = p_force * 5;
@@ -196,21 +191,12 @@ namespace Arcana.Entities
             //else, add the force to the acceleration
             else
             {
-					m_acceleration += p_force * 5;
+
+                m_acceleration += p_force * 5;
 
             }
 
         }
-
-		/// <summary>
-		/// Stops all projectile movement and disables collider.
-		/// </summary>
-		public void Stop()
-		{
-			m_velocity = Vector3.zero;
-			m_mass = 100;
-			GetComponent<BoxCollider2D>().enabled = !enabled;
-		}
 
         
     }
