@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using System.Collections;
+using Arcana.Utilities;
 using Arcana.Physics;
 
 namespace Arcana
@@ -20,7 +21,7 @@ namespace Arcana
     /// <summary>
     /// Handles the main game loop.
     /// </summary>
-    public class GameManager : MonoBehaviour
+    public class GameManager : ArcanaObject
     {
         public GameObject wizzard1;
         public bool m_init = false;
@@ -42,7 +43,11 @@ namespace Arcana
 
         private SpriteRenderer wizzard_sr;
 
-        // TODO: Stub.
+        public const int maxHealth = 100;
+
+        public int currentHealth_p1 = maxHealth;
+
+        public int currentHealth_p2 = maxHealth;
 
         public void UpdatePosWizzard1(float translation)
         {
@@ -106,25 +111,129 @@ namespace Arcana
             m_player1.fireProjPlayer(fire1_pressed, wizzard1.transform.position, this.isFacingRight);
         }
 
-        public void Initialize()
+        public void TakeDamage(int player_id, int amount)
         {
-            wizzard1 = UnityEngine.Resources.Load("Wizzard") as GameObject;
-            wizzard1 = Instantiate(wizzard1, new Vector3( 1, 0, 0), Quaternion.identity );
-
-            charMovement = wizzard1.GetComponent<CharacterMovement>();
-
-            Instantiate(wizzard1, new Vector3(1, 0, 0), Quaternion.identity);
-
-            wizzard1_rb = wizzard1.GetComponent<Rigidbody2D>();
-            wizzard_sr = wizzard1.GetComponent<SpriteRenderer>();
-            m_init = true;
-
-            this.m_player1 = gameObject.GetComponent<Player>();
+            if(player_id == 1)
+            {
+                currentHealth_p1 -= amount;
+                if (currentHealth_p1 <= 0)
+                {
+                    currentHealth_p1 = 0;
+                    // Handle Player Death
+                }
+            }
+            else if(player_id == 2)
+            {
+                currentHealth_p2 -= amount;
+                if (currentHealth_p2 <= 0)
+                {
+                    currentHealth_p2 = 0;
+                    // Handle Player Death
+                }
+            }
         }
+
+        public int GetCurrentHealth(int player_id)
+        {
+            if (player_id == 1)
+            {
+                return currentHealth_p1;
+            }
+            else if (player_id == 2)
+            {
+                return currentHealth_p2;
+            }
+            else return 0;
+        }
+
+        public RectTransform GetWizzard_1HealthReact()
+        {
+            // Lolwut
+            return wizzard1.GetComponent<RectTransform>().GetComponent<RectTransform>().GetComponent<RectTransform>();
+        }
+
+        #region Initialization Methods.
+
+        /// <summary>
+        /// Create the data members for the UIManager.
+        /// </summary>
+        public override void Initialize()
+        {
+            if (!this.Initialized)
+            {
+                wizzard1 = UnityEngine.Resources.Load("Wizzard") as GameObject;
+                wizzard1 = Instantiate(wizzard1, new Vector3(1, 0, 0), Quaternion.identity);
+
+                charMovement = wizzard1.GetComponent<CharacterMovement>();
+
+                Instantiate(wizzard1, new Vector3(1, 0, 0), Quaternion.identity);
+
+                wizzard1_rb = wizzard1.GetComponent<Rigidbody2D>();
+                wizzard_sr = wizzard1.GetComponent<SpriteRenderer>();
+                m_init = true;
+
+                this.m_player1 = gameObject.GetComponent<Player>();
+            }
+        }
+
+        #endregion
 
         private bool IsInitialized()
         {
             return m_init;
         }
+
+        #region Instancing Methods.
+        /// <summary>
+        /// Static instance of the class. (We only want one).
+        /// </summary>
+        public static GameManager instance = null;
+
+        /// <summary>
+        /// Returns the single instance of the class.
+        /// </summary>
+        /// <returns>Returns a component.</returns>
+        public static GameManager GetInstance()
+        {
+            if (instance == null)
+            {
+                Debugger.Print("Creating new instance of EntityManager.");
+                instance = Services.CreateEmptyObject("Game Manager").AddComponent<GameManager>();
+            }
+
+            return instance;
+        }
+
+        /// <summary>
+        /// Returns true if instance exists.
+        /// </summary>
+        /// <returns>Returns boolean indicating instance existence.</returns>
+        public static bool HasInstance()
+        {
+            return (instance != null);
+        }
+        #endregion
+
+        #region Component Factory Methods.
+        /// <summary>
+        /// Creates a new component.
+        /// </summary>
+        /// <returns>Creates a new component and adds it to the parent.</returns>
+        public static GameManager Create(ArcanaObject _parent)
+        {
+            if (!HasInstance())
+            {
+                instance = _parent.GetComponent<GameManager>();
+            }
+
+            if (!HasInstance())
+            {
+                instance = ComponentFactory.Create<GameManager>(_parent);
+            }
+
+            return instance;
+        }
+
+        #endregion
     }
 }

@@ -83,6 +83,9 @@ public class SystemController : ArcanaObject {
     /// </summary>
     private UIManager m_uiManager = null;
 
+    private GameManager m_gameManager = null;
+
+    public RectTransform rect;
     #endregion
 
     #region Properties.
@@ -164,8 +167,8 @@ public class SystemController : ArcanaObject {
             
             // Handle user input.
             HandleInput();
-           
 
+            UpdateHealthbars();
 
             // ***Used to move to the game state once a player presses a key or mouse1.
             // This needs to be updated once the input management is completed.***
@@ -178,6 +181,10 @@ public class SystemController : ArcanaObject {
             {
                 m_uiManager.ChangeState(States.Gameplay);
                 Debugger.Print("Changed state to GAMEPLAY");
+            }
+            if(Input.GetMouseButtonDown(0))
+            {
+                m_gameManager.TakeDamage(1, 10);
             }
             m_uiManager.UpdateState();
             /*
@@ -311,6 +318,9 @@ public class SystemController : ArcanaObject {
         // Build the ui manager.
         BuildUiManager();
 
+        // Build the game manager.
+        BuildGameManager();
+
     }
     
     /// <summary>
@@ -391,6 +401,18 @@ public class SystemController : ArcanaObject {
         // Build the manager.
         Debugger.Print("Create the UiManager component, add it to the Managers GameObject, and retain the reference.");
         this.m_uiManager = UIManager.Create(this.Managers);
+
+        this.m_uiManager.SetHealthBarRect(m_gameManager.GetWizzard_1HealthReact());
+    }
+
+    private void BuildGameManager()
+    {
+        // Build the manager.
+        Debugger.Print("Build the game manager component.");
+
+        // Build the manager.
+        Debugger.Print("Create the GameManager component, add it to the Managers GameObject, and retain the reference.");
+        this.m_gameManager = GameManager.Create(this.Managers);
     }
 
     #endregion
@@ -420,6 +442,14 @@ public class SystemController : ArcanaObject {
             Debugger.Print("Left mouse button was clicked: " + mouse);
         }
         */
+    }
+
+    public void UpdateHealthbars()
+    {
+        int health_p1 = m_gameManager.GetCurrentHealth(1);
+        int health_p2 = m_gameManager.GetCurrentHealth(2);
+
+        m_uiManager.UpdateHealthBars(health_p1, health_p2);
     }
 
     /*

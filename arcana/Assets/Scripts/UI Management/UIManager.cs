@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 using Arcana.Utilities;
 using Arcana.UI.Screens;
 
@@ -51,6 +52,9 @@ namespace Arcana.UI
         private bool stateLoaded = false;
 
         private ScreenManager m_screenManager = null;
+
+        private RectTransform healthBar1;
+        private RectTransform healthBar2;
 
         #region UnityEngine Methods.
 
@@ -175,6 +179,17 @@ namespace Arcana.UI
             }
         }
 
+        public void UpdateHealthBars(int p1, int p2)
+        {
+            healthBar1.sizeDelta = new Vector2(p1, healthBar1.sizeDelta.y);
+            healthBar2.sizeDelta = new Vector2(p2, healthBar2.sizeDelta.y);
+        }
+
+        public void SetHealthBarRect(RectTransform rect)
+        {
+            this.healthBar1 = rect;
+        }
+
         #endregion
 
         #region Instancing Methods.
@@ -228,6 +243,8 @@ namespace Arcana.UI
 
                 m_screenManager = new ScreenManager();
                 m_screenManager.Initialize();
+
+                
             }
         }
 
