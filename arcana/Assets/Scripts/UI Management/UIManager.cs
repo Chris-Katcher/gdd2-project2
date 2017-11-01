@@ -53,8 +53,8 @@ namespace Arcana.UI
 
         private ScreenManager m_screenManager = null;
 
-        private RectTransform healthBar1;
-        private RectTransform healthBar2;
+        public RectTransform healthBar1;
+        public RectTransform healthBar2;
 
         #region UnityEngine Methods.
 
@@ -182,7 +182,7 @@ namespace Arcana.UI
         public void UpdateHealthBars(int p1, int p2)
         {
             healthBar1.sizeDelta = new Vector2(p1, healthBar1.sizeDelta.y);
-            healthBar2.sizeDelta = new Vector2(p2, healthBar2.sizeDelta.y);
+            //healthBar2.sizeDelta = new Vector2(p2, healthBar2.sizeDelta.y);
         }
 
         public void SetHealthBarRect(RectTransform rect)

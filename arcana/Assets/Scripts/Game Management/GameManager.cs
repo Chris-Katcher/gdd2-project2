@@ -18,6 +18,8 @@ using Arcana.Physics;
 
 namespace Arcana
 {
+
+    #region Class: GameManager class.
     /// <summary>
     /// Handles the main game loop.
     /// </summary>
@@ -149,7 +151,13 @@ namespace Arcana
         public RectTransform GetWizzard_1HealthReact()
         {
             // Lolwut
-            return wizzard1.GetComponent<RectTransform>().GetComponent<RectTransform>().GetComponent<RectTransform>();
+            foreach(RectTransform rect in wizzard1.GetComponentsInChildren<RectTransform>())
+            {
+                if (rect.gameObject.name == "Foreground")
+                    return rect;
+            }
+            return null;
+
         }
 
         #region Initialization Methods.
@@ -161,12 +169,18 @@ namespace Arcana
         {
             if (!this.Initialized)
             {
+                // Initialize the base values.
+                base.Initialize();
+
+                // Set this name.
+                this.Name = "Game Manager";
+
                 wizzard1 = UnityEngine.Resources.Load("Wizzard") as GameObject;
                 wizzard1 = Instantiate(wizzard1, new Vector3(1, 0, 0), Quaternion.identity);
 
                 charMovement = wizzard1.GetComponent<CharacterMovement>();
 
-                Instantiate(wizzard1, new Vector3(1, 0, 0), Quaternion.identity);
+                //Instantiate(wizzard1, new Vector3(1, 0, 0), Quaternion.identity);
 
                 wizzard1_rb = wizzard1.GetComponent<Rigidbody2D>();
                 wizzard_sr = wizzard1.GetComponent<SpriteRenderer>();
@@ -236,4 +250,5 @@ namespace Arcana
 
         #endregion
     }
+    #endregion
 }

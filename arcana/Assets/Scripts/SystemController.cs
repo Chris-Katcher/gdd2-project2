@@ -167,6 +167,12 @@ public class SystemController : ArcanaObject {
             
             // Handle user input.
             HandleInput();
+            if(this.m_uiManager != null &&  this.m_uiManager.healthBar1 == null)
+            {
+                if(this.m_gameManager != null && this.m_gameManager.wizzard1 != null)
+                    this.m_uiManager.SetHealthBarRect(m_gameManager.GetWizzard_1HealthReact());
+            }
+            
 
             UpdateHealthbars();
 
@@ -315,11 +321,11 @@ public class SystemController : ArcanaObject {
         // Build the entity manager.
         BuildEntityManager();
 
-        // Build the ui manager.
-        BuildUiManager();
-
         // Build the game manager.
         BuildGameManager();
+
+        // Build the ui manager.
+        BuildUiManager();
 
     }
     
@@ -402,7 +408,7 @@ public class SystemController : ArcanaObject {
         Debugger.Print("Create the UiManager component, add it to the Managers GameObject, and retain the reference.");
         this.m_uiManager = UIManager.Create(this.Managers);
 
-        this.m_uiManager.SetHealthBarRect(m_gameManager.GetWizzard_1HealthReact());
+        
     }
 
     private void BuildGameManager()
