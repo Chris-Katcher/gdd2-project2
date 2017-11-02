@@ -18,7 +18,7 @@ namespace Arcana.UI.Elements
     /// <summary>
     /// Loading bar that is displayed on the loading screen.
     /// </summary>
-    public class GUIProgressBar : IGUIElement
+    public class GUIProgressBar : GUIElement
     {
 
         #region Data Members

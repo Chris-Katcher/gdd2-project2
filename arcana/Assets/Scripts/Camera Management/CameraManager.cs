@@ -127,9 +127,9 @@ namespace Arcana.Cameras
 
             return instance;
         }
-        
-        #endregion
 
+        #endregion
+        
         #endregion
 
         #region Constructor.
@@ -273,6 +273,7 @@ namespace Arcana.Cameras
                 // The base update is called here.
                 base.Update();
 
+                // Debug mode functionality.
                 if (this.Debug)
                 {
                     if (this.debug_active) { this.Activate(); this.m_camera.Activate(); }
@@ -332,7 +333,7 @@ namespace Arcana.Cameras
 
                 // Make the wrapper object a child of this manager's GameObject.
                 Services.AddChild(this.Self, this.m_cameraWrap.Self);
-
+                
                 // Add the controls.
                 BuildControlScheme();
                 InitializeControls();

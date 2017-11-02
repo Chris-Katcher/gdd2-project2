@@ -16,9 +16,9 @@ using UnityEngine;
 namespace Arcana.UI.Elements
 {
     /// <summary>
-    /// Stores other IGUIElements within its space.
+    /// Stores other GUIElements within its space.
     /// </summary>
-    public class GUIPanel : IGUIElement
+    public class GUIPanel : GUIElement
     {
 
         #region Data Members

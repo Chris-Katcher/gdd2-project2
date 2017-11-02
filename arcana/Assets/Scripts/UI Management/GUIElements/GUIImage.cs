@@ -18,9 +18,26 @@ namespace Arcana.UI.Elements
     /// <summary>
     /// Stores information about an image in a GUI element.
     /// </summary>
-    public class GUIImage : IGUIElement
+    public class GUIImage : GUIElement
     {
+
         #region Data Members
+
+        #region Fields.
+
+        /////////////////////
+        // Private data fields.
+        /////////////////////
+
+        /// <summary>
+        /// Children that may be GUI elements.
+        /// </summary>
+        private List<IGUIElement> m_elements;
+
+
+        #endregion
+
+        #region Properties.
 
         /////////////////////
         // Public data fields.
@@ -46,15 +63,9 @@ namespace Arcana.UI.Elements
         /// </summary>
         public bool m_enabled { get; set; }
 
-        /////////////////////
-        // Private data fields.
-        /////////////////////
-
-        /// <summary>
-        /// Children that may be GUI elements.
-        /// </summary>
-        private List<IGUIElement> m_elements;
+        #endregion
 
         #endregion
+
     }
 }

@@ -161,6 +161,11 @@ namespace Arcana.Cameras
         /// </summary>
         private Vector3 m_basePosition = Vector3.zero;
 
+        /// <summary>
+        /// Movement boundaries of the camera that can be set.
+        /// </summary>
+        public Bounds m_bounds = new UnityEngine.Bounds(Vector3.zero, Vector3.zero);
+
         #endregion
 
         #region Properties
@@ -258,12 +263,175 @@ namespace Arcana.Cameras
             }
         }
         
+        /// <summary>
+        /// Checks whether or not there are boundaries to enforce on camera position.
+        /// </summary>
+        public bool HasBounds
+        {
+            // If the boundaries are not zero, then, there are boundaries to enforce.
+            get
+            {
+                return this.Bounds.size != Vector3.zero;
+            }
+        }
+
+        /// <summary>
+        /// Reference to the camera boundaries.
+        /// </summary>
+        public Bounds Bounds
+        {
+            get
+            {
+                if (this.m_bounds == null)
+                {
+                    this.m_bounds = new Bounds(Vector3.zero, Vector3.zero);
+                }
+                return this.m_bounds;
+            }
+        }
+
         #endregion
 
         #endregion
 
         #region UnityEngine Methods.
-        
+
+        /// <summary>
+        /// Update camera every cycle.
+        /// </summary>
+        public override void Update()
+        {
+            // Call the base update.
+            base.Update();
+
+            // Update the camera based on its mode.
+            UpdateCamera();
+        }
+
+        /// <summary>
+        /// Update the camera's movement based on its CameraMode.
+        /// </summary>
+        public void UpdateCamera()
+        {
+            // Print out the camera mode.
+            Debugger.Print("Current camera mode: " + Parse(this.m_mode), this.Name, this.Debug);
+
+            // When in free mode.
+            if (!IsFreeCamera())
+            {
+                // When in target one mode.
+                if (IsTargetOne())
+                {
+                    // Console statement. // Update the target cameras on the target index.
+                    Debugger.Print("Target camera one.", this.Self.name, this.Debug);
+                    UpdateTargetCamera(CurrentConfiguration.SelectedTargetIndex);
+                }
+
+                // Set index to -1 if target all is enabled.
+                if (IsTargetAll())
+                {
+                    // Console statement.
+                    Debugger.Print("Target camera all.", this.Self.name, this.Debug);
+                    UpdateTargetCamera(-1);
+                }
+
+
+                // When in fixed camera mode.
+                if (IsFixedCamera())
+                {
+                    // Update the fixed camera.
+                    Debugger.Print("Fixed camera.", this.Self.name, this.Debug);
+                    UpdateFixedCamera();
+                }
+            }
+
+            // Update these qualities for every camera.
+            CurrentConfiguration.Update(this);
+
+            // If there are bounds, update the position based on them.
+            if (HasBounds)
+            {
+                Vector3 position = CurrentConfiguration.DisplayPosition;
+
+                position.x = Services.Clamp(position.x, this.Bounds.min.x, this.Bounds.max.x);
+                position.y = Services.Clamp(position.y, this.Bounds.min.y, this.Bounds.max.y);
+
+                if (!(this.Bounds.min.z == 0.0f && this.Bounds.max.z == 0.0f))
+                {
+                    position.z = Services.Clamp(position.z, this.Bounds.min.z, this.Bounds.min.z);
+                }
+
+                this.Camera.transform.position = position;
+            }
+        }
+
+        /// <summary>
+        /// Apply settings when in fixed camera mode.
+        /// </summary>
+        public void UpdateFixedCamera()
+        {
+            CurrentConfiguration.Orthographic = true;
+            CurrentConfiguration.TargetPosition = Vector3.zero;
+            CurrentConfiguration.TargetOffsetZ = -10.0f;
+            CurrentConfiguration.OrthographicSize = 5.0f;
+        }
+
+        /// <summary>
+        /// Apply settings when in target camera mode.
+        /// </summary>
+        /// <param name="_index">Index of the selected target.</param>
+        public void UpdateTargetCamera(int _index = -1)
+        {
+            if (CurrentConfiguration.HasTargets)
+            {
+                if (Services.InRange<int>(_index, 0, CurrentConfiguration.Targets.Count))
+                {
+                    // When index is in range, target only a single target.
+                    CurrentConfiguration.TargetPosition = CurrentConfiguration.Targets[_index].Location;
+
+                    Debugger.Print("Targeting index: " + _index + " " + CurrentConfiguration.Targets[_index].Name + " || May be " + CurrentConfiguration.SelectedTarget.Name + ".");
+
+                    // Keep track of the target.
+                    CurrentConfiguration.SetOffsetRange(CurrentConfiguration.InitialOffset.z, -CurrentConfiguration.InitialOffset.z + CurrentConfiguration.Targets[_index].Radius);
+                }
+                else
+                {
+                    // When index is out of range, this means there is no single target selected.
+                    Vector3 centerOfTargets = Vector3.zero;
+                    float radii = 0.0f;
+
+                    foreach (CameraTarget target in CurrentConfiguration.Targets)
+                    {
+                        centerOfTargets += target.Location;
+                        radii += target.Radius;
+                    }
+
+                    // Get the average.
+                    centerOfTargets /= CurrentConfiguration.Targets.Count;
+                    radii /= CurrentConfiguration.Targets.Count;
+
+                    // Get the largest distance.
+                    float largestDistance = Services.Clamp(Math.Abs(GetLargestDistance()), 15.0f, 100.0f);
+
+                    // Set the target position.
+                    CurrentConfiguration.TargetPosition = centerOfTargets;
+
+                    // Multiple targets end up with this offset amount.
+                    CurrentConfiguration.TargetOffsetZ = -((largestDistance + radii) * (CurrentConfiguration.Targets.Count + 1));
+                }
+            }
+            else
+            {
+                Debugger.Print("No targets at all.");
+
+                // If there are no targets, set the center of the screen as the target.
+                CurrentConfiguration.TargetPosition = new Vector3(0.0f, 0.0f, 0.0f);
+
+                // Set the offset to the default.
+                CurrentConfiguration.TargetOffsetZ = -Constants.DEFAULT_OFFSET;
+            }
+        }
+
         /// <summary>
         /// Toggle the current camera mode.
         /// </summary>
@@ -287,18 +455,6 @@ namespace Arcana.Cameras
                     CameraManager.GetInstance().SetCameraFree();
                     break;
             }
-        }
-
-        /// <summary>
-        /// Update camera every cycle.
-        /// </summary>
-        public override void Update()
-        {
-            // Call the base update.
-            base.Update();
-            
-            // Update the camera based on its mode.
-            UpdateCamera();
         }
 
         #endregion
@@ -408,114 +564,6 @@ namespace Arcana.Cameras
         }
 
         /// <summary>
-        /// Update the camera's movement based on its CameraMode.
-        /// </summary>
-        public void UpdateCamera()
-        {
-            // Print out the camera mode.
-            Debugger.Print("Current camera mode: " + Parse(this.m_mode), this.Name, this.Debug);
-            
-            // When in free mode.
-            if (!IsFreeCamera())
-            {
-                // When in target one mode.
-                if (IsTargetOne())
-                {
-                    // Console statement. // Update the target cameras on the target index.
-                    Debugger.Print("Target camera one.", this.Self.name, this.Debug);
-                    UpdateTargetCamera(CurrentConfiguration.SelectedTargetIndex);
-                }
-
-                // Set index to -1 if target all is enabled.
-                if (IsTargetAll())
-                {
-                    // Console statement.
-                    Debugger.Print("Target camera all.", this.Self.name, this.Debug);
-                    UpdateTargetCamera(-1);
-                }
-
-
-                // When in fixed camera mode.
-                if (IsFixedCamera())
-                {
-                    // Update the fixed camera.
-                    Debugger.Print("Fixed camera.", this.Self.name, this.Debug);
-                    UpdateFixedCamera();
-                }
-            }
-
-            // Update these qualities for every camera.
-            CurrentConfiguration.Update(this);
-        }
-
-        /// <summary>
-        /// Apply settings when in fixed camera mode.
-        /// </summary>
-        public void UpdateFixedCamera()
-        {
-            CurrentConfiguration.Orthographic = true;
-            CurrentConfiguration.TargetPosition = Vector3.zero;
-            CurrentConfiguration.TargetOffsetZ = -10.0f;
-            CurrentConfiguration.OrthographicSize = 5.0f;
-        }
-
-        /// <summary>
-        /// Apply settings when in target camera mode.
-        /// </summary>
-        /// <param name="_index">Index of the selected target.</param>
-        public void UpdateTargetCamera(int _index = -1)
-        {
-            if (CurrentConfiguration.HasTargets)
-            {
-                if (Services.InRange<int>(_index, 0, CurrentConfiguration.Targets.Count))
-                {
-                    // When index is in range, target only a single target.
-                    CurrentConfiguration.TargetPosition = CurrentConfiguration.Targets[_index].Location;
-
-                    Debugger.Print("Targeting index: " + _index + " " + CurrentConfiguration.Targets[_index].Name + " || May be " + CurrentConfiguration.SelectedTarget.Name + ".");
-
-                    // Keep track of the target.
-                    CurrentConfiguration.SetOffsetRange(CurrentConfiguration.InitialOffset.z, -CurrentConfiguration.InitialOffset.z + CurrentConfiguration.Targets[_index].Radius);
-                }
-                else
-                {
-                    // When index is out of range, this means there is no single target selected.
-                    Vector3 centerOfTargets = Vector3.zero;
-                    float radii = 0.0f;
-
-                    foreach (CameraTarget target in CurrentConfiguration.Targets)
-                    {
-                        centerOfTargets += target.Location;
-                        radii += target.Radius;
-                    }
-
-                    // Get the average.
-                    centerOfTargets /= CurrentConfiguration.Targets.Count;
-                    radii /= CurrentConfiguration.Targets.Count;
-
-                    // Get the largest distance.
-                    float largestDistance = Services.Clamp(Math.Abs(GetLargestDistance()), 15.0f, 100.0f);
-
-                    // Set the target position.
-                    CurrentConfiguration.TargetPosition = centerOfTargets;
-                    
-                    // Multiple targets end up with this offset amount.
-                    CurrentConfiguration.TargetOffsetZ = -((largestDistance + radii) * (CurrentConfiguration.Targets.Count + 1));
-                }
-            }
-            else
-            {
-                Debugger.Print("No targets at all.");
-
-                // If there are no targets, set the center of the screen as the target.
-                CurrentConfiguration.TargetPosition = new Vector3(0.0f, 0.0f, 0.0f);
-
-                // Set the offset to the default.
-                CurrentConfiguration.TargetOffsetZ = -Constants.DEFAULT_OFFSET;
-            }
-        }
-
-        /// <summary>
         /// Returns the largest distance between all elements in the set.
         /// </summary>
         /// <returns>Returns the largest distance.</returns>
@@ -599,6 +647,24 @@ namespace Arcana.Cameras
         #region Accessor Methods.
 
         /// <summary>
+        /// Returns reference to the Camera bounds, as a Rect.
+        /// </summary>
+        /// <returns>Returns a Rect containing the minimum and maximum positions.</returns>
+        public Rect GetCameraBoundsAsRect()
+        {
+            return new Rect(this.Bounds.min, this.Bounds.max);
+        }
+
+        /// <summary>
+        /// Returns reference to the Camera bounds.
+        /// </summary>
+        /// <returns>Returns a Bounds.</returns>
+        public Bounds GetCameraBounds()
+        {
+            return this.Bounds;
+        }
+
+        /// <summary>
         /// Get target index for input CameraTarget.
         /// </summary>
         /// <param name="_query">CameraTarget to get index for.</param>
@@ -648,6 +714,56 @@ namespace Arcana.Cameras
         #endregion
 
         #region Mutator Methods.
+
+        /// <summary>
+        /// Sets the camera bounds.
+        /// </summary>
+        /// <param name="_bounds">Bounds to set.</param>
+        public void SetCameraBounds(Bounds _bounds)
+        {
+            this.m_bounds = _bounds;
+        }
+
+        /// <summary>
+        /// Sets the camera bounds based on a center point and a size vector.
+        /// </summary>
+        /// <param name="_center">Center point.</param>
+        /// <param name="_size">X, Y, and Z extents.</param>
+        public void SetCameraBounds(Vector3 _center, Vector3 _size)
+        {
+            this.m_bounds = new Bounds(_center, _size);
+        }
+
+        /// <summary>
+        /// Sets the camera bounds, using Vector2s.
+        /// </summary>
+        /// <param name="_min">Minimum position.</param>
+        /// <param name="_max">Maximum position.</param>
+        public void SetCameraBounds(Vector2 _min, Vector2 _max, Vector2? _depth = null)
+        {
+            Vector3 min = Services.ToVector3(_min);
+            Vector3 max = Services.ToVector3(_max);
+
+            min.z = transform.position.z;
+            max.z = transform.position.z;
+
+            if (_depth.HasValue)
+            {
+                min.z = _depth.Value.x;
+                max.z = _depth.Value.y;
+            }
+
+            this.m_bounds.SetMinMax(min, max);
+        }
+
+        /// <summary>
+        /// Sets the camera bounds, using a Rect.
+        /// </summary>
+        /// <param name="_bounds">Minimum and maximum position.</param>
+        public void SetCameraBounds(Rect _bounds)
+        {
+            SetCameraBounds(_bounds.min, _bounds.max);
+        }
 
         /// <summary>
         /// Set the current mode of the camera settings component.

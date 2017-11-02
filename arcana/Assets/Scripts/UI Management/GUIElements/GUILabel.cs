@@ -16,9 +16,9 @@ using UnityEngine;
 namespace Arcana.UI.Elements
 {
     /// <summary>
-    /// IGUIElement that displays text.
+    /// GUIElement that displays text.
     /// </summary>
-    public class GUILabel : IGUIElement
+    public class GUILabel : GUIElement
     {
 
         #region Data Members

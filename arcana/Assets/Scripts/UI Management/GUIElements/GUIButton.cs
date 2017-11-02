@@ -18,7 +18,7 @@ namespace Arcana.UI.Elements
     /// <summary>
     /// Button that can be interacted with by players.
     /// </summary>
-    public class GUIButton : IGUIElement
+    public class GUIButton : GUIElement
     {
 
         #region Data Members

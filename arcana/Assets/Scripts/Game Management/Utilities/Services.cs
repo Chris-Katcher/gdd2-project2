@@ -576,8 +576,7 @@ namespace Arcana
 
             return false;
         }
-
-
+        
         /// <summary>
         /// Check if a vector is null.
         /// </summary>
@@ -874,7 +873,7 @@ namespace Arcana
         /////////////////////
         // Random Number Functions.
         /////////////////////
-
+        
         /// <summary>
         /// Generate random UnityEngine.Color.
         /// </summary>
@@ -942,6 +941,16 @@ namespace Arcana
         }
 
         /// <summary>
+        /// Generate <see cref="Vector2"/> object within a set boundary.
+        /// </summary>
+        /// <param name="_bounds">Rectangle containing minimum and maximum extents.</param>
+        /// <returns>Returns a <see cref="Vector2"/> object.</returns>
+        public static Vector2 NextVector2(Rect _bounds)
+        {
+            return new Vector2(NextFloat(_bounds.xMin, _bounds.xMax), NextFloat(_bounds.yMin, _bounds.yMax));
+        }
+
+        /// <summary>
         /// Generate <see cref="Vector3"/> object within a set boundary.
         /// </summary>
         /// <param name="x">Minimum x-value of the boundary.</param>
@@ -965,6 +974,74 @@ namespace Arcana
             return new Vector3(NextFloat(a.x, b.x), NextFloat(a.y, b.y), NextFloat(a.z, b.z));
         }
 
+        /// <summary>
+        /// Generate <see cref="Vector3"/> object within a set boundary (with a z-value between -0.5f and +0.5f).
+        /// </summary>
+        /// <param name="_bounds">Rectangle containing minimum and maximum extents.</param>
+        /// <returns>Returns a <see cref="Vector3"/> object.</returns>
+        public static Vector3 NextVector3(Rect _bounds)
+        {
+            return new Vector3(
+                NextFloat(_bounds.xMin, _bounds.xMax),
+                NextFloat(_bounds.yMin, _bounds.yMax),
+                NextFloat(-1.0f, 1.0f));
+        }
+
+        /// <summary>
+        /// Generate <see cref="Vector3"/> object within a set boundary, with the option to set a hard z-axis value.
+        /// </summary>
+        /// <param name="_bounds">Rectangle containing minimum and maximum extents.</param>
+        /// <param name="depth">Value to be hard-set.</param>
+        /// <returns>Returns a <see cref="Vector3"/> object.</returns>
+        public static Vector3 NextVector3(Rect _bounds, float depth = float.MinValue)
+        {
+            if (depth == float.MinValue)
+            {
+                return NextVector3(_bounds);
+            }
+            else
+            {
+                return new Vector3(
+                    NextFloat(_bounds.xMin, _bounds.xMax),
+                    NextFloat(_bounds.yMin, _bounds.yMax),
+                    depth);
+            }
+        }
+
+        /// <summary>
+        /// Generate <see cref="Vector3"/> object within a set boundary.
+        /// </summary>
+        /// <param name="_bounds">Bounds containing minimum and maximum extents.</param>
+        /// <returns>Returns a <see cref="Vector3"/> object.</returns>
+        public static Vector3 NextVector3(Bounds _bounds)
+        {
+            return new Vector3(
+                NextFloat(_bounds.min.x, _bounds.max.x),
+                NextFloat(_bounds.min.y, _bounds.max.y),
+                NextFloat(_bounds.min.z, _bounds.max.z));
+        }
+
+        /// <summary>
+        /// Generate <see cref="Vector3"/> object within a set boundary, with the option to set a hard z-axis value.
+        /// </summary>
+        /// <param name="_bounds">Bounds containing minimum and maximum extents.</param>
+        /// <param name="depth">Value to be hard-set.</param>
+        /// <returns>Returns a <see cref="Vector3"/> object.</returns>
+        public static Vector3 NextVector3(Bounds _bounds, float depth = float.MinValue)
+        {
+            if (depth == float.MinValue)
+            {
+                return NextVector3(_bounds);
+            }
+            else
+            {
+                return new Vector3(
+                    NextFloat(_bounds.min.x, _bounds.max.x),
+                    NextFloat(_bounds.min.y, _bounds.max.y),
+                    depth);
+            }
+        }
+        
         #endregion
 
         #region // Comparator Functions.
@@ -972,7 +1049,7 @@ namespace Arcana
         /////////////////////
         // Comparator Functions.
         /////////////////////
-        
+
         /// <summary>
         /// Checks two vectors for being anti-parallel.
         /// </summary>

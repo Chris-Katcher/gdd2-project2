@@ -1,7 +1,8 @@
 ﻿/************************************************
  * MainMenuScreen.cs
  * 
- * This file contains implementation for the MainMenuScreen class.
+ * This file contains:
+ * - The MainMenuScreen class. (Child of ScreenBackground).
  ************************************************/
 
 /////////////////////
@@ -12,114 +13,64 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Arcana.Resources;
 
 namespace Arcana.UI.Screens
 {
+
     /// <summary>
     /// IScreen displayed as the main menu. It should have options for Play, Options, and Exit. Displayed after splash screen.
     /// </summary>
-    public class HomeScreen : IScreen
+    public class MainMenuScreen : ScreenBackground
     {
 
-        #region Data Members
-
-        /////////////////////
-        // Public data fields.
-        /////////////////////
+        #region Abstract Class Methods.
 
         /// <summary>
-        /// Determines if IScreen is initialized.
+        /// Set up the resources for the renderer.
         /// </summary>
-        public bool m_initialized { get; set; }
-
-        /// <summary>
-        /// Determines if IScreen's resources are loaded.
-        /// </summary>
-        public bool m_loaded { get; set; }
-
-        /// <summary>
-        /// IScreen resolution (x-axis).
-        /// </summary>
-        public int m_screenResolutionX { get; set; }
-
-        /// <summary>
-        /// IScreen resolution (y-axis).
-        /// </summary>
-        public int m_screenResolutionY { get; set; }
-
-
-        /////////////////////
-        // Private data fields.
-        /////////////////////
-
-        /// <summary>
-        /// Position of the screen. (Global Coordinates).
-        /// </summary>
-        private Vector2 m_position;
-
-        /// <summary>
-        /// Dimensions of the screen in 2D world space.
-        /// </summary>
-        private Vector2 m_dimensions;
-
-        /// <summary>
-        /// Length of time the screen should be active for.
-        /// </summary>
-        private float m_timeToLive;
-
-        /// <summary>
-        /// Resource for the screen? // TODO: Stub.
-        /// </summary>
-        private Resource m_resource;
-
-        #endregion
-
-        #region Service Methods
-
-        /// <summary>
-        /// Initialize this IScreen object.
-        /// </summary>
-        public void Initialize()
+        public override void InitializeRendererResources()
         {
-
-            // TODO: Stub.
-
+            this.BackgroundID = "BG_MENU";
+            this.BackgroundPath = "Images/Backgrounds/bg_menu";
+            this.MaterialID = "MAT_MENU";
+            this.MaterialPath = "Materials/Screens/mat_menu";
         }
 
         /// <summary>
-        /// Load this IScreen object's resources.
+        /// Initialize the main menu's screen's dimensions.
         /// </summary>
-        public void Load()
+        public override void InitializeDimensions()
         {
-
-            // TODO: Stub.
-
+            this.ScreenWidth = ScreenManager.WindowWidth * ScreenManager.Safety.x;
+            this.ScreenHeight = ScreenManager.WindowHeight * ScreenManager.Safety.y;
         }
 
         /// <summary>
-        /// Update the stage on every frame.
+        /// Initialize the main menu's screen ID.
         /// </summary>
-        public void Update(float delta)
+        public override void InitializeScreenID()
         {
+            this.ScreenID = ScreenID.MainMenuScreen;
+        }
 
-            // TODO: Stub.
+        /// <summary>
+        /// Initialize the main menu's screen name.
+        /// </summary>
+        public override void InitializeScreenName()
+        {
+            this.Name = "Main Menu";
+        }
 
+        /// <summary>
+        /// Update the main menu screen's position.
+        /// </summary>
+        public override void UpdatePosition()
+        {
+            // Maintain the screen as the center of the window.
+            this.Position = ScreenManager.Center;
         }
 
         #endregion
-
-        #region Mutator Methods
-
-        // TODO: Stub.
-
-        #endregion
-
-        #region Accessor Methods
-
-        // TODO: Stub.
-
-        #endregion
-
+        
     }
 }
