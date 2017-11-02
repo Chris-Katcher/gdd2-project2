@@ -190,7 +190,7 @@ namespace Arcana.States
         /// </summary>
         public State CurrentState
         {
-            get { return this.m_states[this.m_currentStateID]; }
+            get { return this.GetState(this.m_currentStateID); }
         }
 
         #endregion
@@ -212,15 +212,14 @@ namespace Arcana.States
         /// </summary>
         public override void Update()
         {
-            // Run base update.
-            base.Update();
-            
-            if (this.Status.IsRunning())
+            if (!this.Initialized)
             {
-                if (!this.Status.IsPaused())
-                {
-                    // TODO: StateManager updates.
-                }
+                this.Initialize();
+            }
+            else
+            {
+                // Run base update.
+                base.Update();                
             }
         }
 
@@ -252,6 +251,63 @@ namespace Arcana.States
 
                 // This isn't a poolable element.
                 this.IsPoolable = false;
+            }
+        }
+
+        /// <summary>
+        /// Builds a state (and adds it to the dictionary) when requested.
+        /// </summary>
+        /// <param name="_state">ID belonging to state that will be built.</param>
+        private State GetState(StateID _state)
+        {
+            switch (_state)
+            {
+                case StateID.MainMenuState:
+                    return GetState<MainMenuState>(_state);
+                case StateID.ArenaState:
+                    return GetState<ArenaState>(_state);
+                case StateID.GameOverState:
+                    return GetState<GameOverState>(_state);
+                case StateID.NULL_STATE:
+                default:
+                    return null;
+            }            
+        }
+
+        /// <summary>
+        /// Builds the state of the particular type and initializes it.
+        /// </summary>
+        /// <typeparam name="T">Generic where T is a State.</typeparam>
+        /// <param name="_stateID">ID of state to build, initialize, and retrieve.</param>
+        /// <returns>Returns state object.</returns>
+        private T GetState<T>(StateID _stateID) where T: State
+        {
+            // If the state already exists, return it.
+            if (HasState(_stateID))
+            {
+                return this.States[_stateID] as T;
+            }
+            else
+            {
+                // If the state hasn't been built yet.
+                // Put it on the container.
+                T state = this.m_container.Self.GetComponent<T>();
+
+                // If it is null.
+                if (state == null)
+                {
+                    // Create the new state.
+                    state = ComponentFactory.Create<T>(this.m_container);
+
+                    // Initialize the state.
+                    state.Initialize();
+                }
+
+                // Add the state to the states dictionary.
+                this.States.Add(_stateID, state);
+
+                // Return the state.
+                return state;
             }
         }
 
@@ -325,7 +381,7 @@ namespace Arcana.States
 
         #endregion
 
-        #region State Methods.
+        #region Status Methods.
 
         /// <summary>
         /// Pause the current state.
@@ -345,6 +401,30 @@ namespace Arcana.States
             base.Resume();
             Debugger.Print("Resuming current state.");
             this.CurrentState.Resume();
+        }
+
+        #endregion
+
+        #region State Methods.
+
+        /// <summary>
+        /// Checks to see if state ID exists as a key for the states map.
+        /// </summary>
+        /// <param name="_stateID">ID of state to check for.</param>
+        /// <returns>Returns true if entry exists</returns>
+        public bool HasStateID(StateID _stateID)
+        {
+            return (this.States.ContainsKey(_stateID));
+        }
+
+        /// <summary>
+        /// Checks to see if state exists.
+        /// </summary>
+        /// <param name="_stateID">ID of state to check for.</param>
+        /// <returns>Returns true if entry exists and is not null.</returns>
+        public bool HasState(StateID _stateID)
+        {
+            return (HasStateID(_stateID) && (this.States[_stateID] != null));
         }
 
         /// <summary>
@@ -372,7 +452,6 @@ namespace Arcana.States
                     // Activate the current state.
                     this.m_currentStateID = _stateID;
                     this.CurrentState.Status.Activate();
-
                 }
             }
         }

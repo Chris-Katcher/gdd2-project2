@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Arcana.Utilities;
+using Arcana.InputManagement;
 
 namespace Arcana.Cameras
 {
@@ -255,26 +256,38 @@ namespace Arcana.Cameras
             }
         }
 
-
         #endregion
 
         #endregion
 
-        #region UniyEngine Methods.
+        #region UnityEngine Methods.
 
         /// <summary>
         /// Update the camera manager.
         /// </summary>
         public override void Update()
         {
-            // The base update is called here.
-            base.Update();
-
-            // If active:
-            if (this.m_camera != null && this.m_camera.Status.IsActive())
+            if (!this.Initialized) { this.Initialize(); }
+            else
             {
-                // Update the target lists based on those in the scene.
-                this.AddTargets(this.Self.GetComponentsInChildren<CameraTarget>().ToList());
+                // The base update is called here.
+                base.Update();
+
+                if (this.Debug)
+                {
+                    if (this.debug_active) { this.Activate(); this.m_camera.Activate(); }
+                    else { this.Deactivate(); this.m_camera.Deactivate(); }
+
+                    // If active:
+                    if (this.m_camera != null && this.m_camera.Status.IsActive())
+                    {
+                        // Handle input while camera isn't null.
+                        HandleInput();
+
+                        // Update the target lists based on those in the scene.
+                        this.AddTargets(this.Self.GetComponentsInChildren<CameraTarget>().ToList());
+                    }
+                }
             }
         }
 
@@ -310,15 +323,84 @@ namespace Arcana.Cameras
                 this.m_cameraShakeStrength = this.m_cameraWrap.Self.AddComponent<DecayTracker>();
 
                 // Add children.
-                // this.m_cameraWrap.AddChild(this.m_camera);
+                this.m_cameraWrap.AddChild(this.m_camera);
                 this.m_cameraWrap.AddChild(this.m_cameraShake);
                 this.m_cameraWrap.AddChild(this.m_cameraShakeStrength);
-                // Services.AddChild(this.m_cameraWrap.Self, this.m_camera.Self);
+                Services.AddChild(this.m_cameraWrap.Self, this.m_camera.Self);
                 Services.AddChild(this.m_cameraWrap.Self, this.m_cameraShake.Self);
                 Services.AddChild(this.m_cameraWrap.Self, this.m_cameraShakeStrength.Self);
 
                 // Make the wrapper object a child of this manager's GameObject.
                 Services.AddChild(this.Self, this.m_cameraWrap.Self);
+
+                // Add the controls.
+                BuildControlScheme();
+                InitializeControls();
+            }
+        }
+
+        protected override void BuildControlScheme()
+        {
+            // Set director.
+            this.Director = InputManagement.Director.Camera;
+            base.BuildControlScheme();
+        }
+
+        /// <summary>
+        /// Initialize the camera controls.
+        /// </summary>
+        protected override ControlScheme InitializeControls()
+        {
+            this.m_scheme = base.InitializeControls();            
+
+            // Register camera background control.
+            this.RegisterControl(ControlScheme.CreateAction("Change Background"),
+                ControlScheme.CreateTrigger(Control.BackButton(-1), ResponseMode.Pressed));
+            this.RegisterControl(ControlScheme.CreateAction("Change Background"),
+                ControlScheme.CreateTrigger(Control.CreateKey(KeyCode.A), ResponseMode.Pressed));
+
+            // Register camera mode controls.
+            this.RegisterControl(ControlScheme.CreateAction("Change Mode"),
+                ControlScheme.CreateTrigger(Control.StartButton(-1), ResponseMode.Pressed));
+
+            this.RegisterControl(ControlScheme.CreateAction("Change Target B"),
+                    ControlScheme.CreateTrigger(Control.BButton(-1), ResponseMode.Pressed));
+            this.RegisterControl(ControlScheme.CreateAction("Change Target X"),
+                    ControlScheme.CreateTrigger(Control.XButton(-1), ResponseMode.Pressed));
+
+            return this.m_scheme;
+        }
+
+        /// <summary>
+        /// Handle camera input.
+        /// </summary>
+        protected override void HandleInput()
+        {
+            // Input should only be handled if a camera exists.
+            if (HasCamera)
+            {
+                // Change background.
+                if (this.Controls.IsActivated(GetAction("Change Background")))
+                {
+                    this.ChangeBackground(Services.GetRandomColor());
+                }
+
+                // Change the camera mode.
+                if (this.Controls.IsActivated(GetAction("Change Mode")))
+                {
+                    this.m_camera.ToggleMode();
+                }
+
+                // Change targets if in set mode.
+                if (this.m_camera.Mode == CameraMode.TargetOne && this.Controls.IsActivated(GetAction("Change Target B")))
+                {
+                    this.m_camera.NextTarget();
+                }
+
+                if (this.m_camera.Mode == CameraMode.TargetOne && this.Controls.IsActivated(GetAction("Change Target X")))
+                {
+                    this.m_camera.PreviousTarget();
+                }
             }
         }
 
@@ -512,7 +594,7 @@ namespace Arcana.Cameras
         {
             foreach (CameraTarget target in _targets)
             {
-                if (target.Status.IsActive())
+                if (target.Status.IsActive() || this.debug_active)
                 {
                     this.m_camera.AddTarget(target, CameraMode.TargetOne, CameraMode.TargetAll);
                 }

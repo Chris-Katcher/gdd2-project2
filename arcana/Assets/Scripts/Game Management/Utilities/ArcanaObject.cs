@@ -17,7 +17,7 @@ using Arcana.InputManagement;
 
 namespace Arcana
 {
-
+    
     #region Class: ArcanaObject class.
 
     /////////////////////
@@ -32,13 +32,18 @@ namespace Arcana
     {
 
         #region Data Members.
-        
+
         #region Fields.
 
         /////////////////////
         // Fields.
         /////////////////////
 
+        public bool debug_delete = false;
+        public bool debug_pause = false;
+        public bool debug_active = true;
+        public bool debug_visible = true;
+        
         /// <summary>
         /// Debug mode for this component.
         /// </summary>
@@ -72,7 +77,7 @@ namespace Arcana
         /// <summary>
         /// Reference to the system's control scheme.
         /// </summary>
-        private ControlScheme m_scheme = null;
+        protected ControlScheme m_scheme = null;
 
         #endregion
 
@@ -201,9 +206,16 @@ namespace Arcana
         /// <summary>
         /// Returns reference to the control scheme.
         /// </summary>
-        public ControlScheme Controls
+        public virtual ControlScheme Controls
         {
-            get { return this.m_scheme; }
+            get
+            {
+                if (this.m_scheme == null)
+                {
+                    this.m_scheme = InitializeControls();
+                }
+                return this.m_scheme;
+            }
         }
 
         #endregion
@@ -211,26 +223,7 @@ namespace Arcana
         #endregion
 
         #region UnityEngine Methods.
-
-        #region UnityEngine Editor values.
-
-        /// <summary>
-        /// UnityEngine debug flag.
-        /// </summary>
-        public bool _debug = false;
-
-        /// <summary>
-        /// UnityEngine active/inactive flag.
-        /// </summary>
-        public bool _active = true;
-
-        /// <summary>
-        /// Debug color to draw for unity.
-        /// </summary>
-        public Color _debugColor = Color.yellow;
-        
-        #endregion
-                
+                        
         /// <summary>
         /// <see cref="MonoBehaviour"/> function run before first update.
         /// </summary>
@@ -252,31 +245,13 @@ namespace Arcana
             else
             {
                 // Handle user input.
-                HandleInput();
+                // HandleInput();
 
                 // If this object is set to be destroyed, destroy it.
                 if (this.Status.IsDestroy())
                 {
                     DestroySelf();
-                }
-
-                if (this.Status.IsActive())
-                {
-                    Debugger.Print("This object is active.", this.Self.name, _debug);
-                }
-
-                if (this.Status.IsInactive())
-                {
-                    Debugger.Print("This object is inactive.", this.Self.name, _debug);
-                }
-
-                if (_active)
-                {
-                    this.Status.Activate();
-                }
-                else
-                {
-                    this.Status.Deactivate();
+                    return;
                 }
             }            
         }
@@ -292,6 +267,8 @@ namespace Arcana
         {
             if (!Initialized)
             {
+                // By default, initialize in non-debug mode. Other children can overwrite this value.
+                this.Debug = false;
                 
                 // Give our object a Status component.
                 this.m_status = ComponentFactory.Create<Status>(this);
@@ -302,7 +279,6 @@ namespace Arcana
                 // Set component as initialized.
                 this.m_status.Initialize();
                 this.m_status.Initialize(true); // Set this component as initialized.
-
             }
         }
 
@@ -329,12 +305,19 @@ namespace Arcana
         /// <summary>
         /// Initialize the object's input controls.
         /// </summary>
-        protected virtual void InitializeControls()
+        protected virtual ControlScheme InitializeControls()
         {
+            if (this.m_scheme == null)
+            {
+                this.m_scheme = this.Self.GetComponent<ControlScheme>();
+            }
+
             if (this.m_scheme == null)
             {
                 this.m_scheme = ControlScheme.Create(this);
             }
+
+            return this.m_scheme;
         }
 
         #endregion
@@ -506,6 +489,82 @@ namespace Arcana
                     child.Resume();
                 }
             }
+        }
+
+        /// <summary>
+        /// Activate the object.
+        /// </summary>
+        public virtual void Activate()
+        {
+            if (!this.Status.IsActive())
+            {
+                this.Status.Activate();
+            }
+        }
+
+        /// <summary>
+        /// Deactivate the object.
+        /// </summary>
+        public virtual void Deactivate()
+        {
+            if (!this.Status.IsInactive())
+            {
+                this.Status.Deactivate();
+            }
+        }
+
+        /// <summary>
+        /// Set respective Status state.
+        /// </summary>
+        public virtual void Kill()
+        {
+            if (!this.Status.IsDead())
+            {
+                this.Status.Kill();
+            }
+        }
+        
+        /// <summary>
+        /// Set respective Status state.
+        /// </summary>
+        public virtual void Revive()
+        {
+            if (!this.Status.IsAlive())
+            {
+                this.Status.Revive();
+            }
+        }
+
+        /// <summary>
+        /// Set respective Status state.
+        /// </summary>
+        public virtual void Hide()
+        {
+            this.Status.Hide();
+        }
+
+        /// <summary>
+        /// Set respective Status state.
+        /// </summary>
+        public virtual void Show()
+        {
+            this.Status.Show();
+        }
+
+        /// <summary>
+        /// Set respective Status state.
+        /// </summary>
+        public virtual void HideGUI()
+        {
+            this.Status.HideGUI();
+        }
+
+        /// <summary>
+        /// Set respective Status state.
+        /// </summary>
+        public virtual void ShowGUI()
+        {
+            this.Status.ShowGUI();
         }
         
         #endregion

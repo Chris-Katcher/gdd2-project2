@@ -344,6 +344,9 @@ namespace Arcana.InputManagement
                 // Set this name.
                 this.Name = "Input Manager";
 
+                // Set debug mode.
+                this.Debug = true;
+
                 // Initialize the input manager.
                 Debugger.Print("Initializing input manager.", this.Self.name);
 

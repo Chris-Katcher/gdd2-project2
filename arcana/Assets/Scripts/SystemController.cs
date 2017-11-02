@@ -40,12 +40,7 @@ public class SystemController : ArcanaObject {
     /// If true, debug messages will print for this program.
     /// </summary>
     public bool DEBUG_MODE = true;    // Will allow setting of debug mode.
-
-    /// <summary>
-    /// Initialization flag.
-    /// </summary>
-    private bool m_initialized = false;
-
+    
     // Set up the managers.
 
     /// <summary>
@@ -144,8 +139,14 @@ public class SystemController : ArcanaObject {
         }
         else
         {
+
+
+
+
+
+
             // If the system controller has been initialized, perform these actions.
-            
+            // HandleInput();
 
 
             /*
@@ -187,7 +188,7 @@ public class SystemController : ArcanaObject {
             Debugger.SetDebugMode(DEBUG_MODE);
 
             // Build the system controller object.
-            Debugger.Print("Initialize system controller object.");
+            Debugger.Print("Initialize system controller object.", this.Self.name, this.Debug);
 
             // Create an empty game object and add the manager object.
             this.m_managers = Services.CreateEmptyObject("System Managers").AddComponent<ArcanaObject>();
@@ -205,19 +206,19 @@ public class SystemController : ArcanaObject {
             BuildManagers();
 
             // Add the controls.
-            InitializeControls();
+            // InitializeControls();
         }
     }
 
     /// <summary>
     /// Initialize the system controller's controls.
     /// </summary>
-    protected override void InitializeControls()
+    protected override ControlScheme InitializeControls()
     {
-        base.InitializeControls();
+        this.m_scheme = base.InitializeControls();
 
         // Set the director for the system controller.
-        Debugger.Print("Adding controls to the control scheme for Controller: " + this.Director);
+        Debugger.Print("Adding controls to the control scheme for Controller: " + this.Director, this.Self.name, this.Debug);
 
         // AddHandle("Mouse X", CommandTypes.MouseMovement);
         // AddHandle("Mouse Y", CommandTypes.Axis);
@@ -256,6 +257,7 @@ public class SystemController : ArcanaObject {
         RegisterControl("Mouse Click", Control.CreateMouseButton(MouseButton.LMB), ResponseMode.Pressed);
         // RegisterAction(Actions.Click, new Command(_mouse: 0), CommandResponseMode.Press);
 
+        return this.m_scheme;
     }
 
     #region Manager Building Methods.
@@ -266,7 +268,7 @@ public class SystemController : ArcanaObject {
     private void BuildManagers()
     {
         // Build the managers.
-        Debugger.Print("Build the managers.");
+        Debugger.Print("Build the managers.", this.Self.name, this.Debug);
 
         // Build the input manager.
         BuildInputManager();
@@ -288,11 +290,16 @@ public class SystemController : ArcanaObject {
     private void BuildInputManager()
     {
         // Build the manager.
-        Debugger.Print("Build the input manager component.");
+        Debugger.Print("Build the input manager component.", this.Self.name, this.Debug);
         
         // Build the manager.
-        Debugger.Print("Create the InputManager component, add it to the Managers GameObject, and retain the reference.");
-        this.m_inputManager = InputManager.Create(this.Managers);
+        Debugger.Print("Create the InputManager component, add as a child to the Managers GameObject, and retain the reference.", this.Self.name, this.Debug);
+
+        // Create an input manager.
+        this.m_inputManager = InputManager.Create(Services.AddChild(this.Managers.Self, Services.CreateEmptyObject("Input Manager")).AddComponent<ArcanaObject>());
+        this.Managers.AddChild(this.m_inputManager);
+        this.m_inputManager.Initialize();
+        this.m_inputManager.Activate();
 
         // Add the system control scheme.
         BuildControlScheme();
@@ -313,11 +320,16 @@ public class SystemController : ArcanaObject {
     private void BuildStateManager()
     {
         // Build the manager.
-        Debugger.Print("Build the state manager component.");
+        Debugger.Print("Build the state manager component.", this.Self.name, this.Debug);
         
         // Build the manager.
-        Debugger.Print("Create the StateManager component, add it to the Managers GameObject, and retain the reference.");
-        this.m_stateManager = StateManager.Create(this.Managers);
+        Debugger.Print("Create the StateManager component, add as a child to the Managers GameObject, and retain the reference.", this.Self.name, this.Debug);
+        
+        // Create a state manager.
+        this.m_stateManager = StateManager.Create(Services.AddChild(this.Managers.Self, Services.CreateEmptyObject("State Manager")).AddComponent<ArcanaObject>());
+        this.Managers.AddChild(this.m_stateManager);
+        this.m_stateManager.Initialize();
+        this.m_stateManager.Activate();
     }
     
     /// <summary>
@@ -326,11 +338,16 @@ public class SystemController : ArcanaObject {
     private void BuildCameraManager()
     {
         // Build the camera manager.
-        Debugger.Print("Build the camera manager component.");
+        Debugger.Print("Build the camera manager component.", this.Self.name, this.Debug);
         
         // Build the manager.
-        Debugger.Print("Create the CameraManager component, add it to the Managers GameObject, and retain the reference.");
-        this.m_cameraManager = CameraManager.Create(this.Managers);
+        Debugger.Print("Create the CameraManager component, add as a child to the Managers GameObject, and retain the reference.", this.Self.name, this.Debug);
+
+        // Create a camera manager.
+        this.m_cameraManager = CameraManager.Create(Services.AddChild(this.Managers.Self, Services.CreateEmptyObject("Camera Manager")).AddComponent<ArcanaObject>());
+        this.Managers.AddChild(this.m_cameraManager);
+        this.m_cameraManager.Initialize();
+        this.m_cameraManager.Activate();
     }
 
     /// <summary>
@@ -339,11 +356,16 @@ public class SystemController : ArcanaObject {
     private void BuildEntityManager()
     {
         // Build the manager.
-        Debugger.Print("Build the entity manager component.");
+        Debugger.Print("Build the entity manager component.", this.Self.name, this.Debug);
         
         // Build the manager.
-        Debugger.Print("Create the EntityManager component, add it to the Managers GameObject, and retain the reference.");
-        this.m_entityManager = EntityManager.Create(this.Managers);
+        Debugger.Print("Create the EntityManager component, add as a child to the Managers GameObject, and retain the reference.", this.Self.name, this.Debug);
+
+        // Create an entity manager.
+        this.m_entityManager = EntityManager.Create(Services.AddChild(this.Managers.Self, Services.CreateEmptyObject("Entity Manager")).AddComponent<ArcanaObject>());
+        this.Managers.AddChild(this.m_entityManager);
+        this.m_entityManager.Initialize();
+        this.m_entityManager.Activate();
     }
 
     #endregion
@@ -364,33 +386,33 @@ public class SystemController : ArcanaObject {
 
         if (Controls.IsActivated(GetAction("D")))
         {
-            Debugger.Print("Pressed the D key.");
+            Debugger.Print("Pressed the D key.", this.Self.name, this.Debug);
         }
 
         if (Controls.IsActivated(GetAction("S")))
         {
-            Debugger.Print("Pressed the S key.");
+            Debugger.Print("Pressed the S key.", this.Self.name, this.Debug);
         }
 
         if (Controls.IsActivated(GetAction("A")))
         {
-            Debugger.Print("Pressed the A key.");
+            Debugger.Print("Pressed the A key.", this.Self.name, this.Debug);
         }
 
         if (Controls.IsActivated(GetAction("Mouse Click")))
         {
             Vector2 mouse = Services.ToVector2(Input.mousePosition);
-            Debugger.Print("Clicked the left mouse button: " + mouse);
+            Debugger.Print("Clicked the left mouse button: " + mouse, this.Self.name, this.Debug);
         }
 
         if (Controls.IsActivated(GetAction("Joystick1A_PRESSED")))
         {
-            Debugger.Print("Joystick 1 A pressed.");
+            Debugger.Print("Joystick 1 A pressed.", this.Self.name, this.Debug);
         }
 
         if (Controls.IsActivated(GetAction("Joystick1A_RELEASED")))
         {
-            Debugger.Print("Joystick 1 A released.");
+            Debugger.Print("Joystick 1 A released.", this.Self.name, this.Debug);
         }
         
     }

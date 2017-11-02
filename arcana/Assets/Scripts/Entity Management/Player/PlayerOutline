@@ -1,0 +1,82 @@
+Platform {
+
+	// Transform
+	// // Position
+	// // Rotation (z only)
+	// // Scale
+		
+	// Cube (mesh filter)
+	
+	// Mesh Renderer
+	
+	// Box Collider 2D (default settings)
+	
+	// Platform Layer
+}
+
+Wizard Prefab {
+	// Sprite Renderer
+	// // Sprite = wizardBodyA (Sprite asset).
+	// // Color = WizzardBodyAMat (Material asset).
+	// // Flip.X = false; Flip.Y = false;
+	// // Draw Mode = Simple
+	// // Sorting Layer = Default
+	// // Order in Layer = 0
+	// // Mask Interaction = None
+	
+	// Box Collider 2D
+	// // Physics Material = None
+	// // IsTrigger = False
+	// // Used By Effector = False
+	// // Used by Composite = False
+	// // Auto Tiling = False
+	// // Offset.X = 0.008312151; Offset.Y = -0.01187449;
+	// // Size.X = 0.1418829; Size.Y = 0.296251;
+	// // Edge Radius = 0
+	// // Info
+	// // // Attached Body (The rigidbody on this object).
+	// // // Friction = 0.4
+	// // // Bounciness = 0
+	// // // Shape Count = 0
+	
+	// Rigidbody 2D
+	// // Body Type = Dynamic
+	// // Physics Material = None
+	// // Simulated = True
+	// // Use Auto Mass = False
+	// // Mass = 5
+	// // Linear Drag = 2.5
+	// // Angular Drag = 0.05
+	// // Gravity Scale = 4
+	// // Collision Detection = Discrete
+	// // Sleeping Mode = Awake
+	// // Interpolate = None
+	// // Constraints
+	// // // Freeze Position.X = False; Freeze Position.Y = False;
+	// // // Freeze Rotation.Z = False;
+	
+	// Entity (Script)
+	// // Set EntityType to EntityType.Player
+	
+	// Player (Script)
+	// // Will create player controller and data scripts.
+	
+	// PlayerController (Script)
+	// // Contains movement for the player.
+	// // Jump_Enabled flag.	
+	// // Keeps the player within bounds.
+	
+	// PlayerData (Script)
+	// // Contains information about starting position.
+	// // Contains event handling code for player spawn/player death.
+	// // Contains information about health.
+	// // Contains information about speed/jump force.
+	// // Contains information about score.
+	// // Contains information about player number (gamepad #).
+	// // Contains setup for input.
+	
+	// Player1Data : PlayerData (Script)
+	// // This will simply inherit PlayerData and modify accordingly.
+
+	// WizardBodyAMaterial
+}

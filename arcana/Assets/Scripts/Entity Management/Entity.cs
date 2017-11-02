@@ -82,9 +82,9 @@ namespace Arcana.Entities
         /////////////////////
         
         /// <summary>
-        /// The type of Entity this Entity component represents.
+        /// The type of Entity this Entity component represents (a composite of various types).
         /// </summary>
-        private EntityType m_type;
+        private List<EntityType> m_types;
 
         /// <summary>
         /// Identifying name of the component that can differ from the object.
@@ -106,18 +106,22 @@ namespace Arcana.Entities
         {
             get
             {
-                return (base.IsNull || this.m_type == EntityType.NULL);
+                return (base.IsNull || this.EntityTypes.Contains(EntityType.NULL));
             }
         }
 
         /// <summary>
-        /// Returns the type of this entity.
+        /// Returns the types of this entity.
         /// </summary>
-        public EntityType EntityType
+        public List<EntityType> EntityTypes
         {
             get
             {
-                return this.m_type;
+                if (this.m_types == null)
+                {
+                    this.m_types = new List<EntityType>();
+                }
+                return this.m_types;
             }
         }
 
@@ -138,13 +142,17 @@ namespace Arcana.Entities
 
         #region Initialization Methods.
 
+        /// <summary>
+        /// Initializes the Entity with a null type.
+        /// </summary>
         public override void Initialize()
         {
             // Call the base initialization method.
             base.Initialize();
-            
+
             // Set the default type.
-            this.m_type = EntityType.Entity;
+            this.m_types = this.EntityTypes;
+            this.m_types.Add(EntityType.NULL); // Null entity by default.
 
             // Set the name to untitled by default.
             this.SetID("Untitled Entity");            
@@ -158,11 +166,21 @@ namespace Arcana.Entities
         /// Return Entities from list of children.
         /// </summary>
         /// <returns>Returns list of entities.</returns>
-        public List<Entity> GetEntities()
+        public List<Entity> GetChildEntities()
         {
             return this.GetChildren<Entity>();
         }
 
+        /// <summary>
+        /// Returns whether or not the Entity contains a certain type.
+        /// </summary>
+        /// <param name="_type">Checks if type exists.</param>
+        /// <returns>Return true if it has the input type.</returns>
+        private bool HasType(EntityType _type)
+        {
+            return this.EntityTypes.Contains(_type);
+        }
+        
         /// <summary>
         /// Check if it matches the input type. EntityType.NULL will never be true.
         /// </summary>
@@ -171,27 +189,15 @@ namespace Arcana.Entities
         public bool IsType(EntityType _type)
         {
             // Null types cannot be checked for a match.
-            if (_type != EntityType.NULL)
+            if (!this.IsNull)
             {
-                return (this.m_type == _type);
+                return HasType(_type);
             }
 
             // Will return false by default.
             return false;
         }
-
-        /// <summary>
-        /// Set the type if it is currently set to null.
-        /// </summary>
-        /// <param name="_type">Type to be set to.</param>
-        public void SetType(EntityType _type)
-        {
-            if (this.IsNull)
-            {
-                this.m_type = _type;
-            }
-        }
-
+        
         /// <summary>
         /// Check if ID value matches input.
         /// </summary>
@@ -206,6 +212,66 @@ namespace Arcana.Entities
             return (input.Length > 0) && (this.m_name.ToUpper().Trim() == input);
         }
 
+        #endregion
+
+        #region Mutator Methods.
+
+        /// <summary>
+        /// Add Entity as a child if it doesn't already exist.
+        /// </summary>
+        /// <param name="_entity">Entity to add as a child.</param>
+        public void AddChildEntity(Entity _entity)
+        {
+            if (!GetChildEntities().Contains(_entity))
+            {
+                this.AddChild(_entity);
+            }
+        }
+
+        /// <summary>
+        /// Remove type from the composite list.
+        /// </summary>
+        /// <param name="_type">Type to remove from this entity.</param>
+        public void RemoveType(EntityType _type)
+        {
+            // Remove type if it exists.
+            if (HasType(_type))
+            {
+                this.EntityTypes.Remove(_type);
+            }
+        }
+
+        /// <summary>
+        /// Add type to the composite list.
+        /// </summary>
+        /// <param name="_type">Type to make this entity.</param>
+        public void AddType(EntityType _type)
+        {
+            // If already null.
+            if (HasType(EntityType.NULL))
+            {
+                // Remove null type and add current type.
+                if (_type != EntityType.NULL)
+                {
+                    this.EntityTypes.Remove(EntityType.NULL);
+                    this.EntityTypes.Add(_type);
+                    return;
+                }
+
+                // If null, do nothing.
+                return;
+            }
+            else
+            {
+                // Else, if not already null.
+                // Add current type if it doesn't already have it.
+                if (!HasType(_type))
+                {
+                    this.EntityTypes.Add(_type);
+                }
+            }
+        }
+
         /// <summary>
         /// Set the name of this Entity, if (and only if) the name doesn't already exist in pool of used names.
         /// </summary>
@@ -213,7 +279,7 @@ namespace Arcana.Entities
         public void SetID(string _id)
         {
             // Get the verified version of the name, added to this.
-            this.m_name = _id;
+            this.m_name = _id.ToUpper().Trim();
 
             // Update the EntityManager registry.
             EntityManager.UpdateRegistry(this);

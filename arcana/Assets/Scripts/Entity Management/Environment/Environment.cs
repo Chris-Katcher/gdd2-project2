@@ -3,6 +3,7 @@
  * 
  * This file contains:
  * - The Environment class. (Child of Entity).
+ * - The EnvironmentType enum.
  ************************************************/
 
 /////////////////////
@@ -21,7 +22,7 @@ namespace Arcana.Environment
     #region Class: Environment class.
 
     /// <summary>
-    /// Environment keeps track of other environment pieces (obstacles, platforms, walls), and is an entity itself.
+    /// Environment is the base class for platforms.
     /// </summary>
     public class Environment : Entity
     {
@@ -35,11 +36,24 @@ namespace Arcana.Environment
         /////////////////////
 
         /// <summary>
-        /// Physical objects that can be placed in the scene are props.
+        /// Represents the type of environment being dealt with.
         /// </summary>
-        private List<Entity> m_props;
+        private List<EnvironmentType> m_type;
 
-        // TODO: Add component for determining boundaries.
+        /// <summary>
+        /// Current position of the environment set-piece.
+        /// </summary>
+        private Vector3 m_position;
+
+        /// <summary>
+        /// Current rotation of the environment set-piece.
+        /// </summary>
+        private Vector3 m_rotation;
+
+        /// <summary>
+        /// Current scale of the environment set-piece.
+        /// </summary>
+        private Vector3 m_scale;
 
         #endregion
 
@@ -50,14 +64,89 @@ namespace Arcana.Environment
         /////////////////////
 
         /// <summary>
-        /// Returns the collection of props in the scene.
+        /// Reference to the environment type.
         /// </summary>
-        public List<Entity> Props
+        public List<EnvironmentType> EnvironmentTypes
         {
-            get { return this.m_props; }
+            get
+            {
+                if (this.m_type == null)
+                {
+                    this.m_type = new List<EnvironmentType>();
+                }
+                return this.m_type;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if base class IsNull is true or if it has a null environment type.
+        /// </summary>
+        public override bool IsNull
+        {
+            get
+            {
+                return base.IsNull && this.EnvironmentTypes.Contains(EnvironmentType.NULL);
+            }
+        }
+
+        /// <summary>
+        /// Reference to the current position.
+        /// </summary>
+        public Vector3 CurrentPosition
+        {
+            get { return this.m_position; }
+            set { SetPosition(value); }
+        }
+
+        /// <summary>
+        /// Set the rotation.
+        /// </summary>
+        public Vector3 Rotation
+        {
+            get { return this.m_rotation; }
+            set { SetRotation(value); }
+        }
+
+        /// <summary>
+        /// Reference to the current scale.
+        /// </summary>
+        public Vector3 Scale
+        {
+            get { return this.m_scale; }
+            set { SetScale(value); }
         }
 
         #endregion
+
+        #endregion
+
+        #region UnityEngine Methods.
+
+        /// <summary>
+        /// Handle environment updates.
+        /// </summary>
+        public override void Update()
+        {
+            if (!this.Initialized)
+            {
+                this.Initialize();
+            }
+            else
+            {
+                // Base update.
+                base.Update();
+            }
+        }
+
+        /// <summary>
+        /// Update transform positions.
+        /// </summary>
+        public void FixedUpdate()
+        {
+            this.transform.position = this.CurrentPosition;
+            this.transform.rotation = Quaternion.Euler(this.Rotation);
+            this.transform.localScale = this.Scale;
+        }
 
         #endregion
 
@@ -73,70 +162,136 @@ namespace Arcana.Environment
                 // Call the base class's initialization function.
                 base.Initialize();
 
-                // Make the props object.
-                this.m_props = new List<Entity>();
-
-                // TODO: Change Entity to Props.
-                // TODO: Initialize the spawnable area.
+                // Initialize with null type.
+                this.m_type = new List<EnvironmentType>() { EnvironmentType.NULL };
             }
         }
 
         #endregion
-        
+
+        #region Status Methods
+
+        /// <summary>
+        /// Hide the environment.
+        /// </summary>
+        public override void Hide()
+        {
+            base.Hide();
+
+            // Hide objects.
+            RendererVisibility(this.Self.GetComponent<MeshRenderer>(), false);
+            RendererVisibility(this.Self.GetComponent<SpriteRenderer>(), false);
+        }
+
+        /// <summary>
+        /// Show the environment.
+        /// </summary>
+        public override void Show()
+        {
+            base.Show();
+
+            // Show objects.
+            RendererVisibility(this.Self.GetComponent<MeshRenderer>(), true);
+            RendererVisibility(this.Self.GetComponent<SpriteRenderer>(), true);
+        }
+
+        /// <summary>
+        /// Adjust a renderer's visibility.
+        /// </summary>
+        /// <param name="r">Renderer to adjust.</param>
+        /// <param name="_enabled">Flag to designate visibility.</param>
+        private void RendererVisibility(Renderer r, bool _enabled)
+        {
+            if(r != null)
+            {
+                r.enabled = _enabled;
+            }
+        }
+
+        #endregion
+
         #region Accessor Methods.
 
         /// <summary>
-        /// Determines if the environment is empty or not.
+        /// Returns true if it contains the type.
         /// </summary>
-        /// <returns>Returns true if there are elements in the prop list.</returns>
-        public bool HasProps()
+        /// <param name="_type">Type to check for.</param>
+        /// <returns>Returns true if match is found.</returns>
+        public bool HasEnvironmentType(EnvironmentType _type)
         {
-            return (this.m_props != null && this.m_props.Count > 0);
+            return this.EnvironmentTypes.Contains(_type);
         }
-
-        /// <summary>
-        /// If this has props, the environment is not available to be reused.
-        /// </summary>
-        /// <returns>Returns true if available.</returns>
-        public override bool IsAvailable()
-        {
-            return (!HasProps() && base.IsAvailable());
-        }
-
-        /// <summary>
-        /// Run when asked to make entity available.
-        /// </summary>
-        public override void MakeAvailable()
-        {
-            this.m_props = new List<Entity>();
-            this.Status.Activate();
-        }
-
+        
         #endregion
 
         #region Mutator Methods.
 
         /// <summary>
-        /// Add prop to the props list.
+        /// Adds type.
         /// </summary>
-        /// <param name="e">Prop to add.</param>
-        public void AddProp(Entity e)
+        /// <param name="_type">Adds a type to the environment.</param>
+        public void AddEnvironmentType(EnvironmentType _type)
         {
-            this.m_props.Add(e);
+            if (!HasEnvironmentType(_type))
+            {
+                this.EnvironmentTypes.Add(_type);
+            }
+
+            if (_type != EnvironmentType.NULL)
+            {
+                RemoveEnvironmentType(EnvironmentType.NULL);
+            }
         }
 
         /// <summary>
-        /// Remove the prop from the props list.
+        /// Remove a type if it exists.
         /// </summary>
-        /// <param name="e">Prop to remove.</param>
-        public void RemoveProp(Entity e)
+        /// <param name="_type">Type to remove.</param>
+        public void RemoveEnvironmentType(EnvironmentType _type)
         {
-            if (this.m_props.Contains(e))
+            if (HasEnvironmentType(_type))
             {
-                this.m_props.Remove(e);
+                this.EnvironmentTypes.Remove(_type);
             }
         }
-        
+
+        /// <summary>
+        /// Set the position of the environment piece.
+        /// </summary>
+        /// <param name="_position"></param>
+        public void SetPosition(Vector3 _position)
+        {
+            if (_position != Vector3.zero)
+            {
+                this.m_position = _position;
+            }
+        }
+
+        /// <summary>
+        /// Set the 
+        /// </summary>
+        /// <param name="_rotation"></param>
+        public void SetRotation(Vector3 _rotation)
+        {
+            this.m_rotation = _rotation;
+        }
+
+        /// <summary>
+        /// Set scale for the environment piece.
+        /// </summary>
+        /// <param name="_scale">Scale to set.</param>
+        public void SetScale(Vector3 _scale)
+        {
+            if (_scale != Vector3.zero)
+            {
+                Vector3 scale = _scale;
+                scale.x = Services.Max(scale.x, 0.1f);
+                scale.y = Services.Max(scale.y, 0.1f);
+                scale.z = Services.Max(scale.z, 0.1f);
+                this.m_scale = scale;
+            }
+        }
+                
         #endregion
 
     }
@@ -145,7 +300,52 @@ namespace Arcana.Environment
 
     #region Enum: EnvironmentType
 
-    // TODO: Create environment types.
+    /// <summary>
+    /// Represents the different type of environmental pieces.
+    /// </summary>
+    public enum EnvironmentType
+    {
+        /// <summary>
+        /// Default type.
+        /// </summary>
+        NULL,
+
+        /// <summary>
+        /// A background set-piece that can't be interacted with.
+        /// </summary>
+        Decor,
+
+        /// <summary>
+        /// A set-piece that can be moved.
+        /// </summary>
+        Obstacle,
+
+        /// <summary>
+        /// Solid platform.
+        /// </summary>
+        Platform,
+        
+        /// <summary>
+        /// Platform modifier that allows players to pass through the bottom.
+        /// </summary>
+        Passthrough,
+        
+        /// <summary>
+        /// Platform that cannot be passed through.
+        /// </summary>
+        Wall,
+
+        /// <summary>
+        /// Wall modifier that indicates top of the screen.
+        /// </summary>
+        Ceiling,
+
+        /// <summary>
+        /// Ground modifier that indicates bottom of the screen.
+        /// </summary>
+        Ground
+    }
+
 
     #endregion
 

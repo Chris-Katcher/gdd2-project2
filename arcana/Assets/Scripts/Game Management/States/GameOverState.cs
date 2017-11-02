@@ -96,7 +96,8 @@ namespace Arcana.States
             // Set the state ID.
             this.InitializeState(StateID.GameOverState);
 
-            // TODO: Add the screen IDs.
+            // Set name.
+            this.Name = "Game Over";
         }
 
         #endregion

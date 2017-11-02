@@ -31,6 +31,34 @@ namespace Arcana.Entities.Attributes
     public class HealthComponent : ArcanaObject
     {
 
+        #region Static Methods.
+        
+        #region Component Factory Methods.
+
+        /// <summary>
+        /// Creates a new component.
+        /// </summary>
+        /// <returns>Creates a new component and adds it to the parent.</returns>
+        public static HealthComponent Create(ArcanaObject _parent)
+        {
+            return ComponentFactory.Create<HealthComponent>(_parent);
+        }
+
+        /// <summary>
+        /// Clone a component and set it equal to another.
+        /// </summary>
+        /// <param name="_parent">Parent to add clone to.</param>
+        /// <param name="_template">Component to clone.</param>
+        /// <returns>Returns a new component that has been cloned.</returns>
+        public static HealthComponent Clone(ArcanaObject _parent, HealthComponent _template)
+        {
+            return (HealthComponent)(HealthComponent.Create(_parent)).Clone(_template);
+        }
+
+        #endregion
+
+        #endregion
+        
         #region Data Members.
 
         #region Fields.

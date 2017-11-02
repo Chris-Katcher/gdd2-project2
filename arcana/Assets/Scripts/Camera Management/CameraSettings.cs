@@ -263,11 +263,10 @@ namespace Arcana.Cameras
         #endregion
 
         #region UnityEngine Methods.
-
-        // Inspector fields:
-        public bool _button = true;
-        private bool _prev = true;
-
+        
+        /// <summary>
+        /// Toggle the current camera mode.
+        /// </summary>
         public void ToggleMode()
         {
             switch (this.m_mode)
@@ -298,12 +297,6 @@ namespace Arcana.Cameras
             // Call the base update.
             base.Update();
             
-            if (_prev != _button)
-            {
-                ToggleMode();
-                _prev = _button;
-            }
-
             // Update the camera based on its mode.
             UpdateCamera();
         }
@@ -420,7 +413,7 @@ namespace Arcana.Cameras
         public void UpdateCamera()
         {
             // Print out the camera mode.
-            Debugger.Print("Current camera mode: " + Parse(this.m_mode), this.Name, _debug);
+            Debugger.Print("Current camera mode: " + Parse(this.m_mode), this.Name, this.Debug);
             
             // When in free mode.
             if (!IsFreeCamera())

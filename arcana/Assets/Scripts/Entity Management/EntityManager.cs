@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Arcana.Utilities;
+using Arcana.Environment;
 
 namespace Arcana.Entities
 {
@@ -47,15 +48,6 @@ namespace Arcana.Entities
 
             switch (_type)
             {
-                case EntityType.Projectile:
-                    result = "(Projectile)";
-                    break;
-                case EntityType.Wall:
-                    result = "(Wall)";
-                    break;
-                case EntityType.Platform:
-                    result = "(Platform)";
-                    break;
                 case EntityType.Player:
                     result = "(Player)";
                     break;
@@ -66,8 +58,10 @@ namespace Arcana.Entities
                     result = "(Environment)";
                     break;
                 case EntityType.NULL:
+                    result = "(Null Entity)";
+                    break;
                 default:
-                    result = "";
+                    result = "(Unknown Entity)";
                     break;
             }
 
@@ -110,7 +104,6 @@ namespace Arcana.Entities
         {
             return (instance != null);
         }
-
 
         #endregion
         
@@ -220,6 +213,7 @@ namespace Arcana.Entities
         /// Add the Entity to the collection.
         /// </summary>
         /// <param name="e">Entity to add.</param>
+        /// <param name="overwrite">Flag to overwrite existing entity if it exists.</param>
         public static void RegisterEntity(Entity e, bool overwrite = true)
         {
             // If you don't want to overwrite an existing Entity. (On by default).
@@ -303,6 +297,7 @@ namespace Arcana.Entities
         /// Returns input name, as long as it isn't in the collection, modifying it should it already exist.
         /// </summary>
         /// <param name="_name">Name to modify, should it be unavailable.</param>
+        /// <param name="level">Level of recursion to apply to entity naming.</param>
         /// <returns>Returns the final form of the name.</returns>
         private static string GetAvailableName(string _name, int level = 0)
         {
@@ -365,15 +360,10 @@ namespace Arcana.Entities
         {
             get
             {
-                if (this.m_entities != null)
+                if (this.m_entities == null)
                 {
-                    return this.m_entities;
+                    this.m_entities = new List<Entity>();
                 }
-
-                // Give entities an empty list.
-                this.m_entities = new List<Entity>();
-
-                // Return an empty list if internal storage is null.
                 return this.m_entities;
             }
         }
@@ -437,7 +427,7 @@ namespace Arcana.Entities
         /// <returns>Returns true if it is contained within the list.</returns>
         public bool HasEntity(Entity e)
         {
-            return this.m_entities.Contains(e);
+            return this.Entities.Contains(e);
         }
 
         /// <summary>
@@ -546,7 +536,7 @@ namespace Arcana.Entities
             {
                 Debugger.Print("Adding new " + Parse(_type) + " Entity component to parent " + parent.Name + ".", this.Name, this.Debug);
                 component = parent.Self.AddComponent<Entity>();
-                component.SetType(_type);
+                component.AddType(_type);
             }
 
             // Add the component.
@@ -554,6 +544,62 @@ namespace Arcana.Entities
 
             // Return the entity.
             return component;
+        }
+
+        /// <summary>
+        /// Makes a platform component and adds it to this manager's list.
+        /// </summary>
+        /// <param name="_parent">Parent to add the Entity component to.</param>
+        /// <param name="_type">Type of Entity to add.</param>
+        /// <returns>Returns an Entity component.</returns>
+        public Platform MakePlatform(ArcanaObject _parent, EnvironmentType _type)
+        {
+            // Get a container to return the component.
+            Platform component = null;
+            ArcanaObject parent = _parent;
+
+            // Check if the parent is null.
+            if (parent == null || parent.IsNull)
+            {
+                Debugger.Print("Creating new parent due to null input...", this.Name, this.Debug);
+
+                // Create a new, empty object and add a new arcana object component to it.
+                parent = Services.CreateEmptyObject().AddComponent<ArcanaObject>();
+
+                // Initialize the parent object.
+                parent.Initialize();
+            }
+
+            // Checking against all of the components currently in the parent.
+            foreach (Platform entity in parent.GetComponents<Platform>())
+            {
+                // Check if parent has an Entity on it already.
+                component = parent.GetComponent<Platform>();
+
+                // If the Entity matches the input type, we can return it.
+                if (component.HasEnvironmentType(_type))
+                {
+                    // Add if it doesn't exist already to the collection.
+                    AddEntity(component);
+
+                    // Leave the loop, with data in hand.
+                    break;
+                }
+            }
+
+            // If the Entity doesn't match the input type, we can create a new Entity component of said type.
+            if (component == null)
+            {
+                component = parent.Self.AddComponent<Platform>();
+                component.AddEnvironmentType(_type);
+            }
+
+            // Add the component.
+            AddEntity(component);
+
+            // Return the entity.
+            return component;
+
         }
 
         /// <summary>
@@ -657,10 +703,7 @@ namespace Arcana.Entities
         NULL,
         Entity,
         Environment,
-        Projectile,
-        Player,
-        Platform,
-        Wall
+        Player
     }
 
     #endregion

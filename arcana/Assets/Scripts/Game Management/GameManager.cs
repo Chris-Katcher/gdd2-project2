@@ -17,6 +17,7 @@ using Arcana.Physics;
 
 namespace Arcana
 {
+    /*
     /// <summary>
     /// Handles the main game loop.
     /// </summary>
@@ -126,5 +127,5 @@ namespace Arcana
         {
             return m_init;
         }
-    }
+    }*/
 }

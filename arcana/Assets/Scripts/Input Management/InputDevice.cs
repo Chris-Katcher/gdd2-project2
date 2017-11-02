@@ -16,6 +16,64 @@ using UnityEngine;
 
 namespace Arcana.InputManagement
 {
+
+    /// <summary>
+    /// Represents the various controllers that can be used.
+    /// </summary>
+    public enum InputDevice
+    {
+
+        /// <summary>
+        /// Refers to the player 1 keyboard controls.
+        /// </summary>
+        KeyboardP1,
+
+        /// <summary>
+        /// Refers to the Player 2 keyboard controls.
+        /// </summary>
+        KeyboardP2,
+
+        /// <summary>
+        /// Refers to an X-Input Controller.
+        /// </summary>
+        XboxController,
+
+        /// <summary>
+        /// Refers to a Playstation 4 controller.
+        /// </summary>
+        PS4Controller,
+
+        /// <summary>
+        /// Refers to a logitech-series controller.
+        /// </summary>
+        LogitechController
+
+    }
+
+    public class Controllers
+    {
+        public const string INPUT_P1_KB = "PLAYER 1";
+        public const string INPUT_P2_KB = "PLAYER 2";
+        public const string INPUT_XBOX_ONE = "CONTROLLER (XBOX ONE FOR WINDOWS)";
+        public const string INPUT_XBOX_360 = "CONTROLLER (XBOX 360 FOR WINDOWS)";
+        public const string INPUT_PS4 = "WIRELESS CONTROLLER";
+        public const string INPUT_LOGITECH_F710 = "LOGITECH DUAL ACTION";
+        public const string INPUT_LOGITECH_RUMBLEPAD2 = "LOGITECH CORDLESS RUMBLEPAD 2";
+        public const string INPUT_LOGITECH_F710_D = "CONTROLLER (WIRELESS GAMEPAD F710)";
+
+
+    }
+
+    /* public InputDevice ParseJoystick(string _joystickName)
+    {
+        // Checks the joystick name against values.
+
+
+    }
+
+    */
+
+
     /*
 
     /// <summary>

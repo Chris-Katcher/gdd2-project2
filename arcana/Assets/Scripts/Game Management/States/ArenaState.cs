@@ -96,7 +96,8 @@ namespace Arcana.States
             // Set the state ID.
             this.InitializeState(StateID.ArenaState);
 
-            // TODO: Add the screen IDs.
+            // Set name.
+            this.Name = "Arena";
         }
 
         #endregion

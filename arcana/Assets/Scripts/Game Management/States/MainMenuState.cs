@@ -95,7 +95,8 @@ namespace Arcana.States
             // Set the state ID.
             this.InitializeState(StateID.MainMenuState);
 
-            // TODO: Add the screen IDs to the main menu.
+            // Set the object name.
+            this.Name = "Main Menu (State)";
         }
 
         #endregion
@@ -118,4 +119,5 @@ namespace Arcana.States
     }
 
     #endregion
+
 }
