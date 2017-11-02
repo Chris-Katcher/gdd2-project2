@@ -640,8 +640,9 @@ namespace Arcana.Entities.Attributes
         /// <summary>
         /// Set health to minimum value.
         /// </summary>
-        public void Kill()
+        public override void Kill()
         {
+            base.Kill();
             this.m_health.End();
         }
 
@@ -650,6 +651,7 @@ namespace Arcana.Entities.Attributes
         /// </summary>
         public void Restore()
         {
+            this.Revive();
             this.m_health.Reset();
         }
 

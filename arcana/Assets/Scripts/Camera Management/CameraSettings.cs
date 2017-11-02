@@ -282,7 +282,7 @@ namespace Arcana.Cameras
         {
             get
             {
-                if (this.m_bounds == null)
+                if (this.m_bounds.size == Vector3.zero)
                 {
                     this.m_bounds = new Bounds(Vector3.zero, Vector3.zero);
                 }

@@ -21,41 +21,31 @@ namespace Arcana.UI.Elements
     public class GUIProgressBar : GUIElement
     {
 
-        #region Data Members
-
-        /////////////////////
-        // Public data fields.
-        /////////////////////
+        #region UnityEngine Methods.
 
         /// <summary>
-        /// Position of the IGUIElement.
+        /// Update the image.
         /// </summary>
-        public Vector2 m_position { get; set; }
+        public void Update()
+        {
+            // Update position.
+            this.transform.position = this.Offset + this.Position;
+        }
+
+        #endregion
+
+        #region Initialization Methods.
 
         /// <summary>
-        /// Depth level.
+        /// Initialize the GUIElement.
         /// </summary>
-        public int m_depth { get; set; }
-
-        /// <summary>
-        /// Element visibility.
-        /// </summary>
-        public bool m_visible { get; set; }
-
-        /// <summary>
-        /// Enable flag.
-        /// </summary>
-        public bool m_enabled { get; set; }
-
-        /////////////////////
-        // Private data fields.
-        /////////////////////
-
-        /// <summary>
-        /// Children that may be GUI elements.
-        /// </summary>
-        private List<IGUIElement> m_elements;
-
+        protected override void Initialize()
+        {
+            this.Offset = Vector3.zero;
+            this.Position = this.transform.position;
+            this.Name = "GUI Progress Bar";
+        }
+        
         #endregion
         
     }

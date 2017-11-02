@@ -38,6 +38,11 @@ namespace Arcana.UI.Elements
         private List<GUIElement> m_elements;
 
         /// <summary>
+        /// Name of the element.
+        /// </summary>
+        private string m_elementName;
+
+        /// <summary>
         /// Offset position of the element.
         /// </summary>
         private Vector2 m_offset;
@@ -58,7 +63,7 @@ namespace Arcana.UI.Elements
         private bool m_visible;
 
         /// <summary>
-        /// Enable flag.
+        /// Enable state for the element.
         /// </summary>
         private bool m_enabled;
 
@@ -76,7 +81,12 @@ namespace Arcana.UI.Elements
         /// Hover state for the element.
         /// </summary>
         private bool m_hover;
-        
+
+        /// <summary>
+        /// Size of the element.
+        /// </summary>
+        private Rect m_dimensions;
+
         #endregion
 
         #region Properties.
@@ -84,6 +94,19 @@ namespace Arcana.UI.Elements
         /////////////////////
         // Public data fields.
         /////////////////////
+
+        /// <summary>
+        /// Name of the element.
+        /// </summary>
+        public string Name
+        {
+            get { return this.m_elementName; }
+            set
+            {
+                this.m_elementName = value;
+                this.gameObject.name = this.m_elementName;        
+            }
+        }
 
         /// <summary>
         /// Reference to its children.
@@ -114,6 +137,7 @@ namespace Arcana.UI.Elements
         public Vector2 Offset
         {
             get { return this.m_offset; }
+            protected set { this.m_offset = value; }
         }
         
         /// <summary>
@@ -122,6 +146,7 @@ namespace Arcana.UI.Elements
         public Vector2 Position
         {
             get { return this.m_position; }
+            protected set { this.m_position = value; }
         }
 
         /// <summary>
@@ -160,17 +185,134 @@ namespace Arcana.UI.Elements
             protected set { this.m_visible = value; }
         }
 
+        /// <summary>
+        /// The enabled flag reference. 
+        /// </summary>
+        public bool Enabled
+        {
+            get { return this.m_enabled; }
+            set { this.m_enabled = value; }
+        }
+
+        /// <summary>
+        /// Size of the image.
+        /// </summary>
+        public Vector2 Dimensions
+        {
+            get { return this.m_dimensions.max; }
+            set { SetSize(value); }
+        }
+
+        /// <summary>
+        /// Returns the boundaries in world-space.
+        /// </summary>
+        public Rect Bounds
+        {
+            get { return new Rect(this.Position.x, this.Position.y, this.Position.x + this.Dimensions.x, this.Position.y + this.Dimensions.y); }
+            set
+            {
+                this.Position = value.min;
+                this.Dimensions = value.max - value.min;
+            }
+        }
+
         #endregion
+
+        #endregion
+
+        #region Service Methods
+
+        /// <summary>
+        /// Builds a GUIElement, initializes it, and returns a reference to it.
+        /// </summary>
+        /// <typeparam name="T">Type of element to build.</typeparam>
+        /// <param name="_parent">Parent that the element will be attached to.</param>
+        /// <returns>Returns a built and initialized GUIElement.</returns>
+        public T Build<T>(GameObject _parent = null) where T : GUIElement
+        {
+            GameObject parent = _parent;
+
+            // If parent is null, create a new parent.
+            if (parent == null)
+            {
+                parent = Services.CreateEmptyObject("GUIElement");
+            }
+
+            // Get reference to the input element.
+            T element = parent.GetComponent<T>();
+
+            // If the element doesn't exist, make a new one.
+            if (element == null)
+            {
+                parent.AddComponent<T>();
+            }
+
+            // Initialize the element.
+            return Initialize<T>(element);
+        }
+
+        /// <summary>
+        /// Generic GUIElement constructor.
+        /// </summary>
+        /// <param name="_parent">Parent that the element will be attached to.</param>
+        /// <returns>Returns a built and initialized GUIElement.</returns>
+        public GUIElement Build(GameObject _parent = null)
+        {
+            return Build<GUIElement>(_parent);
+        }
+
+        /// <summary>
+        /// Initialize the GUIElement.
+        /// </summary>
+        /// <returns>Returns an initialized GUIElement.</returns>
+        private T Initialize<T>(T _element) where T : GUIElement
+        {
+            _element.Initialize();
+            return _element;
+        }
+
+        /// <summary>
+        /// Initialize the GUIElement. Defined by child classes.
+        /// </summary>
+        protected abstract void Initialize();
+
+        /// <summary>
+        /// Destroy the element.
+        /// </summary>
+        public void Destroy()
+        {
+            // Destroying the element.
+            Debugger.Print("Destroying GUIElement.", this.Name);
+
+            // Destroy each of the children.
+            foreach (GUIElement child in this.Children)
+            {
+                child.Destroy();
+            }
+
+            // Destroy the game object.
+            Destroy(this.gameObject);
+        }
 
         #endregion
 
         #region Mutator Methods.
 
         /// <summary>
+        /// Set the boundaries of the image.
+        /// </summary>
+        /// <param name="_size">Bounds.</param>
+        public void SetSize(Vector2 _size)
+        {
+            this.transform.localScale = new Vector3(_size.x, _size.y, 1.0f);
+            this.m_dimensions.Set(0.0f, 0.0f, _size.x, _size.y);
+        }
+        
+        /// <summary>
         /// Set the offset of this element.
         /// </summary>
         /// <param name="_offset">Set the offset of this element</param>
-        public void SetOffset(Vector2 _offset)
+        public virtual void SetOffset(Vector2 _offset)
         {
             this.m_offset = _offset;
             
@@ -184,7 +326,7 @@ namespace Arcana.UI.Elements
         /// Set the position of this element.
         /// </summary>
         /// <param name="_position">Set the position of this element.</param>
-        public void SetPosition(Vector2 _position)
+        public virtual void SetPosition(Vector2 _position)
         {
             this.m_position = _position;
 
@@ -198,7 +340,7 @@ namespace Arcana.UI.Elements
         /// Set the depth of this element and any of its children.
         /// </summary>
         /// <param name="_depth">Depth to set.</param>
-        public void SetDepth(int _depth)
+        public virtual void SetDepth(int _depth)
         {
             this.m_depth = _depth;
 
@@ -212,7 +354,7 @@ namespace Arcana.UI.Elements
         /// Set the visibility.
         /// </summary>
         /// <param name="_visible">Visibility flag.</param>
-        public void SetVisible(bool _visible)
+        public virtual void SetVisible(bool _visible)
         {
             this.m_visible = _visible;
 
@@ -226,7 +368,7 @@ namespace Arcana.UI.Elements
         /// Set the focus.
         /// </summary>
         /// <param name="_focus">Focus flag.</param>
-        public void SetFocus(bool _focus)
+        public virtual void SetFocus(bool _focus)
         {
             this.m_focus = _focus;
 
@@ -240,7 +382,7 @@ namespace Arcana.UI.Elements
         /// Set the hover.
         /// </summary>
         /// <param name="_hover">Hover flag.</param>
-        public void SetHover(bool _hover)
+        public virtual void SetHover(bool _hover)
         {
             this.m_hover = _hover;
 
@@ -254,7 +396,7 @@ namespace Arcana.UI.Elements
         /// Enable/Disable.
         /// </summary>
         /// <param name="_flag">Enable flag.</param>
-        public void Enable(bool _flag)
+        public virtual void Enable(bool _flag)
         {
             this.m_enabled = _flag;
 
@@ -268,7 +410,7 @@ namespace Arcana.UI.Elements
         /// Select a GUI element.
         /// </summary>
         /// <param name="_select">Selection flag.</param>
-        public void Select(bool _select)
+        public virtual void Select(bool _select)
         {
             this.m_selected = _select;
 
