@@ -189,7 +189,6 @@ namespace Arcana.Entities.Attributes
                     "Images/wizardBodyA",
                     "Materials/WizzardBodyAMat");
                 renderer.InitializeRenderer();
-
             }
             
             return renderer;
