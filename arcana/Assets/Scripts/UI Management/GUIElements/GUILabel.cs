@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Arcana.UI.Screens;
 
 namespace Arcana.UI.Elements
 {
@@ -20,6 +21,56 @@ namespace Arcana.UI.Elements
     /// </summary>
     public class GUILabel : GUIElement
     {
+
+        #region Static Members.
+
+        /// <summary>
+        /// Create new GUILabel.
+        /// </summary>
+        /// <returns>Returns a GUILabel component reference.</returns>
+        public static GUILabel CreateLabel()
+        {
+            // Get reference to the prefab and instantiate it.
+            GameObject prefab = Instantiate(UIManager.GetInstance().Label) as GameObject;
+
+            // Make the label a child of the UIManager's canvas.
+            prefab = Services.AddChild(UIManager.GetInstance().Canvas, prefab);
+
+            // Create a new game object.
+            GUILabel label = prefab.AddComponent<GUILabel>();
+
+            // Initialize the label.
+            label.Initialize();
+
+            // Return the GUILabel.
+            return label;
+        }
+
+        /// <summary>
+        /// Create a label while specifying its message and position.
+        /// </summary>
+        /// <param name="message">Message to set label to.</param>
+        /// <param name="position">Position to place label.</param>
+        /// <returns>Returns a GUILabel.</returns>
+        public static GUILabel CreateLabel(string _message = "", Vector2? _position = null)
+        {
+            GUILabel label = CreateLabel();
+
+            label.Message = _message;
+
+            if (_position.HasValue)
+            {
+                label.SetPosition(_position.Value);
+            }
+            else
+            {
+                label.SetPosition(ScreenManager.Center);
+            }
+
+            return label;
+        }
+
+        #endregion
 
         #region Data Members.
 
@@ -64,8 +115,7 @@ namespace Arcana.UI.Elements
         /// </summary>
         public GameObject Label
         {
-            get { return this.m_label; }
-            set { this.m_label = value; }
+            get { return this.gameObject; }
         }
 
         /// <summary>
@@ -96,6 +146,15 @@ namespace Arcana.UI.Elements
                 }
                 return this.m_text;
             }
+        }
+
+        /// <summary>
+        /// Reference to the actual content of the label.
+        /// </summary>
+        public string Message
+        {
+            get { return this.Text.text; }
+            set { this.Text.text = value; }
         }
 
         /// <summary>
@@ -174,6 +233,31 @@ namespace Arcana.UI.Elements
         }
 
         #endregion
+
+        #region GUIElement Methods.
+
+        /// <summary>
+        /// Update the enabled state of the renderer.
+        /// </summary>
+        /// <param name="_flag">Value to set.</param>
+        public override void Enable(bool _flag)
+        {
+            base.Enable(_flag);
+            this.Text.enabled = this.Enabled && this.Visible;
+        }
+
+        /// <summary>
+        /// Update the visibility of the renderer.
+        /// </summary>
+        /// <param name="_flag">Value to set.</param>
+        public override void SetVisible(bool _flag)
+        {
+            base.SetVisible(_flag);
+            this.Text.enabled = this.Enabled && this.Visible;
+        }
+
+        #endregion
+
 
     }
 }

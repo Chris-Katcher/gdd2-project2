@@ -22,6 +22,8 @@ namespace Arcana.InputManagement
         {
             base.Update();
 
+            HandleInput();
+
             this.Self.transform.position = currentPosition;
         }
 
@@ -31,7 +33,7 @@ namespace Arcana.InputManagement
             {
                 base.Initialize();
 
-                this.Debug = false;
+                this.Debug = true;
                 this.Status.Activate();
 
                 if (this.leftStick) { this.Name = "Left Stick"; }

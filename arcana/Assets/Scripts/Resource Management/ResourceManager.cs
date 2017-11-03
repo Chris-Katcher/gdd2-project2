@@ -56,6 +56,9 @@ namespace Arcana.Resources
                 case ResourceType.Sound:
                     result = "(Auditory Resource)";
                     break;
+                case ResourceType.Prefab:
+                    result = "(Prefab Resource)";
+                    break;
                 default:
                     result = "(Unknown Resource)";
                     break;
@@ -87,6 +90,7 @@ namespace Arcana.Resources
             {
                 Debugger.Print("Creating new instance of ResourceManager.");
                 instance = Services.CreateEmptyObject("Resource Manager").AddComponent<ResourceManager>();
+                instance.Initialize();
             }
 
             return instance;
@@ -329,6 +333,9 @@ namespace Arcana.Resources
 
                 // Make the new list.
                 this.m_resources = new List<Resource>();
+
+                // Set the resource manager instance.
+                ResourceManager.instance = this;
             }
         }
 
@@ -498,14 +505,14 @@ namespace Arcana.Resources
 
             switch (_type)
             {
-                case ResourceType.NULL:
-                    resource = CreateResource(key, _path);
-                    break;
                 case ResourceType.Art:
                     resource = CreateArtResource(key, _path) as Resource;
                     break;
                 case ResourceType.Sound:
                     resource = CreateSoundResource(key, _path) as Resource;
+                    break;
+                default:
+                    resource = CreateResource(key, _path, _type);
                     break;
             }
 
@@ -513,12 +520,13 @@ namespace Arcana.Resources
             {
                 this.Resources.Add(resource);
                 ResourceManager.Register(resource);
+                return true;
             }
 
             Debugger.Print("Null resource cannot be registered.");
             return false;
         }
-
+        
         /// <summary>
         /// Create and register a resource.
         /// </summary>
@@ -535,17 +543,15 @@ namespace Arcana.Resources
             {
                 switch (_type)
                 {
-                    case ResourceType.NULL:
-                        resource = new Resource(key, _path);
-                        break;
                     case ResourceType.Art:
-                        resource = new ArtResource(key, _path) as Resource;
+                        resource = new ArtResource(key, _path, ResourceType.Art) as Resource;
                         break;
                     case ResourceType.Sound:
-                        resource = new SoundResource(key, _path) as Resource;
+                        resource = new SoundResource(key, _path, ResourceType.Sound) as Resource;
                         break;
                     default:
-                        return null;
+                        resource = new Resource(key, _path, _type);
+                        break;
                 }
 
                 return resource;
@@ -643,7 +649,12 @@ namespace Arcana.Resources
         /// <summary>
         /// An auditory resource will be represented by SoundResource objects.
         /// </summary>
-        Sound
+        Sound,
+
+        /// <summary>
+        /// A prefab resource.
+        /// </summary>
+        Prefab
     }
 
     #endregion

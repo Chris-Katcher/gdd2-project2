@@ -132,11 +132,11 @@ namespace Arcana.Resources
         /// Create a resource struct using the input filepath.
         /// </summary>
         /// <param name="_path">Filepath to assign.</param>
-        public Resource(string _id, string _path)
+        public Resource(string _id, string _path, ResourceType _type = ResourceType.NULL)
         {
             this.m_id = _id;
             this.m_resourcePath = _path.Trim();
-            this.m_type = ResourceType.NULL;
+            this.m_type = _type;
         }
 
         #endregion
@@ -157,7 +157,7 @@ namespace Arcana.Resources
         /// Returns the resource retrieved from the UnityEngine resources.
         /// </summary>
         /// <returns>Loaded asset.</returns>
-        protected UnityEngine.Object Load()
+        public UnityEngine.Object Load()
         {
             if (!IsLoaded && IsValid)
             {
