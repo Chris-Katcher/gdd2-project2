@@ -75,12 +75,7 @@ namespace Arcana.UI.Elements
         #region Data Members.
 
         #region Fields.
-
-        /// <summary>
-        /// Reference to the label.
-        /// </summary>
-        private GameObject m_label;
-
+        
         /// <summary>
         /// The rect transform reference.
         /// </summary>
@@ -216,6 +211,7 @@ namespace Arcana.UI.Elements
         {
             // Update position.
             this.transform.position = this.Offset + this.Position;
+            this.Text.fontSize = this.m_fontSize;
         }
 
         #endregion

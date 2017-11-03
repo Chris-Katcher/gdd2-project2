@@ -45,25 +45,63 @@ namespace Arcana.UI.Elements
             // Return the GUIPanel.
             return panel;
         }
-        
+
+        /// <summary>
+        /// Create new GUIPanel and initialize it.
+        /// </summary>
+        /// <param name="_position">Location of element.</param>
+        /// <param name="_dimensions">Size of element.</param>
+        /// <param name="_rotation">Rotation of element.</param>
+        /// <returns>Returns the panel.</returns>
+        public static GUIPanel CreatePanel(Vector2? _position = null, Vector2? _dimensions = null, Vector2? _rotation = null)
+        {
+            GUIPanel panel = CreatePanel();
+            
+            if (_position.HasValue)
+            {
+                panel.SetPosition(_position.Value);
+            }
+            else
+            {
+                panel.SetPosition(ScreenManager.Center);
+            }
+
+            if (_dimensions.HasValue)
+            {
+                panel.Dimensions = _dimensions.Value;
+            }
+            else
+            {
+                // Defaults.
+                panel.SetSize(new Vector2(100, 100));
+            }
+
+            if (_rotation.HasValue)
+            {
+                panel.Rotation = _rotation.Value;
+            }
+            else
+            {
+                // Defaults.
+                panel.Rotation = Vector3.zero;
+            }
+
+            return panel;
+        }
+
         #endregion
 
         #region Data Members.
 
         #region Fields.
-
-        /// <summary>
-        /// Reference to the panel.
-        /// </summary>
-        private GameObject m_panel;
-
+        
         /// <summary>
         /// The rect transform reference.
         /// </summary>
         private RectTransform m_rectTransform;
 
         /// <summary>
-        /// The UnityEnigine Image reference.
+        /// The UnityEngine Image reference.
         /// </summary>
         private UnityEngine.UI.Image m_image;
         
@@ -108,7 +146,16 @@ namespace Arcana.UI.Elements
                 return this.m_image;
             }
         }
-        
+
+        /// <summary>
+        /// Reference to the image's sprite.
+        /// </summary>
+        public Sprite Background
+        {
+            get { return this.Image.sprite; }
+            set { this.Image.sprite = value; }
+        }
+
         /// <summary>
         /// Width of the panel rect transform.
         /// </summary>
@@ -149,6 +196,8 @@ namespace Arcana.UI.Elements
         {
             // Update position.
             this.Transform.position = this.Offset + this.Position;
+            this.Width = this.Dimensions.x;
+            this.Height = this.Dimensions.y;
         }
 
         #endregion

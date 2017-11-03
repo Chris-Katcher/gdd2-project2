@@ -14,6 +14,8 @@ using System.Text;
 using UnityEngine;
 using Arcana.Cameras;
 using Arcana.Entities.Attributes;
+using Arcana.Resources;
+using Arcana.UI.Screens;
 
 namespace Arcana.UI.Elements
 {
@@ -23,116 +25,175 @@ namespace Arcana.UI.Elements
     public class GUIImage : GUIElement
     {
 
-        #region Data Members
+        #region Static Members.
+
+        /// <summary>
+        /// Create new GUIElement and initialize it.
+        /// </summary>
+        /// <returns>Returns a GUIElement component reference.</returns>
+        public static GUIImage CreateImage()
+        {
+            // Get reference to the prefab and instantiate it.
+            GameObject prefab = UIManager.GetInstance().Image.Clone;
+
+            // Make the label a child of the UIManager's canvas.
+            prefab = Services.AddChild(UIManager.GetInstance().Canvas, prefab);
+
+            // Create a new game object.
+            GUIImage image = prefab.AddComponent<GUIImage>();
+
+            // Initialize the image.
+            image.Initialize();
+
+            // Return the GUIImage.
+            return image;
+        }
+        
+        /// <summary>
+        /// Creates the image element.
+        /// </summary>
+        /// <param name="_id">ID of art asset.</param>
+        /// <param name="_path">Path to art asset.</param>
+        /// <param name="_position">Position of the image.</param>
+        /// <param name="_dimensions">Dimensions to give the image.</param>
+        /// <param name="_rotation">Rotation to apply to the image.</param>
+        /// <returns></returns>
+        public static GUIImage CreateImage(string _id, string _path, Vector2? _position = null, Vector2? _dimensions = null, Vector2? _rotation = null)
+        {
+            GUIImage image = CreateImage();
+
+            ResourceManager.GetInstance().AddResource(_id, _path, ResourceType.Art);
+            Sprite sprite = ResourceManager.GetInstance().GetArtResource(_id).GetSprite();
+
+            if (sprite != null)
+            {
+                image.Background = sprite;
+            }
+
+            if (_position.HasValue)
+            {
+                image.SetPosition(_position.Value);
+            }
+            else
+            {
+                image.SetPosition(ScreenManager.Center);
+            }
+            
+            if (_dimensions.HasValue)
+            {
+                image.Dimensions = _dimensions.Value;
+            }
+            else
+            {
+                // Defaults.
+                image.SetSize(sprite.rect.max);
+            }
+
+            if (_rotation.HasValue)
+            {
+                image.Rotation = _rotation.Value;
+            }
+            else
+            {
+                // Defaults.
+                image.Rotation = Vector3.zero;
+            }
+            
+            return image;
+        }
+
+        #endregion
+
+        #region Data Members.
 
         #region Fields.
 
         /// <summary>
-        /// Background ID of the screen.
+        /// The rect transform reference.
         /// </summary>
-        private string m_backgroundID;
+        private RectTransform m_rectTransform;
 
         /// <summary>
-        /// Location of the background sprite.
+        /// The UnityEngine Image reference.
         /// </summary>
-        private string m_backgroundPath;
-
-        /// <summary>
-        /// Material ID.
-        /// </summary>
-        private string m_materialID;
-
-        /// <summary>
-        /// Location of the background material.
-        /// </summary>
-        private string m_materialPath;
-
-        /// <summary>
-        /// SpriteRenderer for the background.
-        /// </summary>
-        private EntityRenderer m_renderer = null;
-
-        /// <summary>
-        /// Size of the element.
-        /// </summary>
-        private Rect m_dimensions;
+        private UnityEngine.UI.Image m_image;
 
         #endregion
 
         #region Properties.
 
         /// <summary>
-        /// Background ID.
+        /// The panel to use.
         /// </summary>
-        public string BackgroundID
+        public GameObject Self
         {
-            get { return this.m_backgroundID; }
-            protected set { this.m_backgroundID = value; }
+            get { return this.gameObject; }
         }
 
         /// <summary>
-        /// Location of the background sprite.
+        /// Reference to component on panel.
         /// </summary>
-        public string BackgroundPath
-        {
-            get { return this.m_backgroundPath; }
-            protected set { this.m_backgroundPath = value; }
-        }
-
-        /// <summary>
-        /// Material ID.
-        /// </summary>
-        public string MaterialID
-        {
-            get { return this.m_materialID; }
-            protected set { this.m_materialID = value; }
-        }
-
-        /// <summary>
-        /// Location of the background material.
-        /// </summary>
-        public string MaterialPath
-        {
-            get { return this.m_materialPath; }
-            protected set { this.m_materialPath = value; }
-        }
-
-        /// <summary>
-        /// Reference to the screen's sprite renderer.
-        /// </summary>
-        public EntityRenderer Renderer
+        public RectTransform Transform
         {
             get
             {
-                if (this.m_renderer == null)
+                if (this.m_rectTransform == null)
                 {
-                    this.m_renderer = this.InitializeRenderer();
+                    this.m_rectTransform = this.Self.GetComponent<RectTransform>();
                 }
-
-                return this.m_renderer;
+                return this.m_rectTransform;
             }
         }
 
         /// <summary>
-        /// Size of the image.
+        /// Reference to component on label.
         /// </summary>
-        public Vector2 Dimensions
+        public UnityEngine.UI.Image Image
         {
-            get { return this.m_dimensions.max; }
-            set { SetSize(value); }
-        }
-
-        /// <summary>
-        /// Returns the boundaries in world-space.
-        /// </summary>
-        public Rect Bounds
-        {
-            get { return new Rect(this.Position.x, this.Position.y, this.Position.x + this.Dimensions.x, this.Position.y + this.Dimensions.y); }
-            set
+            get
             {
-                this.Position = value.min;
-                this.Dimensions = value.max - value.min;
+                if (this.m_image == null)
+                {
+                    this.m_image = this.Self.GetComponent<UnityEngine.UI.Image>();
+                }
+                return this.m_image;
             }
+        }
+
+        /// <summary>
+        /// Reference to the image's sprite.
+        /// </summary>
+        public Sprite Background
+        {
+            get { return this.Image.sprite; }
+            set { this.Image.sprite = value; }
+        }
+
+        /// <summary>
+        /// Width of the image's rect transform.
+        /// </summary>
+        public float Width
+        {
+            get { return this.Transform.sizeDelta.x; }
+            set { this.Transform.sizeDelta = new Vector2(value, this.Height); }
+        }
+
+        /// <summary>
+        /// Height of the image's rect transform.
+        /// </summary>
+        public float Height
+        {
+            get { return this.Transform.sizeDelta.y; }
+            set { this.Transform.sizeDelta = new Vector2(this.Width, value); }
+        }
+
+        /// <summary>
+        /// Rotation of the image element.
+        /// </summary>
+        public Vector3 Rotation
+        {
+            get { return this.Transform.rotation.eulerAngles; }
+            set { this.Transform.rotation = Quaternion.Euler(value); }
         }
 
         #endregion
@@ -146,17 +207,10 @@ namespace Arcana.UI.Elements
         /// </summary>
         public void Update()
         {
-            if (this.m_renderer == null)
-            {
-                // If it's been given a background.
-                if (this.BackgroundID.Length > 0 && this.BackgroundPath.Length > 0)
-                {
-                    this.m_renderer = this.InitializeRenderer();
-                }
-            }
-            
             // Update position.
             this.transform.position = this.Offset + this.Position;
+            this.Width = this.Dimensions.x;
+            this.Height = this.Dimensions.y;
         }
 
         #endregion
@@ -164,54 +218,13 @@ namespace Arcana.UI.Elements
         #region Initialization Methods.
 
         /// <summary>
-        /// Load the background resource for the main menu.
+        /// Initialize the GUIElement.
         /// </summary>
         protected override void Initialize()
         {
             this.Offset = Vector3.zero;
             this.Position = this.transform.position;
-            InitializeRendererResources("", "");
             this.Name = "GUI Image";
-        }
-
-        /// <summary>
-        /// Set up the resources for the renderer.
-        /// </summary>
-        public void InitializeRendererResources(string _backgroundID, string _backgroundPath)
-        {
-            this.BackgroundID = "";
-            this.BackgroundPath = "";
-            this.MaterialID = "MAT_MENU";
-            this.MaterialPath = "Materials/Screens/mat_menu";
-        }
-
-        /// <summary>
-        /// Iniitalize the renderer.
-        /// </summary>
-        /// <returns>Returns a SpriteRenderer component.</returns>
-        public EntityRenderer InitializeRenderer()
-        {
-            if (this.BackgroundID.Length > 0 && this.BackgroundPath.Length > 0)
-            {
-
-                EntityRenderer renderer = this.gameObject.GetComponent<EntityRenderer>();
-
-                if (renderer == null)
-                {
-                    renderer = this.gameObject.AddComponent<EntityRenderer>();
-                    renderer.Initialize();
-                    renderer.InitializeResources(
-                        BackgroundID,
-                        MaterialID,
-                        BackgroundPath,
-                        MaterialPath);
-                    renderer.InitializeRenderer();
-                }
-
-                return renderer;
-            }
-
-            return null;
         }
 
         #endregion
@@ -225,7 +238,7 @@ namespace Arcana.UI.Elements
         public override void Enable(bool _flag)
         {
             base.Enable(_flag);
-            this.m_renderer.enabled = this.Enabled && this.Visible;
+            this.Image.enabled = this.Enabled && this.Visible;
         }
 
         /// <summary>
@@ -235,7 +248,7 @@ namespace Arcana.UI.Elements
         public override void SetVisible(bool _flag)
         {
             base.SetVisible(_flag);
-            this.m_renderer.enabled = this.Enabled && this.Visible;
+            this.Image.enabled = this.Enabled && this.Visible;
         }
 
         #endregion

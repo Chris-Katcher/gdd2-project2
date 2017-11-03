@@ -114,7 +114,12 @@ namespace Arcana.UI
         /// Reference to the GUIPanel prefab.
         /// </summary>
         private UIPrefab<GUIPanel> m_panel;
-        
+
+        /// <summary>
+        /// Reference to the GUIImage prefab.
+        /// </summary>
+        private UIPrefab<GUIImage> m_image;
+
         /// <summary>
         /// Reference to the canvas object for building UI systems.
         /// </summary>
@@ -151,6 +156,14 @@ namespace Arcana.UI
         public UIPrefab<GUIPanel> Panel
         {
             get { return this.m_panel; }
+        }
+
+        /// <summary>
+        /// Reference to the image prefab.
+        /// </summary>
+        public UIPrefab<GUIImage> Image
+        {
+            get { return this.m_image; }
         }
 
         /// <summary>
@@ -192,36 +205,54 @@ namespace Arcana.UI
 
             // Update the UI Manager.
 
+            GUIImage debugImage = this.GetElement<GUIImage>("Test Image");
             GUILabel debugLabel = this.GetElement<GUILabel>("Test Label");
             GUIPanel debugPanel = this.GetElement<GUIPanel>("Test Panel");
 
             // Debug mode.
             if (this.Debug)
             {
+                if (debugImage == null)
+                {
+                    debugImage = CreateImage("Test Image", "BG_ELEMENT", "Images/Backgrounds/bg_menu", ScreenManager.Center, ScreenManager.WindowBounds.max);
+                }
+
                 if (debugLabel == null)
                 {
                     debugLabel = CreateLabel("Test Label", "Test Text!", ScreenManager.Center + new Vector2(0, -50));
-                    debugLabel.FontSize = 80;
                 }
 
                 if (debugPanel == null)
                 {
                     debugPanel = CreatePanel("Test Panel", ScreenManager.Center, new Vector2(120, 120));
                 }
+
             }
-            
+
+            if (debugImage != null)
+            {
+                debugImage.SetPosition(ScreenManager.Center);
+                debugImage.SetSize(ScreenManager.WindowBounds.max);
+                debugImage.Enable(this.debug_active);
+                debugImage.SetVisible(this.debug_visible);
+            }
+
             if (debugLabel != null)
             {
+                debugLabel.SetPosition(ScreenManager.Center + new Vector2(0, -50));
+                debugLabel.FontSize = (int)(80 * ScreenManager.SafetyScale);
                 debugLabel.Enable(this.debug_active);
                 debugLabel.SetVisible(this.debug_visible);
             }
 
             if (debugPanel != null)
             {
+                debugPanel.SetPosition(ScreenManager.Center + new Vector2(0, -50));
+                debugPanel.SetSize(ScreenManager.WindowBounds.max);
                 debugPanel.Enable(this.debug_active);
                 debugPanel.SetVisible(this.debug_visible);
             }
-
+            
             if (this.debug_pause)
             {
                 debugLabel.Message = "This is paused.";
@@ -270,6 +301,7 @@ namespace Arcana.UI
             this.m_uiSystem = new UIPrefab<GameObject>("PREFAB_UISYSTEM", "UISystem");
             this.m_label = new UIPrefab<GUILabel>("PREFAB_LABEL", "GUILabel");
             this.m_panel = new UIPrefab<GUIPanel>("PREFAB_PANEL", "GUIPanel");
+            this.m_image = new UIPrefab<GUIImage>("PREFAB_IMAGE", "GUIImage");
         }
 
         #endregion
@@ -312,10 +344,7 @@ namespace Arcana.UI
         {
             // Create the label.
             GUILabel label = GUILabel.CreateLabel(_message, _position);
-
-            // Set up default properties.
-            label.FontSize = 120;
-
+            
             // Return the label.
             return label;
         }
@@ -330,43 +359,27 @@ namespace Arcana.UI
         public GUIPanel CreatePanel(Vector2? _position = null, Vector2? _dimensions = null, Vector3? _rotation = null)
         {
             // Create the panel.
-            GUIPanel panel = GUIPanel.CreatePanel();
-
-            // Set up properties.
-            if (_position.HasValue)
-            {
-                panel.SetPosition(_position.Value);
-            }
-            else
-            {
-                // Defaults.
-                panel.SetPosition(ScreenManager.Center);
-            }
-
-            if (_dimensions.HasValue)
-            {
-                panel.Width = _dimensions.Value.x;
-                panel.Height = _dimensions.Value.y;
-            }
-            else
-            {
-                // Defaults.
-                panel.Width = 10.0f;
-                panel.Height = 10.0f;
-            }
-
-            if (_rotation.HasValue)
-            {
-                panel.Rotation = _rotation.Value;
-            }
-            else
-            {
-                // Defaults.
-                panel.Rotation = Vector3.zero;
-            }
+            GUIPanel panel = GUIPanel.CreatePanel(_position, _dimensions, _rotation);
 
             // Return the panel.
             return panel;
+        }
+        
+        /// <summary>
+        /// Create a image and return it.
+        /// </summary>
+        /// <param name="_id">ID of sprite resource.</param>
+        /// <param name="_path">Path to sprite resource.</param>
+        /// <param name="_position">Position of the element.</param>
+        /// <param name="_dimensions">Dimensions of the element.</param>
+        /// <returns>Returns new GUIElement.</returns>
+        public GUIImage CreateImage(string _id, string _path, Vector2? _position = null, Vector2? _dimensions = null)
+        {
+            // Create the element.
+            GUIImage image = GUIImage.CreateImage(_id, _path, _position, _dimensions);
+            
+            // Return the image.
+            return image;
         }
 
         /// <summary>
@@ -410,6 +423,29 @@ namespace Arcana.UI
 
             // If label doesn't exist, create a new label and add it.
             return AddElement<GUIPanel>(key, CreatePanel(_position, _dimensions, _rotation));
+        }
+
+        /// <summary>
+        /// Add new image to the map, and return a reference to it.
+        /// </summary>
+        /// <param name="_key">Key associated with the new element.</param>
+        /// <param name="_id">ID of sprite resource.</param>
+        /// <param name="_path">Path to sprite resource.</param>
+        /// <param name="_position">Position of the element.</param>
+        /// <param name="_dimensions">Dimensions of the element.</param>
+        /// <returns>Returns a GUIImage.</returns>
+        public GUIImage CreateImage(string _key, string _id, string _path, Vector2? _position = null, Vector2? _dimensions = null)
+        {
+            // Check if element exists.
+            string key = MakeKey(_key);
+            if (HasElement(key))
+            {
+                // Return existing reference.
+                return this.GetElement<GUIImage>(key);
+            }
+
+            // If label doesn't exist, create a new label and add it.
+            return AddElement<GUIImage>(key, CreateImage(_id, _path, _position, _dimensions));
         }
 
         #endregion
@@ -469,7 +505,6 @@ namespace Arcana.UI
         }
         
         #endregion
-
-
+        
     }
 }

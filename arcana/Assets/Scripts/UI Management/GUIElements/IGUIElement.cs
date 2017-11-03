@@ -304,7 +304,6 @@ namespace Arcana.UI.Elements
         /// <param name="_size">Bounds.</param>
         public void SetSize(Vector2 _size)
         {
-            this.transform.localScale = new Vector3(_size.x, _size.y, 1.0f);
             this.m_dimensions.Set(0.0f, 0.0f, _size.x, _size.y);
         }
         

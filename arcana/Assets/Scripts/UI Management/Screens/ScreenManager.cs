@@ -234,7 +234,16 @@ namespace Arcana.UI.Screens
         {
             return Services.NextVector2(_bounds);
         }
-        
+                
+        public static float SafetyScale
+        {
+            get
+            {
+                float scale = WindowWidth + WindowHeight;
+                return scale.MapValue(0.0f, 2000f, 0.0f, 1.0f);
+            }
+        }
+
         #endregion
 
         #endregion
@@ -247,7 +256,7 @@ namespace Arcana.UI.Screens
         /// Map of all IScreen instances, with their associated ID's.
         /// </summary> 
         private Dictionary<ScreenID, IScreen> m_screens { get; set; }
-
+        
         #endregion
 
         #region Properties.
@@ -284,6 +293,7 @@ namespace Arcana.UI.Screens
                 // Call the base method.
                 base.Update();
             }
+
         }
 
         #endregion
@@ -302,6 +312,7 @@ namespace Arcana.UI.Screens
 
                 // Set the safety.
                 ScreenManager.Safety = new Vector2(0.80f, 0.95f);
+
             }
         }
 

@@ -476,7 +476,14 @@ namespace Arcana
         /// <returns>Returns the child object.</returns>
         public static GameObject AddChild(GameObject gParent, GameObject gChild)
         {
-            gChild.transform.parent = gParent.transform;
+            if (gChild.transform.GetType() == typeof(RectTransform))
+            {
+                gChild.transform.SetParent(gParent.transform, false);
+            }
+            else
+            {
+                gChild.transform.parent = gParent.transform;
+            }
             return gChild;
         }
 
