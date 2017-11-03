@@ -30,7 +30,7 @@ namespace Arcana.Physics
 
 		public ProjectileManager projectileManager;
 		
-		public float SimpleCollisionDistance = 1.0f;
+		public float SimpleCollisionDistance = 10.5f;
 
 		public bool isWater;
 		public bool isFire;
@@ -58,7 +58,7 @@ namespace Arcana.Physics
 			}
 			else if (gameObject.tag == "Player")
 			{
-				
+				CheckPlayerCollision();
 			}
 			else
 			{
@@ -150,7 +150,17 @@ namespace Arcana.Physics
 
 		private void CheckPlayerCollision()
 		{
-
+			for (int bigList = 0; bigList <= allProj.Count - 1; bigList++)
+			{
+				for (int indivProj = 0; indivProj <= allProj[bigList].Count - 1; indivProj++)
+				{
+					if (DetectCollision(gameObject, allProj[bigList][indivProj]))
+					{
+						SetLoseState();
+					}
+					
+				}
+			}
 		}
 
 		// Moves Primiary to location way off screen
@@ -173,7 +183,7 @@ namespace Arcana.Physics
 		// Used to cause a player to lose.
 		private void SetLoseState()
 		{
-			//TODO: Set state to lose
+			Debug.Log("Player dead");
 		}
 
 

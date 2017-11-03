@@ -17,10 +17,10 @@ public class Player : MonoBehaviour {
 	{
 		m_systemGO = GameObject.Find("SystemControllerGO");
 		m_system = m_systemGO.GetComponent<SystemController>();
-        //gameObject.AddComponent<ProjectileManager>();
-        m_projectile = m_system.GetComponent<ProjectileManager>();
+		//gameObject.AddComponent<ProjectileManager>();
+		m_projectile = m_system.GetComponent<ProjectileManager>();
 
-    }
+	}
 	
 	// Update is called once per frame
 	void Update () {
@@ -42,11 +42,11 @@ public class Player : MonoBehaviour {
     {
         if (facingRight)
         {
-            pos.x += .5f;
+            pos.x += 2.0f;
             pos.y += .1f;
         } else
         {
-            pos.x -= .5f;
+            pos.x -= 2.0f;
             pos.y += .1f;
         }
 
