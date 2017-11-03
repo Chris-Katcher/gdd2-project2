@@ -97,11 +97,12 @@ namespace Arcana.Physics
 							{
 								if (isFire)
 								{
-									DestroyBoth(gameObject, allProj[bigList][indivProj]);
+                                    DestroyBoth(gameObject, allProj[bigList][indivProj]);
+                                   
 								}
 								else if (isWater)
 								{
-									DestroyOne(allProj[bigList][indivProj]);
+									//DestroyOne(allProj[bigList][indivProj]);
 								}
 								else if (isGrass)
 								{
@@ -118,11 +119,12 @@ namespace Arcana.Physics
 								}
 								else if (isWater)
 								{
-									DestroyBoth(gameObject, allProj[bigList][indivProj]);
+                                    DestroyBoth(gameObject, allProj[bigList][indivProj]);
+                                    
 								}
 								else if (isGrass)
 								{
-									DestroyOne(allProj[bigList][indivProj]);
+									//DestroyOne(allProj[bigList][indivProj]);
 								}
 							}
 
@@ -131,7 +133,7 @@ namespace Arcana.Physics
 							{
 								if (isFire)
 								{
-									DestroyOne(allProj[bigList][indivProj]);
+									//DestroyOne(allProj[bigList][indivProj]);
 								}
 								else if (isWater)
 								{
@@ -139,7 +141,8 @@ namespace Arcana.Physics
 								}
 								else if (isGrass)
 								{
-									DestroyBoth(gameObject, allProj[bigList][indivProj]);
+                                    DestroyBoth(gameObject, allProj[bigList][indivProj]);
+                                    
 								}
 							}
 
