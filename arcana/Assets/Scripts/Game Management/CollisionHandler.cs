@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using Arcana.Entities;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Arcana.Physics
 {
@@ -184,6 +185,8 @@ namespace Arcana.Physics
 		private void SetLoseState()
 		{
 			Debug.Log("Player dead");
+
+            SceneManager.LoadScene(0);
 		}
 
 
