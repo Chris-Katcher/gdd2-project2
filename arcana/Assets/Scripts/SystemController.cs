@@ -99,7 +99,7 @@ public class SystemController : MonoBehaviour {
         m_gameManager.UpdateDropStatus(player_drop);
 		// TODO: Stub code.
 
-		m_projectile.updateProjectiles();
+		//m_projectile.updateProjectiles();
 		
 
 	}
@@ -113,20 +113,20 @@ public class SystemController : MonoBehaviour {
     /// </summary>
     private void Initialize()
     {
-        // Create and initialize managers.
-        gameObject.AddComponent<InputManager>();
-        gameObject.AddComponent<Player>();
-        gameObject.AddComponent<GameManager>();
-        gameObject.AddComponent<InputManager>();
+		// Create and initialize managers.
+		gameObject.AddComponent<InputManager>();
+		gameObject.AddComponent<Player>();
+		gameObject.AddComponent<GameManager>();
+		gameObject.AddComponent<InputManager>();
 		gameObject.AddComponent<ProjectileManager>();
 
-        // Set references to managers.
-        m_uiManager = new UIManager();
-        m_gameManager = gameObject.GetComponent<GameManager>();
-        m_inputManager = gameObject.GetComponent<InputManager>();
+		// Set references to managers.
+		m_uiManager = new UIManager();
+		m_gameManager = gameObject.GetComponent<GameManager>();
+		m_inputManager = gameObject.GetComponent<InputManager>();
 		m_projectile = gameObject.GetComponent<ProjectileManager>();
-        //m_player = gameObject.GetComponent<Player>();
-        m_gameManager.Initialize();
+		//m_player = gameObject.GetComponent<Player>();
+		m_gameManager.Initialize();
 
         // Set initialized.
         m_init = true;

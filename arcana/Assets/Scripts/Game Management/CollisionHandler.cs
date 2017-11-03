@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Arcana.Entities;
 using UnityEngine;
 
 namespace Arcana.Physics
@@ -22,79 +23,150 @@ namespace Arcana.Physics
 	public class CollisionHandler : MonoBehaviour
 	{
 		// refrences to interacting objects;
-		public GameObject primiary;
-		public GameObject secondary;
-		BoxCollider2D primiaryCollider;
-		BoxCollider2D secondaryCollider;
-		// TODO: primiary updates to the instance of the parent, but secondary does not.
-		// This class needs refrences to the projectile manager
-		// The projectile manager needs active lists of projectiles of each 'element'
-		// This class then needs to be updated to reflect the checking of each list of projectiles, as opposed to individual projectiles
-		// If you need my help, I'll be avalible sporatically throughout the day. 
-		// Facebook messenger is the best way to contact me.
 
+		public List<List<GameObject>> allProj;
+		GameObject SC_Go;
+		SystemController sc;
 
-		// possible behaviors
-		[Header("Behaviors")]
+		public ProjectileManager projectileManager;
+		
+		public float SimpleCollisionDistance = 1.0f;
 
-		public bool destroyPrimiary;
-		public bool destroySecondary;
-		public bool setLoseState;
+		public bool isWater;
+		public bool isFire;
+		public bool isGrass;
+		public bool isPlayer;
 
 		// Other important varibles
 		Vector3 offScreen;
 
 		private void Start()
 		{
-			offScreen = new Vector3(100, 100, 100);
-			primiaryCollider = primiary.GetComponent<BoxCollider2D>();
-			secondaryCollider = secondary.GetComponent<BoxCollider2D>();
+			SC_Go = GameObject.Find("SystemControllerGO");
+			sc = SC_Go.GetComponent<SystemController>();
+			projectileManager = sc.m_projectile;
+			allProj = projectileManager.allProj;
+
+			offScreen = new Vector3(1000, 1000, 1000);
 		}
 
-		// Every frame, sees if there is a collision, and if so, calls whatever methods have been
-		// 'selected' in the inspector.
 		private void Update()
 		{
-			if (DetectCollision())
+			if (gameObject.tag == "Projectile")
 			{
-				if (destroyPrimiary)
-				{
-					DestroyPrimiary();
-				}
-				if (destroySecondary)
-				{
-					DestroySecondary();
-				}
-				if (setLoseState)
-				{
-					SetLoseState();
-				}
-
+				CheckProjectileCollision();
 			}
+			else if (gameObject.tag == "Player")
+			{
+				
+			}
+			else
+			{
+				Debug.Log("Tag not recgonized or not assigned. Make sure object is tagged as 'Projectile' or 'Player' in the inspector");
+			}
+			
 		}
 
-		private bool DetectCollision()
+		private bool DetectCollision(GameObject primiary, GameObject secondary)
 		{
-			if (primiaryCollider.IsTouching(secondaryCollider))
+			if (primiary.transform.position.x - SimpleCollisionDistance < secondary.transform.position.x + SimpleCollisionDistance &&
+				primiary.transform.position.x + SimpleCollisionDistance > secondary.transform.position.x - SimpleCollisionDistance &&
+				primiary.transform.position.y + SimpleCollisionDistance > secondary.transform.position.y - SimpleCollisionDistance &&
+				primiary.transform.position.y - SimpleCollisionDistance < secondary.transform.position.y + SimpleCollisionDistance)
 			{
-				Debug.Log("Collision!");
+				//Debug.Log("Collision");
 				return true;
 			}
 			else return false;
 		}
 
-		// Moves Primiary to location way off screen
-		private void DestroyPrimiary()
+		private void CheckProjectileCollision()
 		{
-			primiary.transform.position = offScreen;
-			// TODO: Call Stop
+			for (int bigList = 0; bigList <= allProj.Count - 1; bigList++)
+			{
+				for (int indivProj = 0; indivProj <= allProj[bigList].Count - 1; indivProj++)
+				{
+					// only runs logic if not the same projectile and each is active.
+					if (gameObject != allProj[bigList][indivProj] && gameObject.activeSelf)
+					{
+						if (DetectCollision(gameObject, allProj[bigList][indivProj]))
+						{
+							// Fire
+							if (bigList == 0)
+							{
+								if (isFire)
+								{
+									DestroyBoth(gameObject, allProj[bigList][indivProj]);
+								}
+								else if (isWater)
+								{
+									DestroyOne(allProj[bigList][indivProj]);
+								}
+								else if (isGrass)
+								{
+									DestroyOne(gameObject);
+								}
+							}
+
+							// Water
+							if (bigList == 1)
+							{
+								if (isFire)
+								{
+									DestroyOne(gameObject);
+								}
+								else if (isWater)
+								{
+									DestroyBoth(gameObject, allProj[bigList][indivProj]);
+								}
+								else if (isGrass)
+								{
+									DestroyOne(allProj[bigList][indivProj]);
+								}
+							}
+
+							// Earth
+							if (bigList == 2)
+							{
+								if (isFire)
+								{
+									DestroyOne(allProj[bigList][indivProj]);
+								}
+								else if (isWater)
+								{
+									DestroyOne(gameObject);
+								}
+								else if (isGrass)
+								{
+									DestroyBoth(gameObject, allProj[bigList][indivProj]);
+								}
+							}
+
+						}
+					}
+				}
+			}
 		}
 
-		// Moves Secondary to location way off screen
-		private void DestroySecondary()
+		private void CheckPlayerCollision()
 		{
+
+		}
+
+		// Moves Primiary to location way off screen
+		private void DestroyOne(GameObject primiary)
+		{
+			primiary.transform.position = offScreen;
+			primiary.SetActive(false);
+		}
+
+
+		private void DestroyBoth(GameObject primiary, GameObject secondary)
+		{
+			primiary.transform.position = offScreen;
+			primiary.SetActive(false);
 			secondary.transform.position = offScreen;
-			// TODO: Call Stop
+			secondary.SetActive(false);
 		}
 
 
