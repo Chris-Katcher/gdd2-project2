@@ -23,11 +23,13 @@ namespace Arcana
     public class GameManager : MonoBehaviour
     {
         public GameObject wizzard1;
+        public GameObject wizzard2;
         public bool m_init = false;
         private float max_speed = 10.0f;
 
         private bool grounded = true;
         private Rigidbody2D wizzard1_rb;
+        private Rigidbody2D wizzard2_rb;
 
         private float jumpForce = 110000f;
         private float moveForce = 7000f;
@@ -35,8 +37,10 @@ namespace Arcana
         public bool fly_mode = false;
 
         private CharacterMovement charMovement;
+        private CharacterMovement charMovement2;
 
         public Player m_player1;
+        public Player m_player2;
 
         private bool isFacingRight = true;
 
@@ -150,11 +154,16 @@ namespace Arcana
             wizzard1 = UnityEngine.Resources.Load("Wizzard") as GameObject;
             wizzard1 = Instantiate(wizzard1, new Vector3( 1, 0, 0), Quaternion.identity );
 
+            wizzard2 = UnityEngine.Resources.Load("Wizzard") as GameObject;
+            wizzard2 = Instantiate(wizzard2, new Vector3(25, 0, 0), Quaternion.identity);
+
             charMovement = wizzard1.GetComponent<CharacterMovement>();
+            charMovement2 = wizzard2.GetComponent<CharacterMovement>();
 
             //Instantiate(wizzard1, new Vector3(1, 0, 0), Quaternion.identity);
 
             wizzard1_rb = wizzard1.GetComponent<Rigidbody2D>();
+            wizzard2_rb = wizzard2.GetComponent<Rigidbody2D>();
             wizzard_sr = wizzard1.GetComponent<SpriteRenderer>();
             m_init = true;
 

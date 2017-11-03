@@ -49,7 +49,8 @@ public class SystemController : MonoBehaviour {
 
     public ProjectileManager m_projectile;
 
-    public Player m_player;
+    public Player m_player1;
+    public Player m_player2;
     
     // Flags. //
 
@@ -116,6 +117,7 @@ public class SystemController : MonoBehaviour {
 		// Create and initialize managers.
 		gameObject.AddComponent<InputManager>();
 		gameObject.AddComponent<Player>();
+        gameObject.AddComponent<Player>();
 		gameObject.AddComponent<GameManager>();
 		gameObject.AddComponent<InputManager>();
 		gameObject.AddComponent<ProjectileManager>();

@@ -30,7 +30,7 @@ namespace Arcana.Physics
 
 		public ProjectileManager projectileManager;
 		
-		public float SimpleCollisionDistance = 10.5f;
+		public float SimpleCollisionDistance = 0.05f;
 
 		public bool isWater;
 		public bool isFire;
@@ -69,10 +69,10 @@ namespace Arcana.Physics
 
 		private bool DetectCollision(GameObject primiary, GameObject secondary)
 		{
-			if (primiary.transform.position.x - SimpleCollisionDistance < secondary.transform.position.x + SimpleCollisionDistance &&
-				primiary.transform.position.x + SimpleCollisionDistance > secondary.transform.position.x - SimpleCollisionDistance &&
-				primiary.transform.position.y + SimpleCollisionDistance > secondary.transform.position.y - SimpleCollisionDistance &&
-				primiary.transform.position.y - SimpleCollisionDistance < secondary.transform.position.y + SimpleCollisionDistance)
+			if (primiary.transform.position.x - SimpleCollisionDistance/10 < secondary.transform.position.x  &&
+				primiary.transform.position.x + SimpleCollisionDistance/10 > secondary.transform.position.x  &&
+				primiary.transform.position.y + SimpleCollisionDistance/10 > secondary.transform.position.y  &&
+				primiary.transform.position.y - SimpleCollisionDistance/10 < secondary.transform.position.y )
 			{
 				//Debug.Log("Collision");
 				return true;
