@@ -205,6 +205,9 @@ namespace Arcana.UI
 
             // Update the UI Manager.
 
+            #region UI Debug Reference.
+
+            /*
             GUIImage debugImage = this.GetElement<GUIImage>("Test Image");
             GUILabel debugLabel = this.GetElement<GUILabel>("Test Label");
             GUIPanel debugPanel = this.GetElement<GUIPanel>("Test Panel");
@@ -260,7 +263,9 @@ namespace Arcana.UI
             else
             {
                 debugLabel.Message = "This is not paused.";
-            }
+            }*/
+
+            #endregion
 
         }
 
