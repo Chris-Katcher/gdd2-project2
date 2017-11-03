@@ -215,6 +215,7 @@ namespace Arcana.Utilities
         {
             if (!this.InitializedComponent)
             {
+                this.Debug = false;
                 this.m_status = new List<ComponentStatus>();
                 this.m_initialized = true;
             }
@@ -410,7 +411,7 @@ namespace Arcana.Utilities
 
             if (!IsState(_status))
             {
-                Debugger.Print("Adding state " + Status.Parse(_status) + " to " + gameObject.name, _mode: m_debug);
+                Debugger.Print("Adding state " + Status.Parse(_status) + " to " + gameObject.name, this.name, this.Debug);
                 this.m_status.Add(_status);
             }
         }
@@ -423,7 +424,7 @@ namespace Arcana.Utilities
         {
             if (HasStatus && IsState(_status))
             {
-                Debugger.Print("Removing state " + Status.Parse(_status) + " from " + gameObject.name, _mode: m_debug);
+                Debugger.Print("Removing state " + Status.Parse(_status) + " from " + gameObject.name, this.name, this.Debug);
                 this.m_status.Remove(_status);
             }
         }

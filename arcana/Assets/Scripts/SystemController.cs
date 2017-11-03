@@ -37,6 +37,8 @@ namespace Arcana {
 
         #region Static Methods.
 
+        #region Instancing Methods.
+
         /// <summary>
         /// Static instance of the system controller.
         /// </summary>
@@ -65,33 +67,40 @@ namespace Arcana {
             return instance;
         }
 
+        #endregion
+
+        #region Component Factory Methods.
+
         /// <summary>
         /// Creates and adds the instance of the SystemController GameObject to the input object.
         /// </summary>
-        /// <param name="_parent">Object that the system controller will be added to.</param>
+        /// <param name="_parent">Object that the component will be added to.</param>
         /// <returns>Returns instance of the system controller.</returns>
-        private static SystemController Create(GameObject _parent = null)
+        private static SystemController Create(ArcanaObject _parent = null)
         {
-            SystemController system = instance;
+            ArcanaObject parent = _parent;
 
-            if (system == null)
+            if (parent == null)
             {
-                // If the system controller instance is null, create a new GameObject for it.
-                system = Services.CreateEmptyObject("System Controller").AddComponent<SystemController>();
-                system.Initialize();
+                parent = Services.CreateEmptyObject().AddComponent<ArcanaObject>();
+                parent.Initialize();
             }
 
-            // Create GameObject reference.
-            GameObject parent = _parent;
-
-            if (parent != null)
+            if (!HasInstance())
             {
-                // If the parent object is not null, parent it.
-                parent = Services.AddParent(system.Self, parent);
+                instance = parent.GetComponent<SystemController>();
             }
 
-            return system;
+            if (!HasInstance())
+            {
+                instance = ComponentFactory.Create<SystemController>(parent);
+                instance.Initialize();
+            }
+            
+            return instance;
         }
+
+        #endregion
 
         #endregion
 
@@ -254,6 +263,24 @@ namespace Arcana {
                     this.DestroySelf();
                 }
 
+                // While this status is running, perform functions.
+                if (this.Status.IsRunning())
+                {
+                    // Run all managers.
+                    this.StateController.Run();
+                    this.InputController.Run();
+                    this.CameraController.Run();
+                    this.EntityController.Run();
+                }
+                else
+                {
+                    // Stop all managers.
+                    this.StateController.Stop();
+                    this.InputController.Stop();
+                    this.CameraController.Stop();
+                    this.EntityController.Stop();
+                }
+                                
                 #region  // TODO: Stub code.
 
                 /*
@@ -297,11 +324,11 @@ namespace Arcana {
                 base.Initialize();
 
                 // Initialize members of class.
-                SystemController.instance = this; // Set the instance of the controller.
                 Debugger.SetDebugMode(DebugMode); // Set the global debug mode.
-                this.Debug = false; // Turn off debug mode.
+                SystemController.instance = this; // Set the instance of the controller.
                 this.Name = "Arcana (System Controller)"; // Set up the name for the manager.
-                this.transform.position = new Vector3(0.0f, 0.0f, 0.0f); // Ensure no movement.
+                this.transform.position = Vector3.zero; // Ensure no movement.
+                this.transform.rotation = Quaternion.Euler(Vector3.zero); // Ensure no rotation.
 
                 // Build the system controller object.
                 Debugger.Print("Initialize system controller object.", this.Self.name, this.Debug);
@@ -317,7 +344,9 @@ namespace Arcana {
             }
         }
 
-        #region Building Methods.
+        #endregion
+
+        #region Manager Initialization Methods.
 
         /// <summary>
         /// Constructs the manager objects and its components.
@@ -354,13 +383,11 @@ namespace Arcana {
             Debugger.Print("Build the input manager component.", this.Self.name, this.Debug);
 
             // Create an input manager.
-            // this.m_inputManager = InputManager.Create(Services.AddChild(this.Managers.Self, Services.CreateEmptyObject("Input Manager")).AddComponent<ArcanaObject>());
             this.m_inputManager = InputManager.GetInstance();
-            this.m_inputManager.Initialize();
-            this.m_inputManager.Activate();
 
             // Add input manager as a child.
             this.Managers.AddChild(this.m_inputManager);
+            Services.AddChild(this.Managers.Self, this.m_inputManager.Self);
         }
 
         /// <summary>
@@ -372,13 +399,11 @@ namespace Arcana {
             Debugger.Print("Build the state manager component.", this.Self.name, this.Debug);
 
             // Create a state manager.
-            //this.m_stateManager = StateManager.Create(Services.AddChild(this.Managers.Self, Services.CreateEmptyObject("State Manager")).AddComponent<ArcanaObject>());
             this.m_stateManager = StateManager.GetInstance();
-            this.m_stateManager.Initialize();
-            this.m_stateManager.Activate();
 
             // Add state manager as a child.
             this.Managers.AddChild(this.m_stateManager);
+            Services.AddChild(this.Managers.Self, this.m_stateManager.Self);
         }
 
         /// <summary>
@@ -390,13 +415,11 @@ namespace Arcana {
             Debugger.Print("Build the camera manager component.", this.Self.name, this.Debug);
 
             // Create a camera manager.
-            // this.m_cameraManager = CameraManager.Create(Services.AddChild(this.Managers.Self, Services.CreateEmptyObject("Camera Manager")).AddComponent<ArcanaObject>());
             this.m_cameraManager = CameraManager.GetInstance();
-            this.m_cameraManager.Initialize();
-            this.m_cameraManager.Activate();
 
             // Add camera manager as a child.
             this.Managers.AddChild(this.m_cameraManager);
+            Services.AddChild(this.Managers.Self, this.m_cameraManager.Self);
         }
 
         /// <summary>
@@ -408,16 +431,12 @@ namespace Arcana {
             Debugger.Print("Build the entity manager component.", this.Self.name, this.Debug);
 
             // Create an entity manager.
-            // this.m_entityManager = EntityManager.Create(Services.AddChild(this.Managers.Self, Services.CreateEmptyObject("Entity Manager")).AddComponent<ArcanaObject>());
             this.m_entityManager = EntityManager.GetInstance();
-            this.m_entityManager.Initialize();
-            this.m_entityManager.Activate();
 
             // Add entity manager as a child.
             this.Managers.AddChild(this.m_entityManager);
+            Services.AddChild(this.Managers.Self, this.m_entityManager.Self);
         }
-
-        #endregion
 
         #endregion
 

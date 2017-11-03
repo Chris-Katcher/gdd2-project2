@@ -16,6 +16,8 @@ using UnityEngine;
 using Arcana.Entities;
 using Arcana.Utilities;
 using Arcana.UI.Screens;
+using Arcana.Cameras;
+using Arcana.Environment;
 
 namespace Arcana.States
 {
@@ -34,50 +36,90 @@ namespace Arcana.States
     public class ArenaState : State
     {
 
-        #region Static Members.
-
-        // TODO: Create component maker.
-
-        #endregion
-
         #region Data Members
 
-        #region Properties
-
-        /////////////////////
-        // Properties.
-        /////////////////////
+        #region Fields.
 
         /// <summary>
-        /// Return the current screen.
+        /// Time to switch states.
         /// </summary>
-        public sealed override IScreen CurrentScreen
-        {
-            get
-            {
-                // TODO: Fix this implementation in the base class.
-                throw new NotImplementedException();
-            }
-        }
+        private float timeToLive;
+
+        private GameObject environment;
 
         #endregion
-
+        
         #endregion
 
         #region UnityEngine Methods.
 
         /// <summary>
-        /// The main menu should handle some input functionality.
+        /// The arena should handle some input functionality.
         /// </summary>
         public override void Update()
         {
-            // Call base method.
-            base.Update();
-
-            // Update when running.
-            if (this.Status.IsRunning())
+            if (!this.Initialized)
             {
-                // Handle input.
+                this.Initialize();
+            }
+            else
+            {
+                // Call base method.
+                base.Update();
+
+                if (this.Status.IsActive())
+                {
+                    if (!this.Status.IsPaused())
+                    {
+                        environment.SetActive(true);
+                        CameraManager.GetInstance().SetCameraTargetAll();
+                        CameraManager.GetInstance().ChangeBackground(Color.gray);
+                        this.SwitchScreen(ScreenID.GameplayScreen);
+                    }
+                    else
+                    {
+                        environment.SetActive(false);
+                        CameraManager.GetInstance().ChangeBackground(Color.black);
+                        this.SwitchScreen(ScreenID.PauseScreen);
+                    }
+
+                    if (this.m_currentScreenID == ScreenID.GameplayScreen)
+                    {
+                        // Create the platforms.
+
+
+
+
+                    }
+                }
+
+                #region Debug Functionality.
+
+                if (this.Debug)
+                {
+                    // Update when running.
+                    if (this.Status.IsActive())
+                    {
+                        Debugger.Print("Running arena state.", this.Self.name, this.Debug);
+
+                        if (this.Status.IsPaused())
+                        {
+                            Debugger.Print("State is paused.", this.Self.name, this.Debug);
+                        }
+                        else
+                        {
+                            this.timeToLive = Services.Max(this.timeToLive - Time.fixedDeltaTime, 0.0f);
+                            Debugger.Print("Time until state switch: " + this.timeToLive + " seconds.", this.Self.name, this.Debug);
+                        }
+
+                        if (timeToLive == 0.0f)
+                        {
+                            this.SetNextState(StateID.GameOverState);
+                        }
+                    }
+                }
+
+                #endregion
             }
         }
 
@@ -93,30 +135,64 @@ namespace Arcana.States
             // Initialize base data members.
             base.Initialize();
 
-            // Set the state ID.
-            this.InitializeState(StateID.ArenaState);
+            // Initialize members.                  
+            this.Name = "Arcana (Arena State)"; // Set the object name.
+            this.Revive();
 
-            // Set name.
-            this.Name = "Arena";
+            // Initialize the platforms.
+            environment = Instantiate(UnityEngine.Resources.Load("Environment")) as GameObject;
+            
+            this.ResetState();
+        }
+        
+        /// <summary>
+        /// Set the state to the arena state.
+        /// </summary>
+        public sealed override void InitializeState()
+        {
+            this.m_stateID = StateID.ArenaState;
         }
 
         #endregion
-
-        #region Accessor Methods.
+        
+        #region Mutator Methods.
 
         /// <summary>
-        /// Return the requested Screen object.
+        /// Reset the state.
         /// </summary>
-        /// <param name="id">Screen ID associated with requested screen.</param>
-        /// <returns>Returns a screen object.</returns>
-        public sealed override IScreen GetScreen(ScreenID id)
+        public override void ResetState()
         {
-            // TODO: Implement wrapper function.
-            throw new NotImplementedException();
+            this.timeToLive = 5.0f; // 5 seconds to live.
+            this.SetNextState(StateID.NULL_STATE);
+            this.SwitchScreen(ScreenID.GameplayScreen);
         }
 
-        #endregion
+        /// <summary>
+        /// Switch screens.
+        /// </summary>
+        /// <param name="_id">Screen to switch to.</param>
+        public void SwitchScreen(ScreenID _id)
+        {
+            if (this.m_currentScreenID != _id)
+            {
+                ScreenBase screen = this.CurrentScreen as ScreenBase;
+                if (screen != null)
+                {
+                    screen.Deactivate();
+                    screen.Kill();
+                    screen.Hide();
+                    screen.HideGUI();
+                }
 
+                this.m_currentScreenID = _id;
+                screen = this.CurrentScreen as ScreenBase;
+                screen.Revive();
+                screen.Activate();
+                screen.Show();
+                screen.ShowGUI();
+            }
+        }
+        #endregion
     }
 
     #endregion

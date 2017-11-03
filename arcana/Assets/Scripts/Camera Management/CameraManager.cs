@@ -29,7 +29,7 @@ namespace Arcana.Cameras
     /// <summary>
     /// Handles all functionality related to the camera users see from.
     /// </summary>
-    [AddComponentMenu("Arcana/Managers/CameraManager")]
+    [AddComponentMenu("Arcana/Managers/Camera Manager")]
     public class CameraManager : ArcanaObject
     {
 
@@ -82,6 +82,15 @@ namespace Arcana.Cameras
         public static CameraManager instance = null;
 
         /// <summary>
+        /// Returns true if instance exists.
+        /// </summary>
+        /// <returns>Returns boolean indicating instance existence.</returns>
+        public static bool HasInstance()
+        {
+            return (instance != null);
+        }
+
+        /// <summary>
         /// Returns the single instance of the factory.
         /// </summary>
         /// <returns>Returns a ComponentFactory MonoBehaviour component.</returns>
@@ -89,20 +98,10 @@ namespace Arcana.Cameras
         {
             if (instance == null)
             {
-                Debugger.Print("Creating new instance of ComponentFactory.");
-                instance = Services.CreateEmptyObject("Camera Manager").AddComponent<CameraManager>();
+                instance = Create(null);
             }
 
             return instance;
-        }
-        
-        /// <summary>
-        /// Returns true if instance exists.
-        /// </summary>
-        /// <returns>Returns boolean indicating instance existence.</returns>
-        public static bool HasInstance()
-        {
-            return (instance != null);
         }
 
         #endregion
@@ -112,17 +111,27 @@ namespace Arcana.Cameras
         /// <summary>
         /// Creates a new component.
         /// </summary>
+        /// <param name="_parent">Object that the component will be added to.</param>
         /// <returns>Creates a new component and adds it to the parent.</returns>
-        public static CameraManager Create(ArcanaObject _parent)
+        public static CameraManager Create(ArcanaObject _parent = null)
         {
-            if (!HasInstance())
+            ArcanaObject parent = _parent;
+
+            if (parent == null)
             {
-                instance = _parent.GetComponent<CameraManager>();
+                parent = Services.CreateEmptyObject().AddComponent<ArcanaObject>();
+                parent.Initialize();
             }
 
             if (!HasInstance())
             {
-                instance = ComponentFactory.Create<CameraManager>(_parent);
+                instance = parent.GetComponent<CameraManager>();
+            }
+
+            if (!HasInstance())
+            {
+                instance = ComponentFactory.Create<CameraManager>(parent);
+                instance.Initialize();
             }
 
             return instance;
@@ -165,22 +174,7 @@ namespace Arcana.Cameras
         /// Reference to the camera.
         /// </summary>
         private CameraSettings m_camera = null;
-
-        /// <summary>
-        /// Position of the camera when not shaking.
-        /// </summary>
-        private Vector3 m_noShakePosition;
-
-        /// <summary>
-        /// Position of the camera when shaking it.
-        /// </summary>
-        private Vector3 m_currentShakePosition;
-
-        /// <summary>
-        /// Current position of the camera shaker.
-        /// </summary>
-        private Vector3 m_currentPosition;
-
+        
         /// <summary>
         /// Decay tracker allowing timer for the entire shake.
         /// </summary>
@@ -256,6 +250,22 @@ namespace Arcana.Cameras
             }
         }
 
+        /// <summary>
+        /// Reference to the camera.
+        /// </summary>
+        public CameraSettings Camera
+        {
+            get
+            {
+                if (this.m_camera == null)
+                {
+                    this.m_camera = CameraSettings.Create(this.m_cameraWrap);
+                    this.m_camera.Initialize();
+                }
+                return this.m_camera;
+            }
+        }
+
         #endregion
 
         #endregion
@@ -272,22 +282,12 @@ namespace Arcana.Cameras
             {
                 // The base update is called here.
                 base.Update();
-
-                // Debug mode functionality.
-                if (this.Debug)
+                
+                // Camera null check.
+                if (this.m_camera != null && this.m_camera.Status.IsActive())
                 {
-                    if (this.debug_active) { this.Activate(); this.m_camera.Activate(); }
-                    else { this.Deactivate(); this.m_camera.Deactivate(); }
-
-                    // If active:
-                    if (this.m_camera != null && this.m_camera.Status.IsActive())
-                    {
-                        // Handle input while camera isn't null.
-                        HandleInput();
-
-                        // Update the target lists based on those in the scene.
-                        this.AddTargets(this.Self.GetComponentsInChildren<CameraTarget>().ToList());
-                    }
+                    // Update the target lists based on those in the scene.
+                    this.AddTargets(this.Self.GetComponentsInChildren<CameraTarget>().ToList());
                 }
             }
         }
@@ -306,20 +306,21 @@ namespace Arcana.Cameras
                 // Base initialization.
                 base.Initialize();
 
-                // Set this name.
-                this.Name = "Camera Manager";
+                // Initialize members of class.
+                CameraManager.instance = this;
+                this.Name = "Arcana (Camera Manager)";
 
                 // Initialize the camera manager.
-                Debugger.Print("Initializing camera manager.", this.Self.name);
+                Debugger.Print("Initializing camera manager.", this.Self.name, this.Debug);
                 
                 // Set up parenting.
                 this.m_cameraWrap = Services.CreateEmptyObject("Camera Shaker").AddComponent<ArcanaObject>();
-                this.m_cameraWrap.Name = "Camera Shaker";
-                
-                // Initialize the camera settings.
-                this.m_camera = CameraSettings.Create(this.m_cameraWrap);
-                this.m_camera.Initialize();
+                this.m_cameraWrap.Name = "Arcana (Camera Shaker)";
 
+                // Initialize the camera settings.
+                this.m_camera = this.Camera;
+
+                // Make the camera shaker.
                 this.m_cameraShake = this.m_cameraWrap.Self.AddComponent<DecayTracker>();
                 this.m_cameraShakeStrength = this.m_cameraWrap.Self.AddComponent<DecayTracker>();
 
@@ -333,10 +334,12 @@ namespace Arcana.Cameras
 
                 // Make the wrapper object a child of this manager's GameObject.
                 Services.AddChild(this.Self, this.m_cameraWrap.Self);
-                
-                // Add the controls.
-                BuildControlScheme();
-                InitializeControls();
+
+                // Run initialization methods.
+                // this.BuildControlScheme(); // Build control scheme.
+                // this.InitializeControls(); // Add controls for the HandleInput function.
+                this.Activate();
+                this.Run();
             }
         }
 
@@ -595,10 +598,19 @@ namespace Arcana.Cameras
         {
             foreach (CameraTarget target in _targets)
             {
-                if (target.Status.IsActive() || this.debug_active)
-                {
-                    this.m_camera.AddTarget(target, CameraMode.TargetOne, CameraMode.TargetAll);
-                }
+                AddTarget(target);
+            }
+        }
+
+        /// <summary>
+        /// Add target to the camera.
+        /// </summary>
+        /// <param name="_target">Target to add.</param>
+        public void AddTarget(CameraTarget _target)
+        {
+            if (_target.Status.IsActive())
+            {
+                this.m_camera.AddTarget(_target, CameraMode.TargetOne, CameraMode.TargetAll);
             }
         }
 

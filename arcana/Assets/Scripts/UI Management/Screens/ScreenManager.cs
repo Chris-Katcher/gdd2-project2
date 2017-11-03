@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text;
 using Arcana.Utilities;
 using UnityEngine;
+using Arcana.Cameras;
 
 namespace Arcana.UI.Screens
 {
@@ -92,21 +93,6 @@ namespace Arcana.UI.Screens
         public static ScreenManager instance = null;
 
         /// <summary>
-        /// Returns the single instance of the class.
-        /// </summary>
-        /// <returns>Returns a component.</returns>
-        public static ScreenManager GetInstance()
-        {
-            if (instance == null)
-            {
-                Debugger.Print("Creating new instance of ScreenManager.");
-                instance = Services.CreateEmptyObject("Screen Manager").AddComponent<ScreenManager>();
-            }
-
-            return instance;
-        }
-
-        /// <summary>
         /// Returns true if instance exists.
         /// </summary>
         /// <returns>Returns boolean indicating instance existence.</returns>
@@ -115,6 +101,19 @@ namespace Arcana.UI.Screens
             return (instance != null);
         }
 
+        /// <summary>
+        /// Returns the single instance of the class.
+        /// </summary>
+        /// <returns>Returns a component.</returns>
+        public static ScreenManager GetInstance()
+        {
+            if (instance == null)
+            {
+                instance = Create(null);
+            }
+
+            return instance;
+        }
 
         #endregion
 
@@ -123,17 +122,27 @@ namespace Arcana.UI.Screens
         /// <summary>
         /// Creates a new component.
         /// </summary>
+        /// <param name="_parent">Object that the component will be added to.</param>
         /// <returns>Creates a new component and adds it to the parent.</returns>
-        public static ScreenManager Create(ArcanaObject _parent)
+        public static ScreenManager Create(ArcanaObject _parent = null)
         {
-            if (!HasInstance())
+            ArcanaObject parent = _parent;
+
+            if (parent == null)
             {
-                instance = _parent.GetComponent<ScreenManager>();
+                parent = Services.CreateEmptyObject().AddComponent<ArcanaObject>();
+                parent.Initialize();
             }
 
             if (!HasInstance())
             {
-                instance = ComponentFactory.Create<ScreenManager>(_parent);
+                instance = parent.GetComponent<ScreenManager>();
+            }
+
+            if (!HasInstance())
+            {
+                instance = ComponentFactory.Create<ScreenManager>(parent);
+                instance.Initialize();
             }
 
             return instance;
@@ -142,6 +151,11 @@ namespace Arcana.UI.Screens
         #endregion
 
         #region Screen Members.
+
+        /// <summary>
+        /// Targets.
+        /// </summary>
+        private static List<CameraTarget> targets;
 
         /// <summary>
         /// Screen safety scale amount.
@@ -155,6 +169,21 @@ namespace Arcana.UI.Screens
             set
             {
                 s_safety = Services.Max(value, new Vector2(0.5f, 0.5f));
+            }
+        }
+
+        /// <summary>
+        /// Targets.
+        /// </summary>
+        public static List<CameraTarget> Targets
+        {
+            get
+            {
+                if (targets == null)
+                {
+                    targets = new List<CameraTarget>();
+                }
+                return targets;
             }
         }
 
@@ -313,6 +342,8 @@ namespace Arcana.UI.Screens
                 // Set the safety.
                 ScreenManager.Safety = new Vector2(0.80f, 0.95f);
 
+                // Set the name.
+                this.Name = "Arcana (Screen Manager)";
             }
         }
 
@@ -359,8 +390,34 @@ namespace Arcana.UI.Screens
             }
             else
             {
-                Debugger.Print("There is no screen associated with the input ScreenID " + Parse(_id) + ".");
-                return null;
+                IScreen screen = null;
+
+                switch (_id)
+                {
+                    case ScreenID.SplashScreen:
+                        screen = Create<SplashScreen>(null);
+                        break;
+                    case ScreenID.MainMenuScreen:
+                        screen = Create<MainMenuScreen>(null);
+                        break;
+                    case ScreenID.GameplayScreen:
+                        screen = Create<GameplayScreen>(null);
+                        break;
+                    case ScreenID.GameoverScreen:
+                        screen = Create<GameoverScreen>(null);
+                        break;
+                    case ScreenID.PauseScreen:
+                        screen = Create<PauseScreen>(null);
+                        break;
+                }
+
+                if (screen != null)
+                {
+                    // Add screen.
+                    this.Screens.Add(_id, screen);
+                }
+
+                return screen;
             }
         }
 
@@ -371,6 +428,32 @@ namespace Arcana.UI.Screens
         public Dictionary<ScreenID, IScreen> GetScreens()
         {
             return this.Screens;
+        }
+
+        /// <summary>
+        /// Create a screen and return it.
+        /// </summary>
+        /// <param name="_parent">Parent of the screen.</param>
+        /// <returns>Returns an initialized screen object.</returns>
+        public static T Create<T>(ArcanaObject _parent = null) where T: ScreenBase
+        {
+            ArcanaObject parent = _parent;
+
+            if (parent == null)
+            {
+                parent = Services.CreateEmptyObject("Arcana (Splash Screen)").AddComponent<ArcanaObject>();
+                parent.Initialize();
+            }
+
+            T screen = parent.GetComponent<T>();
+
+            if (screen == null)
+            {
+                screen = parent.Self.AddComponent<T>();
+                screen.Initialize();
+            }
+
+            return screen;
         }
 
         #endregion

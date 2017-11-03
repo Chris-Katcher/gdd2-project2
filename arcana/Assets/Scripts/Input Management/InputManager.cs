@@ -32,7 +32,7 @@ namespace Arcana.InputManagement
     /// <summary>
     /// Handles all input functionality and controller mapping functions.
     /// </summary>
-    [AddComponentMenu("Arcana/Managers/InputManager")]
+    [AddComponentMenu("Arcana/Managers/Input Manager")]
     public class InputManager : ArcanaObject
     {
 
@@ -154,24 +154,9 @@ namespace Arcana.InputManagement
         /////////////////////
 
         /// <summary>
-        /// Static instance of the class. (We only want one).
+        /// Static instance of the input manager class.
         /// </summary>
         public static InputManager instance = null;
-
-        /// <summary>
-        /// Returns the single instance of the class.
-        /// </summary>
-        /// <returns>Returns a component.</returns>
-        public static InputManager GetInstance()
-        {
-            if (instance == null)
-            {
-                Debugger.Print("Creating new instance of InputManager.");
-                instance = Services.CreateEmptyObject("Input Manager").AddComponent<InputManager>();
-            }
-
-            return instance;
-        }
 
         /// <summary>
         /// Returns true if instance exists.
@@ -182,6 +167,21 @@ namespace Arcana.InputManagement
             return (instance != null);
         }
 
+        /// <summary>
+        /// Returns the single instance of the class.
+        /// </summary>
+        /// <returns>Returns a component.</returns>
+        public static InputManager GetInstance()
+        {
+            if (!HasInstance())
+            {
+                instance = Create(null);
+            }
+
+            return instance;
+        }
+
+
         #endregion
 
         #region Component Factory Methods.
@@ -189,17 +189,27 @@ namespace Arcana.InputManagement
         /// <summary>
         /// Creates a new component.
         /// </summary>
+        /// <param name="_parent">Object that the component will be added to.</param>
         /// <returns>Creates a new component and adds it to the parent.</returns>
-        public static InputManager Create(ArcanaObject _parent)
+        public static InputManager Create(ArcanaObject _parent = null)
         {
-            if (!HasInstance())
+            ArcanaObject parent = _parent;
+
+            if (parent == null)
             {
-                instance = _parent.GetComponent<InputManager>();
+                parent = Services.CreateEmptyObject().AddComponent<ArcanaObject>();
+                parent.Initialize();
             }
 
             if (!HasInstance())
             {
-                instance = ComponentFactory.Create<InputManager>(_parent);
+                instance = parent.GetComponent<InputManager>();
+            }
+
+            if (!HasInstance())
+            {
+                instance = ComponentFactory.Create<InputManager>(parent);
+                instance.Initialize();
             }
 
             return instance;
@@ -341,26 +351,24 @@ namespace Arcana.InputManagement
                 // Initialize the base values.
                 base.Initialize();
 
-                // Set this name.
-                this.Name = "Input Manager";
-
-                // Set debug mode.
-                this.Debug = true;
+                // Initialize the members.
+                InputManager.instance = this;
+                this.Name = "Arcana (Input Manager)";
+                this.m_controllerCount = 0; // Set the initial controller count.
+                this.IsPoolable = false; // This isn't a poolable element.
+                this.transform.position = Vector3.zero; // Ensure no movement.
+                this.transform.rotation = Quaternion.Euler(Vector3.zero); // Ensure no rotation.
 
                 // Initialize the input manager.
-                Debugger.Print("Initializing input manager.", this.Self.name);
+                Debugger.Print("Initializing input manager.", this.Self.name, this.Debug);
 
                 // Make the timer.
                 this.m_tracker = new StatTracker("Controller Connection Check", 3.0f, 0.0f, 4.0f, -1.0f, -1.0f);
+                this.m_tracker.Reset(); // Set up the tracker for the start.
 
-                // Set up the tracker for the start.
-                this.m_tracker.Reset();
-
-                // Set the controller count.
-                this.m_controllerCount = 0;
-
-                // This isn't a poolable element.
-                this.IsPoolable = false;
+                // Activate and run the manager.
+                this.Activate();
+                this.Run();
             }
         }
 

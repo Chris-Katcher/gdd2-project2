@@ -209,9 +209,19 @@ namespace Arcana.UI.Elements
         /// </summary>
         public void Update()
         {
+            if (this.m_fontSize != 0)
+            {
+                this.Text.fontSize = this.m_fontSize;
+            }
+        }
+
+        /// <summary>
+        /// Update position.
+        /// </summary>
+        public void UpdatePosition()
+        {
             // Update position.
             this.transform.position = this.Offset + this.Position;
-            this.Text.fontSize = this.m_fontSize;
         }
 
         #endregion

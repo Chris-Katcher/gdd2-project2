@@ -140,10 +140,7 @@ namespace Arcana.Entities.Attributes
                 // Visible.
 
                 // Must follow above:
-                this.Renderer.enabled = this.Status.IsActive()
-                    && !this.Status.IsInactive()
-                    && !this.Status.IsPaused()
-                    && this.Status.IsVisible();                                
+                this.Renderer.enabled = this.Status.IsActive() && this.Status.IsVisible();                             
             }
         }
 
@@ -246,7 +243,20 @@ namespace Arcana.Entities.Attributes
         }
 
         #endregion
-        
+
+        #region ArcanaObject Methods.
+
+        /// <summary>
+        /// Destroy the sprite renderer.
+        /// </summary>
+        public override void DestroySelf()
+        {
+            Destroy(this.Renderer);
+            Destroy(this);
+        }
+
+        #endregion
+
     }
 
     #endregion

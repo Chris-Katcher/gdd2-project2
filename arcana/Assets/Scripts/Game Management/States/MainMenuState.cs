@@ -16,6 +16,7 @@ using UnityEngine;
 using Arcana.Entities;
 using Arcana.Utilities;
 using Arcana.UI.Screens;
+using Arcana.Cameras;
 
 namespace Arcana.States
 {
@@ -33,34 +34,17 @@ namespace Arcana.States
     public class MainMenuState : State
     {
 
-        #region Static Members.
-
-        // TODO: Create component maker.
-
-        #endregion
-
         #region Data Members
 
-        #region Properties
-
-        /////////////////////
-        // Properties.
-        /////////////////////
+        #region Fields.
 
         /// <summary>
-        /// Return the current screen.
+        /// Time to switch states.
         /// </summary>
-        public sealed override IScreen CurrentScreen
-        {
-            get
-            {
-                // TODO: Fix this implementation in the base class.
-                throw new NotImplementedException();
-            }
-        }
-
+        private float timeToLive;
+        
         #endregion
-
+        
         #endregion
 
         #region UnityEngine Methods.
@@ -70,13 +54,63 @@ namespace Arcana.States
         /// </summary>
         public override void Update()
         {
-            // Call base method.
-            base.Update();
-
-            // Update when running.
-            if (this.Status.IsRunning())
+            if (!this.Initialized)
             {
-                // Handle input.
+                this.Initialize();
+            }
+            else
+            {
+                // Call base method.
+                base.Update();
+
+                // Update when running.
+                if (this.Status.IsActive())
+                {
+                    // Based on the screen.
+                    switch (this.m_currentScreenID)
+                    {
+                        case ScreenID.SplashScreen:
+                            CameraManager.GetInstance().ChangeBackground(Services.GetColor(0, 0, 0));
+                            SplashScreen screen1 = this.CurrentScreen as SplashScreen;
+                            if (screen1.Status.IsDead())
+                            {
+                                SwitchScreen(ScreenID.MainMenuScreen);
+                            }
+                            break;
+                        case ScreenID.MainMenuScreen:
+                            MainMenuScreen screen2 = this.CurrentScreen as MainMenuScreen;
+                            screen2.DeactivateTimer();
+                            if (screen2.HasNextState)
+                            {
+                                this.m_nextStateID = screen2.NextStateID;
+                            }
+                            break;
+                    }
+                    
+                    #region Debug Functionality.
+
+                    if (this.Debug)
+                    {
+                        Debugger.Print("Running main menu.", this.Self.name, this.Debug);
+
+                        if (this.Status.IsPaused())
+                        {
+                            Debugger.Print("State is paused.", this.Self.name, this.Debug);
+                        }
+                        else
+                        {
+                            this.timeToLive = Services.Max(this.timeToLive - Time.fixedDeltaTime, 0.0f);
+                            Debugger.Print("Time until state switch: " + this.timeToLive + " seconds.", this.Self.name, this.Debug);
+                        }
+
+                        if (timeToLive == 0.0f)
+                        {
+                            this.SetNextState(StateID.ArenaState);
+                        }
+                    }
+
+                    #endregion
+                }
             }
         }
 
@@ -89,29 +123,61 @@ namespace Arcana.States
         /// </summary>
         public sealed override void Initialize()
         {
-            // Initialize base data members.
+            // Initialize base data members and collection.
             base.Initialize();
 
-            // Set the state ID.
-            this.InitializeState(StateID.MainMenuState);
+            // Initialize members.                  
+            this.Name = "Arcana (Main Menu State)"; // Set the object name.
+            this.Revive();
+            this.ResetState();
+        }
 
-            // Set the object name.
-            this.Name = "Main Menu (State)";
+        /// <summary>
+        /// Set the state to the menu state.
+        /// </summary>
+        public sealed override void InitializeState()
+        {
+            this.m_stateID = StateID.MainMenuState;
         }
 
         #endregion
-
-        #region Accessor Methods.
+        
+        #region Mutator Methods.
 
         /// <summary>
-        /// Return the requested Screen object.
+        /// Reset the state.
         /// </summary>
-        /// <param name="id">Screen ID associated with requested screen.</param>
-        /// <returns>Returns a screen object.</returns>
-        public sealed override IScreen GetScreen(ScreenID id)
+        public override void ResetState()
         {
-            // TODO: Implement wrapper function.
-            throw new NotImplementedException();
+            this.timeToLive = 5.0f; // 5 seconds to live.
+            this.SetNextState(StateID.NULL_STATE);
+            this.SwitchScreen(ScreenID.SplashScreen);
+        }
+
+        /// <summary>
+        /// Switch screens.
+        /// </summary>
+        /// <param name="_id">Screen to switch to.</param>
+        public void SwitchScreen(ScreenID _id)
+        {
+            if (this.m_currentScreenID != _id)
+            {
+                ScreenBase screen = this.CurrentScreen as ScreenBase;
+                if (screen != null)
+                {
+                    screen.Deactivate();
+                    screen.Kill();
+                    screen.Hide();
+                    screen.HideGUI();
+                }
+
+                this.m_currentScreenID = _id;
+                screen = this.CurrentScreen as ScreenBase;
+                screen.Revive();
+                screen.Activate();
+                screen.Show();
+                screen.ShowGUI();
+            }
         }
 
         #endregion

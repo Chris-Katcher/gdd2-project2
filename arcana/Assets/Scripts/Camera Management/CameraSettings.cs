@@ -28,7 +28,7 @@ namespace Arcana.Cameras
     /// <summary>
     /// A camera setting component enables for on-the-fly modification of Camera properties.
     /// </summary>
-    [AddComponentMenu("Arcana/Cameras/CameraSettings")]
+    [AddComponentMenu("Arcana/Cameras/Camera Settings")]
     public class CameraSettings : ArcanaObject
     {
 
@@ -389,7 +389,7 @@ namespace Arcana.Cameras
                     // When index is in range, target only a single target.
                     CurrentConfiguration.TargetPosition = CurrentConfiguration.Targets[_index].Location;
 
-                    Debugger.Print("Targeting index: " + _index + " " + CurrentConfiguration.Targets[_index].Name + " || May be " + CurrentConfiguration.SelectedTarget.Name + ".");
+                    Debugger.Print("Targeting index: " + _index + " " + CurrentConfiguration.Targets[_index].Name + " || May be " + CurrentConfiguration.SelectedTarget.Name + ".", this.Self.name, this.Debug);
 
                     // Keep track of the target.
                     CurrentConfiguration.SetOffsetRange(CurrentConfiguration.InitialOffset.z, -CurrentConfiguration.InitialOffset.z + CurrentConfiguration.Targets[_index].Radius);
@@ -422,7 +422,7 @@ namespace Arcana.Cameras
             }
             else
             {
-                Debugger.Print("No targets at all.");
+                Debugger.Print("No targets at all.", this.Self.name, this.Debug);
 
                 // If there are no targets, set the center of the screen as the target.
                 CurrentConfiguration.TargetPosition = new Vector3(0.0f, 0.0f, 0.0f);
@@ -471,28 +471,20 @@ namespace Arcana.Cameras
                 // Create the status, set the name, and children collection.
                 base.Initialize();
 
-                // Set the camera.
-                this.m_camera = this.Camera;
-
-                // Set the mode.
-                this.m_mode = CameraMode.Free;
-
-                // Set up the configurations.
-                this.m_settings = new Dictionary<CameraMode, CameraConfiguration>();
-                
-                // Set the copyable flag to false.
-                this.SetCopyable(false);
-
-                // Change name of the object.
-                this.Name = "Arcana Camera";
-
-                Debugger.Print("Reset camera.", this.Self.name, this.Debug);
-
-                // Reset camera when in free mode.
-                ResetCamera();
+                // Initialize members of class.
+                this.Name = "Arcana (Camera)"; // Change name of the object.
+                this.m_camera = this.Camera; // Get a reference to the main camera.
+                this.m_mode = CameraMode.Free; // Set the initial mode.
+                this.m_settings = new Dictionary<CameraMode, CameraConfiguration>(); // Set up the configurations.
+                this.SetCopyable(false); // Set the copyable flag to false.
 
                 // Initialize the camera settings.
-                Debugger.Print("Initializing camera settings.", this.Self.name);
+                Debugger.Print("Initializing camera settings.", this.Self.name, this.Debug);
+
+                // Run initialization methods.
+                this.ResetCamera();
+                this.Activate();
+                this.Run();
             }
         }
         

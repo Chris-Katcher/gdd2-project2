@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Arcana.Resources;
+using Arcana.Cameras;
 
 namespace Arcana.UI.Screens
 {
@@ -67,7 +68,7 @@ namespace Arcana.UI.Screens
         public override void UpdatePosition()
         {
             // Maintain the screen as the center of the window.
-            this.Position = ScreenManager.Center;
+            this.Position = CameraManager.GetInstance().Camera.Camera.ScreenToWorldPoint(ScreenManager.Center);
         }
 
         #endregion

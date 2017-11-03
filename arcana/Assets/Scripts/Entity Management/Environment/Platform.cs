@@ -9,8 +9,8 @@ using UnityEngine;
 namespace Arcana.Environment
 {
     public class Platform : Environment
-    {
-        
+    {        
+
         #region Data Members
 
         #region Fields.

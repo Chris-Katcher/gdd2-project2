@@ -74,6 +74,14 @@ namespace Arcana.UI.Elements
         }
 
         /// <summary>
+        /// Reference to the object when cast as type.
+        /// </summary>
+        public T InstanceType
+        {
+            get { return Instance as T; }
+        }
+
+        /// <summary>
         /// Returns an instantiation of the game object.
         /// </summary>
         public T Prefab
@@ -151,6 +159,7 @@ namespace Arcana.UI.Elements
             if(this.m_object == null)
             {
                 this.m_object = UnityEngine.Object.Instantiate(Load()) as GameObject;
+                this.m_object.name = "Original " + typeof(T).Name;
             }
             return this.m_object;
         }

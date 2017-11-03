@@ -163,7 +163,7 @@ namespace Arcana.UI.Screens
         }
 
         #endregion
-
+        
     }
     
     #endregion
@@ -307,7 +307,7 @@ namespace Arcana.UI.Screens
                 }
 
                 // If set to less than zero, turn off time to live parameter.
-                if (this.m_timeToLive != -1.0f)
+                if (value != -1.0f)
                 {
                     this.m_timeToLive = Services.Max(value, 0.0f);
                 }
@@ -357,10 +357,7 @@ namespace Arcana.UI.Screens
             else
             {
                 // Check if destroyed.
-                base.Update();
-
-                // Update position.
-                this.UpdatePosition();
+                base.Update();                
             }
         }
 
@@ -505,6 +502,16 @@ namespace Arcana.UI.Screens
         #region Accessor Methods.
 
         /// <summary>
+        /// Checks if the screen is the same.
+        /// </summary>
+        /// <param name="_id">ID to check.</param>
+        /// <returns>Returns true if IDs match.</returns>
+        public bool IsScreen(ScreenID _id)
+        {
+            return this.ScreenID == _id;
+        }
+
+        /// <summary>
         /// If time is equal to -1.0f, the screen can't decay.
         /// </summary>
         /// <returns>Returns true if time can decay.</returns>
@@ -639,6 +646,13 @@ namespace Arcana.UI.Screens
         #endregion
 
         #region Accessors Methods
+
+        /// <summary>
+        /// Checks if the screen is the same.
+        /// </summary>
+        /// <param name="_id">ID to check.</param>
+        /// <returns>Returns true if IDs match.</returns>
+        bool IsScreen(ScreenID _id);
 
         /// <summary>
         /// Checks if within x and y axis bounds. (z-axis is ignored).

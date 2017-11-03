@@ -120,13 +120,8 @@ namespace Arcana.Entities.Attributes
                 //UpdatePosWizzard(Input.GetAxis("P1_LSX"));
 
                 //UpdateJumpStatus(Input.GetKeyDown(KeyCode.Space));
-
-                if (debug_delete)
-                {
-                    this.Status.Destroy();
-                }
-
-                if (debug_active)
+                
+                if (this.Status.IsActive())
                 {
                     this.Activate();
                 }
@@ -135,7 +130,7 @@ namespace Arcana.Entities.Attributes
                     this.Deactivate();
                 }
 
-                if (debug_visible)
+                if (!this.Status.IsVisible())
                 {
                     this.Show();
                 }
@@ -144,7 +139,7 @@ namespace Arcana.Entities.Attributes
                     this.Hide();
                 }
 
-                if (debug_pause)
+                if (!this.Status.IsPaused())
                 {
                     this.Pause();
                 }

@@ -122,12 +122,12 @@ namespace Arcana.Cameras
 
                 // Set the tracking flag.
                 this.m_trackable = true;
-
+                
                 // Create the status, set the name, and children collection.
                 base.Initialize();
 
                 // Append the camera target to the name.
-                this.Name = this.Name + " (Camera Target)";
+                // this.Name = this.Name + " (Camera Target)";
             }
         }
 

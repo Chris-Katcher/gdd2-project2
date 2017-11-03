@@ -49,7 +49,7 @@ namespace Arcana.Utilities
         {
             if (instance == null)
             {
-                Debugger.Print("Creating new instance of ComponentFactory.");
+                Debugger.Print("Creating new instance of ComponentFactory.", "Component Factory", debugMode);
                 instance = Services.CreateEmptyObject("Component Factory").AddComponent<ComponentFactory>();
             }
 
@@ -100,17 +100,23 @@ namespace Arcana.Utilities
         /////////////////////
 
         /// <summary>
+        /// Debug mode for component factory.
+        /// </summary>
+        public static bool debugMode = false;
+
+        /// <summary>
         /// Private constructor that creates the factory when requested for the very first time.
         /// </summary>
         private ComponentFactory()
         {
             ComponentFactory.instance = this;
+            debugMode = false;
         }
 
         #endregion
 
         #region Component Creation Methods.
-
+        
         /// <summary>
         /// Returns a <see cref="MonoBehaviour"/> type <see cref="Component"/>, and adds it to the requesting object.
         /// </summary>
@@ -126,23 +132,23 @@ namespace Arcana.Utilities
             // Check if the parent is null.
             if (_parent == null || _parent.IsNull)
             {
-                Debugger.Print("Cannot add " + componentType + "component to null parent.");
+                Debugger.Print("Cannot add " + componentType + "component to null parent.", this.name, debugMode);
                 return component; // Is null.
             }
 
             // Check if the component already exists on the object.
-            Debugger.Print("Creating " + componentType + " component for " + _parent.Name);
+            Debugger.Print("Creating " + componentType + " component for " + _parent.Name, this.name, debugMode);
             component = _parent.GetComponent<T>();
 
             // If retrieved reference is null, create a new component.
             if (component == null)
             {
-                Debugger.Print("Creating new " + componentType + " component.");
+                Debugger.Print("Creating new " + componentType + " component.", this.name, debugMode);
                 component = _parent.Self.AddComponent<T>();
             }
             else
             {
-                Debugger.Print(componentType + " component already exists.");
+                Debugger.Print(componentType + " component already exists.", this.name, debugMode);
             }
             
             // Return the created component.
@@ -166,26 +172,26 @@ namespace Arcana.Utilities
             // Check if the parent is null.
             if (_parent == null || _parent.IsNull)
             {
-                Debugger.Print("Cannot add clone of " + componentType + "component to null parent.");
+                Debugger.Print("Cannot add clone of " + componentType + "component to null parent.", this.name, debugMode);
                 return clone; // Is null.
             }
 
             // Check if the component already exists on the object.
-            Debugger.Print("Creating cloen of " + componentType + " component for " + _parent.Name);
+            Debugger.Print("Creating cloen of " + componentType + " component for " + _parent.Name, this.name, debugMode);
             clone = _parent.GetComponent<T>();
 
             // If retrieved reference is null, create a new component.
             if (clone == null)
             {
-                Debugger.Print("Creating new " + componentType + " component.");
+                Debugger.Print("Creating new " + componentType + " component.", this.name, debugMode);
                 clone = _parent.Self.AddComponent<T>();
             }
             else
             {
-                Debugger.Print(componentType + " component already exists.");
+                Debugger.Print(componentType + " component already exists.", this.name, debugMode);
             }
             
-            Debugger.Print("Cloning " + componentType + " component into new component.");
+            Debugger.Print("Cloning " + componentType + " component into new component.", this.name, debugMode);
             clone.Clone(_template);
 
             // Return the cloned component.

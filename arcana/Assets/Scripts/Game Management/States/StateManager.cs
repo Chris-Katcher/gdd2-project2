@@ -17,6 +17,8 @@ using UnityEngine;
 using Arcana.Utilities;
 using Arcana.UI.Screens;
 using Arcana.Entities.Attributes;
+using Arcana.InputManagement;
+using InputAction = Arcana.InputManagement.Action;
 
 namespace Arcana.States
 {
@@ -85,22 +87,7 @@ namespace Arcana.States
         /// Static instance of the class. (We only want one).
         /// </summary>
         public static StateManager instance = null;
-
-        /// <summary>
-        /// Returns the single instance of the class.
-        /// </summary>
-        /// <returns>Returns a component.</returns>
-        public static StateManager GetInstance()
-        {
-            if (instance == null)
-            {
-                Debugger.Print("Creating new instance of StateManager.");
-                instance = Services.CreateEmptyObject("State Manager").AddComponent<StateManager>();
-            }
-
-            return instance;
-        }
-
+        
         /// <summary>
         /// Returns true if instance exists.
         /// </summary>
@@ -110,25 +97,48 @@ namespace Arcana.States
             return (instance != null);
         }
 
+        /// <summary>
+        /// Returns the single instance of the class.
+        /// </summary>
+        /// <returns>Returns a component.</returns>
+        public static StateManager GetInstance()
+        {
+            if (instance == null)
+            {
+                instance = Create(null);
+            }
+
+            return instance;
+        }
 
         #endregion
 
         #region Component Factory Methods.
-        
+
         /// <summary>
         /// Creates a new component.
         /// </summary>
+        /// <param name="_parent">Object that the component will be added to.</param>
         /// <returns>Creates a new component and adds it to the parent.</returns>
-        public static StateManager Create(ArcanaObject _parent)
+        public static StateManager Create(ArcanaObject _parent = null)
         {
-            if (!HasInstance())
+            ArcanaObject parent = _parent;
+
+            if (parent == null)
             {
-                instance = _parent.GetComponent<StateManager>();
+                parent = Services.CreateEmptyObject().AddComponent<ArcanaObject>();
+                parent.Initialize();
             }
 
             if (!HasInstance())
             {
-                instance = ComponentFactory.Create<StateManager>(_parent);
+                instance = parent.GetComponent<StateManager>();
+            }
+
+            if (!HasInstance())
+            {
+                instance = ComponentFactory.Create<StateManager>(parent);
+                instance.Initialize();
             }
 
             return instance;
@@ -170,6 +180,14 @@ namespace Arcana.States
         /////////////////////
 
         /// <summary>
+        /// Instance of the system controller.
+        /// </summary>
+        public SystemController System
+        {
+            get { return SystemController.GetInstance(); }
+        }
+
+        /// <summary>
         /// Map of all IState instances, with their associated ID's.
         /// </summary>
         public Dictionary<StateID, State> States
@@ -204,7 +222,8 @@ namespace Arcana.States
         /// </summary>
         public override void Start()
         {
-            this.Initialize();
+            // Call the base class.
+            base.Start();
         }
 
         /// <summary>
@@ -214,12 +233,58 @@ namespace Arcana.States
         {
             if (!this.Initialized)
             {
+                // Call the initialization method.
                 this.Initialize();
             }
             else
             {
                 // Run base update.
-                base.Update();                
+                base.Update();
+
+                // If the manager is active.
+                if (this.Status.IsActive())
+                {
+
+                    // Handle input here.
+                    this.HandleInput();
+
+                    // If the running is active.
+                    if (this.Status.IsRunning())
+                    {
+                        // If at the start of the program.
+                        if (IsState(StateID.NULL_STATE))
+                        {
+                            Debugger.Print("In the entry-point state.", this.Self.name, this.Debug);
+                            
+                            // Change to the main menu state.
+                            this.ChangeStates(StateID.MainMenuState);
+                        }
+
+                        // If in the main menu state.
+                        if (IsState(StateID.MainMenuState))
+                        {
+                            Debugger.Print("In the main menu state.", this.Self.name, this.Debug);
+                        }
+
+                        // If in the gameplay state.
+                        if (IsState(StateID.ArenaState))
+                        {
+                            Debugger.Print("In the arena state.", this.Self.name, this.Debug);
+                        }
+
+                        // If in the game over state.
+                        if (IsState(StateID.GameOverState))
+                        {
+                            Debugger.Print("In the gameover state.", this.Self.name, this.Debug);
+                        }
+
+                        // Switch states.
+                        if (this.CurrentState.HasNextState)
+                        {
+                            this.ChangeStates(this.CurrentState.NextStateID);
+                        }
+                    }
+                }
             }
         }
 
@@ -237,79 +302,110 @@ namespace Arcana.States
                 // Initialize the base values.
                 base.Initialize();
 
-                // Set this name.
-                this.Name = "State Manager";
+                // Initialize members of class.
+                StateManager.instance = this;
+                this.Debug = false;
+                this.Director = Director.State;
+                this.Name = "Arcana (State Manager)";
+                this.m_states = new Dictionary<StateID, State>(); // Create the dictionary for state management.
+                this.IsPoolable = false; // This isn't a poolable element.
 
                 // Initialize the state manager.
-                Debugger.Print("Initializing state manager.", this.Self.name);
+                Debugger.Print("Initializing state manager.", this.Self.name, this.Debug);
 
                 // Create the container, while also adding an ArcanaObject component and making it a child of this component's gameObject.
-                this.m_container = Services.AddChild(this.Self, Services.CreateEmptyObject("State Container")).AddComponent<ArcanaObject>();
+                this.m_container = Services.CreateEmptyObject("Arcana (State Container)").AddComponent<ArcanaObject>();
+                Services.AddChild(this.Self, this.m_container.Self);
+                
+                // Initialize with the initial game state. (Null).
+                this.m_currentStateID = StateID.NULL_STATE;
 
-                // Create the dictionary for state management.
-                this.m_states = new Dictionary<StateID, State>();
+                // Activate and run this manager.
+                this.Activate();
+                this.Run();
+                this.Show();
+                this.ShowGUI();
 
-                // This isn't a poolable element.
-                this.IsPoolable = false;
+                // Build controls.
+                this.BuildControlScheme();
+                this.InitializeControls();
             }
         }
 
+        #region Input Methods.
+
         /// <summary>
-        /// Builds a state (and adds it to the dictionary) when requested.
+        /// Set up controls for the state manager.
         /// </summary>
-        /// <param name="_state">ID belonging to state that will be built.</param>
-        private State GetState(StateID _state)
+        /// <returns>Returns reference to control scheme.</returns>
+        protected override ControlScheme InitializeControls()
         {
-            switch (_state)
-            {
-                case StateID.MainMenuState:
-                    return GetState<MainMenuState>(_state);
-                case StateID.ArenaState:
-                    return GetState<ArenaState>(_state);
-                case StateID.GameOverState:
-                    return GetState<GameOverState>(_state);
-                case StateID.NULL_STATE:
-                default:
-                    return null;
-            }            
+            this.m_scheme = base.InitializeControls();
+
+            this.RegisterControl(ControlScheme.CreateAction("Toggle Pause", this.Director),
+                ControlScheme.CreateTrigger(Control.StartButton(-1), ResponseMode.Pressed));
+
+            this.RegisterControl(ControlScheme.CreateAction("Toggle Pause", this.Director),
+                ControlScheme.CreateTrigger(Control.CreateKey(KeyCode.Pause), ResponseMode.Pressed));
+
+            this.RegisterControl(ControlScheme.CreateAction("Toggle Pause", this.Director),
+                ControlScheme.CreateTrigger(Control.CreateKey(KeyCode.Escape), ResponseMode.Pressed));
+
+            this.RegisterControl(ControlScheme.CreateAction("Exit", this.Director),
+                ControlScheme.CreateTrigger(Control.CreateKey(KeyCode.Escape), ResponseMode.Pressed));
+
+            return this.m_scheme;
         }
 
         /// <summary>
-        /// Builds the state of the particular type and initializes it.
+        /// Handle registered actions.
         /// </summary>
-        /// <typeparam name="T">Generic where T is a State.</typeparam>
-        /// <param name="_stateID">ID of state to build, initialize, and retrieve.</param>
-        /// <returns>Returns state object.</returns>
-        private T GetState<T>(StateID _stateID) where T: State
+        protected override void HandleInput()
         {
-            // If the state already exists, return it.
-            if (HasState(_stateID))
-            {
-                return this.States[_stateID] as T;
-            }
-            else
-            {
-                // If the state hasn't been built yet.
-                // Put it on the container.
-                T state = this.m_container.Self.GetComponent<T>();
+            InputAction togglePause = GetAction("Toggle Pause");
+            InputAction exit = GetAction("Exit");
 
-                // If it is null.
-                if (state == null)
+            if (this.Controls.IsActivated(togglePause))
+            {
+                if (!this.Status.IsPaused())
                 {
-                    // Create the new state.
-                    state = ComponentFactory.Create<T>(this.m_container);
-
-                    // Initialize the state.
-                    state.Initialize();
+                    this.Pause();
                 }
-
-                // Add the state to the states dictionary.
-                this.States.Add(_stateID, state);
-
-                // Return the state.
-                return state;
+                else
+                {
+                    this.Resume();
+                }
             }
+
+            if (this.Controls.IsActivated(exit) && IsState(StateID.MainMenuState))
+            {
+                if (this.CurrentState != null && this.CurrentState.CurrentScreen != null && this.CurrentState.CurrentScreen.IsScreen(ScreenID.MainMenuScreen))
+                {                    
+                    foreach (GameObject obj in GameObject.FindObjectsOfType<GameObject>())
+                    {
+                        if (obj != this.Self)
+                        {
+                            if (obj.GetComponent<ArcanaObject>() != null)
+                            {
+                                obj.GetComponent<ArcanaObject>().Status.Destroy();
+                            }
+                            else
+                            {
+                                Destroy(obj);
+                            }
+                        }
+                    }
+                    this.Status.Destroy();
+                    Application.Quit();
+                }
+            }
+
+
         }
+
+        #endregion
+
+        #region Commented regions.
 
         /*
         #region Build Property Methods.
@@ -381,6 +477,8 @@ namespace Arcana.States
 
         #endregion
 
+        #endregion
+
         #region Status Methods.
 
         /// <summary>
@@ -406,6 +504,77 @@ namespace Arcana.States
         #endregion
 
         #region State Methods.
+        
+        /// <summary>
+        /// Builds a state (and adds it to the dictionary) when requested.
+        /// </summary>
+        /// <param name="_state">ID belonging to state that will be built.</param>
+        private State GetState(StateID _state)
+        {
+            switch (_state)
+            {
+                case StateID.MainMenuState:
+                    return GetState<MainMenuState>(_state);
+                case StateID.ArenaState:
+                    return GetState<ArenaState>(_state);
+                case StateID.GameOverState:
+                    return GetState<GameOverState>(_state);
+                case StateID.NULL_STATE:
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Builds the state of the particular type and initializes it.
+        /// </summary>
+        /// <typeparam name="T">Generic where T is a State.</typeparam>
+        /// <param name="_stateID">ID of state to build, initialize, and retrieve.</param>
+        /// <returns>Returns state object.</returns>
+        private T GetState<T>(StateID _stateID) where T : State
+        {
+            // If the state already exists, return it.
+            if (HasState(_stateID))
+            {
+                return this.States[_stateID] as T;
+            }
+            else
+            {
+                // If the state hasn't been built yet.
+                // Put it on the container.
+                T state = this.m_container.Self.GetComponentInChildren<T>();
+
+                // If it is null.
+                if (state == null)
+                {
+                    ArcanaObject parent = Services.CreateEmptyObject("State").AddComponent<ArcanaObject>();
+
+                    // Create the new state.
+                    state = ComponentFactory.Create<T>(parent);
+
+                    Services.AddChild(this.m_container.Self, parent.Self);
+
+                    // Initialize the state.
+                    state.Initialize();
+                }
+
+                // Add the state to the states dictionary.
+                this.States.Add(_stateID, state);
+
+                // Return the state.
+                return state;
+            }
+        }
+
+        /// <summary>
+        /// Checks if input state matches the current state.
+        /// </summary>
+        /// <param name="_stateID">State ID to check.</param>
+        /// <returns>Return true if match is made.</returns>
+        public bool IsState(StateID _stateID)
+        {
+            return CurrentStateID == _stateID;
+        }
 
         /// <summary>
         /// Checks to see if state ID exists as a key for the states map.
@@ -433,7 +602,7 @@ namespace Arcana.States
         public void ResetState()
         {
             Debugger.Print("Resetting the state.");
-            throw new NotImplementedException();
+            this.CurrentState.ResetState();
         }
 
         /// <summary>
@@ -444,15 +613,25 @@ namespace Arcana.States
         {
             if (this.Status.IsActive())
             {
+                if (this.m_currentStateID == StateID.NULL_STATE)
+                {
+                    this.m_currentStateID = _stateID;
+                }
+
                 if (this.m_currentStateID != _stateID)
                 {
                     // Deactivate the previous state.
-                    this.CurrentState.Status.Deactivate();
+                    this.CurrentState.Deactivate();
+                    this.CurrentState.Stop();
 
                     // Activate the current state.
                     this.m_currentStateID = _stateID;
-                    this.CurrentState.Status.Activate();
+                    this.CurrentState.ResetState();
                 }
+
+                this.CurrentState.Activate();
+                this.CurrentState.Run();
+                this.CurrentState.Debug = this.Debug;
             }
         }
 

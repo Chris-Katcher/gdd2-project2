@@ -81,6 +81,15 @@ namespace Arcana.Resources
         public static ResourceManager instance = null;
 
         /// <summary>
+        /// Returns true if instance exists.
+        /// </summary>
+        /// <returns>Returns boolean indicating instance existence.</returns>
+        public static bool HasInstance()
+        {
+            return (instance != null);
+        }
+
+        /// <summary>
         /// Returns the single instance of the class.
         /// </summary>
         /// <returns>Returns a component.</returns>
@@ -88,21 +97,10 @@ namespace Arcana.Resources
         {
             if (instance == null)
             {
-                Debugger.Print("Creating new instance of ResourceManager.");
-                instance = Services.CreateEmptyObject("Resource Manager").AddComponent<ResourceManager>();
-                instance.Initialize();
+                instance = Create(null);
             }
 
             return instance;
-        }
-
-        /// <summary>
-        /// Returns true if instance exists.
-        /// </summary>
-        /// <returns>Returns boolean indicating instance existence.</returns>
-        public static bool HasInstance()
-        {
-            return (instance != null);
         }
 
         #endregion
@@ -112,17 +110,27 @@ namespace Arcana.Resources
         /// <summary>
         /// Creates a new component.
         /// </summary>
+        /// <param name="_parent">Object that the component will be added to.</param>
         /// <returns>Creates a new component and adds it to the parent.</returns>
-        public static ResourceManager Create(ArcanaObject _parent)
+        public static ResourceManager Create(ArcanaObject _parent = null)
         {
-            if (!HasInstance())
+            ArcanaObject parent = _parent;
+
+            if (parent == null)
             {
-                instance = _parent.GetComponent<ResourceManager>();
+                parent = Services.CreateEmptyObject().AddComponent<ArcanaObject>();
+                parent.Initialize();
             }
 
             if (!HasInstance())
             {
-                instance = ComponentFactory.Create<ResourceManager>(_parent);
+                instance = parent.GetComponent<ResourceManager>();
+            }
+
+            if (!HasInstance())
+            {
+                instance = ComponentFactory.Create<ResourceManager>(parent);
+                instance.Initialize();
             }
 
             return instance;

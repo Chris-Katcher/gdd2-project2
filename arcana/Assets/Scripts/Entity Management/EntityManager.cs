@@ -80,22 +80,7 @@ namespace Arcana.Entities
         /// Static instance of the class. (We only want one).
         /// </summary>
         public static EntityManager instance = null;
-
-        /// <summary>
-        /// Returns the single instance of the class.
-        /// </summary>
-        /// <returns>Returns a component.</returns>
-        public static EntityManager GetInstance()
-        {
-            if (instance == null)
-            {
-                Debugger.Print("Creating new instance of EntityManager.");
-                instance = Services.CreateEmptyObject("Entity Manager").AddComponent<EntityManager>();
-            }
-
-            return instance;
-        }
-
+        
         /// <summary>
         /// Returns true if instance exists.
         /// </summary>
@@ -105,24 +90,48 @@ namespace Arcana.Entities
             return (instance != null);
         }
 
+        /// <summary>
+        /// Returns the single instance of the class.
+        /// </summary>
+        /// <returns>Returns a component.</returns>
+        public static EntityManager GetInstance()
+        {
+            if (instance == null)
+            {
+                instance = Create(null);
+            }
+
+            return instance;
+        }
+
         #endregion
-        
+
         #region Component Factory Methods.
 
         /// <summary>
         /// Creates a new component.
         /// </summary>
+        /// <param name="_parent">Object that the component will be added to.</param>
         /// <returns>Creates a new component and adds it to the parent.</returns>
-        public static EntityManager Create(ArcanaObject _parent)
+        public static EntityManager Create(ArcanaObject _parent = null)
         {
-            if (!HasInstance())
+            ArcanaObject parent = _parent;
+
+            if (parent == null)
             {
-                instance = _parent.GetComponent<EntityManager>();
+                parent = Services.CreateEmptyObject().AddComponent<ArcanaObject>();
+                parent.Initialize();
             }
 
             if (!HasInstance())
             {
-                instance = ComponentFactory.Create<EntityManager>(_parent);
+                instance = parent.GetComponent<EntityManager>();
+            }
+
+            if (!HasInstance())
+            {
+                instance = ComponentFactory.Create<EntityManager>(parent);
+                instance.Initialize();
             }
 
             return instance;
@@ -394,21 +403,17 @@ namespace Arcana.Entities
             {
                 // Initialize the base values.
                 base.Initialize();
-
-                // Set this name.
-                this.Name = "Entity Manager";
+                
+                // Initialize members of class.
+                this.Name = "Arcana (Entity Manager)"; // Set the name.
+                this.m_entities = new List<Entity>(); // Make the new list.
 
                 // Initialize the entity manager.
                 Debugger.Print("Initializing entity manager.", this.Self.name);
 
-                // Make the new list.
-                this.m_entities = new List<Entity>();
-
-                // In the context of a manager ArcanaObject,
-                // This means that we can pool the objects
-                // that it manages,
-                // so long as its Entities are poolable, themselves.
-                this.IsPoolable = true;
+                // Run initialization methods.
+                this.Activate();
+                this.Run();
             }
         }
 

@@ -34,13 +34,16 @@ namespace Arcana.States
     public class GameOverState : State
     {
 
-        #region Static Members.
+        #region Data Members
 
-        // TODO: Create component maker.
+        #region Fields.
+
+        /// <summary>
+        /// Time to switch states.
+        /// </summary>
+        private float timeToLive;
 
         #endregion
-
-        #region Data Members
 
         #region Properties
 
@@ -67,17 +70,39 @@ namespace Arcana.States
         #region UnityEngine Methods.
 
         /// <summary>
-        /// The main menu should handle some input functionality.
+        /// The game over state should handle some input functionality.
         /// </summary>
         public override void Update()
         {
-            // Call base method.
-            base.Update();
-
-            // Update when running.
-            if (this.Status.IsRunning())
+            if (!this.Initialized)
             {
-                // Handle input.
+                this.Initialize();
+            }
+            else
+            {
+                // Call base method.
+                base.Update();
+
+                // Update when running.
+                if (this.Status.IsActive())
+                {
+                    Debugger.Print("Running game over state.", this.Self.name, this.Debug);
+
+                    if (this.Status.IsPaused())
+                    {
+                        Debugger.Print("State is paused.", this.Self.name, this.Debug);
+                    }
+                    else
+                    {
+                        this.timeToLive = Services.Max(this.timeToLive - Time.fixedDeltaTime, 0.0f);
+                        Debugger.Print("Time until state switch: " + this.timeToLive + " seconds.", this.Self.name, this.Debug);
+                    }
+
+                    if (timeToLive == 0.0f)
+                    {
+                        this.SetNextState(StateID.MainMenuState);
+                    }
+                }
             }
         }
 
@@ -93,48 +118,35 @@ namespace Arcana.States
             // Initialize base data members.
             base.Initialize();
 
-            // Set the state ID.
-            this.InitializeState(StateID.GameOverState);
-
-            // Set name.
-            this.Name = "Game Over";
+            // Initialize members.                  
+            this.Name = "Arcana (Game Over State)"; // Set the object name.
+            this.Revive();
+            this.ResetState();
         }
-
-        #endregion
-
-        /*
-        #region Input Methods.
-
-        protected override void HandleInput()
-        {
-            // TODO: Implement action handling.
-            throw new NotImplementedException();
-        }
-
-        protected override void InitializeControls()
-        {
-            // TODO: Implement controls for the main menu controls.
-            throw new NotImplementedException();
-        }
-
-        #endregion
-        */
-
-        #region Accessor Methods
 
         /// <summary>
-        /// Return the requested Screen object.
+        /// Set the state to the arena state.
         /// </summary>
-        /// <param name="id">Screen ID associated with requested screen.</param>
-        /// <returns>Returns a screen object.</returns>
-        public sealed override IScreen GetScreen(ScreenID id)
+        public sealed override void InitializeState()
         {
-            // TODO: Implement wrapper function.
-            throw new NotImplementedException();
+            this.m_stateID = StateID.GameOverState;
         }
 
         #endregion
+        
+        #region Mutator Methods.
 
+        /// <summary>
+        /// Reset the state.
+        /// </summary>
+        public override void ResetState()
+        {
+            this.timeToLive = 5.0f; // 5 seconds to live.
+            this.SetNextState(StateID.NULL_STATE);
+            this.m_currentScreenID = ScreenID.GameoverScreen;
+        }
+
+        #endregion
     }
 
     #endregion

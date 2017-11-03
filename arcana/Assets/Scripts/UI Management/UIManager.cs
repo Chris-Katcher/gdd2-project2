@@ -15,6 +15,7 @@ using Arcana.Utilities;
 using Arcana.Resources;
 using Arcana.UI.Elements;
 using Arcana.UI.Screens;
+using Arcana.Cameras;
 using UnityEngine;
 
 // The UI namespace contains the visual layer for all of the user-facing information.
@@ -48,6 +49,15 @@ namespace Arcana.UI
         public static UIManager instance = null;
 
         /// <summary>
+        /// Returns true if instance exists.
+        /// </summary>
+        /// <returns>Returns boolean indicating instance existence.</returns>
+        public static bool HasInstance()
+        {
+            return (instance != null);
+        }
+
+        /// <summary>
         /// Returns the single instance of the class.
         /// </summary>
         /// <returns>Returns a component.</returns>
@@ -55,21 +65,10 @@ namespace Arcana.UI
         {
             if (instance == null)
             {
-                Debugger.Print("Creating new instance of UIManager.");
-                instance = Services.CreateEmptyObject("UI Manager").AddComponent<UIManager>();
-                instance.Initialize();
+                instance = Create(null);
             }
 
             return instance;
-        }
-
-        /// <summary>
-        /// Returns true if instance exists.
-        /// </summary>
-        /// <returns>Returns boolean indicating instance existence.</returns>
-        public static bool HasInstance()
-        {
-            return (instance != null);
         }
 
         #endregion
@@ -79,17 +78,27 @@ namespace Arcana.UI
         /// <summary>
         /// Creates a new component.
         /// </summary>
+        /// <param name="_parent">Object that the component will be added to.</param>
         /// <returns>Creates a new component and adds it to the parent.</returns>
-        public static UIManager Create(ArcanaObject _parent)
+        public static UIManager Create(ArcanaObject _parent = null)
         {
-            if (!HasInstance())
+            ArcanaObject parent = _parent;
+
+            if (parent == null)
             {
-                instance = _parent.GetComponent<UIManager>();
+                parent = Services.CreateEmptyObject().AddComponent<ArcanaObject>();
+                parent.Initialize();
             }
 
             if (!HasInstance())
             {
-                instance = ComponentFactory.Create<UIManager>(_parent);
+                instance = parent.GetComponent<UIManager>();
+            }
+
+            if (!HasInstance())
+            {
+                instance = ComponentFactory.Create<UIManager>(parent);
+                instance.Initialize();
             }
 
             return instance;
@@ -495,7 +504,9 @@ namespace Arcana.UI
             if (this.m_canvas == null)
             {
                 // Returns a reference to the game object with the Canvas.
-                this.m_canvas = this.UISystem.Instance.GetComponentInChildren<Canvas>().gameObject;
+                Canvas canvas = this.UISystem.Instance.GetComponentInChildren<Canvas>();
+                canvas.transform.position = Vector3.zero;
+                this.m_canvas = canvas.gameObject;                
             }
 
             // Returns reference to the canvas.

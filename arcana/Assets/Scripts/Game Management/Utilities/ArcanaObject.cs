@@ -161,7 +161,9 @@ namespace Arcana
         /// </summary>
         public virtual bool IsNull
         {
-            get { return (this.gameObject == null); }
+            get {
+                return (this.gameObject == null);
+            }
         }
 
         /// <summary>
@@ -262,17 +264,19 @@ namespace Arcana
         {
             if (!Initialized)
             {
-                // By default, initialize in non-debug mode. Other children can overwrite this value.
-                this.Debug = false;
-                
-                // Give our object a Status component.
-                this.m_status = ComponentFactory.Create<Status>(this);
-                
-                // Give our object a children component.
-                this.m_children = new List<ArcanaObject>();
-                
-                // Set component as initialized.
-                this.m_status.Initialize();
+                // Set members.
+                this.Debug = false; // Set the debug mode.
+                this.m_status = ComponentFactory.Create<Status>(this); // Create the Status component.
+                this.m_children = new List<ArcanaObject>(); // Create the children collection.
+
+                if (this.m_status == null)
+                {
+                    Debugger.Print("This is null.", this.Self.name, true);
+                    this.m_status = ComponentFactory.Create<Status>(this); // Create the Status component.
+                }
+
+                // Run initialization functions.                
+                this.m_status.Initialize(); // Set component as initialized.
                 this.m_status.Initialize(true); // Set this component as initialized.
             }
         }
@@ -309,7 +313,7 @@ namespace Arcana
 
             if (this.m_scheme == null)
             {
-                this.m_scheme = ControlScheme.Create(this);
+                BuildControlScheme();
             }
 
             return this.m_scheme;

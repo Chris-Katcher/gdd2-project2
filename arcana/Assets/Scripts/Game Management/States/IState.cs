@@ -21,7 +21,7 @@ using Arcana.InputManagement;
 
 namespace Arcana.States
 {
-    
+
     #region Class: State base class.
 
     /////////////////////
@@ -37,7 +37,7 @@ namespace Arcana.States
         #region Static Methods.
 
         #region Enum Parsing Method.
-        
+
         /////////////////////
         // Enum parsing.
         /////////////////////
@@ -68,21 +68,21 @@ namespace Arcana.States
         /// The ID associated with the current state.
         /// </summary>
         protected StateID m_stateID = StateID.NULL_STATE;
-        
+
         /// <summary>
         /// A list of contained Entity components.
         /// </summary>
         protected List<Entity> m_entities = null;
 
         /// <summary>
-        /// A list of screen IDs containing references to IScreen implementations.
+        /// Reference to the current screen.
         /// </summary>
-        protected List<ScreenID> m_screens = null;
-
+        protected ScreenID m_currentScreenID = ScreenID.NULL_SCREEN;
+        
         /// <summary>
-        /// Index representing selected screen.
+        /// The ID associated with the state to change to.
         /// </summary>
-        protected int m_currentScreen = -1;
+        protected StateID m_nextStateID = StateID.NULL_STATE;
 
         #endregion
 
@@ -91,21 +91,13 @@ namespace Arcana.States
         /////////////////////
         // Properties.
         /////////////////////
-        
+
         /// <summary>
-        /// Returns true if state is in null mode.
+        /// Returns true if screen exists.
         /// </summary>
-        public override bool IsNull
+        public bool HasScreen
         {
-            get { return (base.IsNull || this.m_stateID == StateID.NULL_STATE); }
-        }
-        
-        /// <summary>
-        /// Returns true if collection of screens exist.
-        /// </summary>
-        public bool HasScreens
-        {
-            get { return (this.m_screens != null && this.m_screens.Count > 0); }
+            get { return (this.m_currentScreenID != ScreenID.NULL_SCREEN); }
         }
 
         /// <summary>
@@ -117,19 +109,30 @@ namespace Arcana.States
         }
 
         /// <summary>
-        /// Returns the list of screens.
+        /// Reference to the next state's ID.
         /// </summary>
-        public List<ScreenID> Screens
+        public StateID NextStateID
         {
-            get { return this.m_screens; }
+            get { return this.m_nextStateID; }
+        }
+
+        /// <summary>
+        /// Returns true if the next state ID isn't null.
+        /// </summary>
+        public bool HasNextState
+        {
+            get { return this.NextStateID != StateID.NULL_STATE; }
         }
         
         /// <summary>
         /// Returns the current screen object.
         /// </summary>
-        public abstract IScreen CurrentScreen
+        public virtual IScreen CurrentScreen
         {
-            get;
+            get
+            {
+                return GetScreen(this.m_currentScreenID);
+            }
         }
 
         #endregion
@@ -147,19 +150,16 @@ namespace Arcana.States
             base.Initialize();
 
             // Initialize data members.
-            this.InitializeMembers();
-
-            // Initialize the state.
-            this.InitializeState(StateID.NULL_STATE);
+            this.m_stateID = StateID.NULL_STATE; // When just calling base class, ensure it is null.
+            this.m_nextStateID = StateID.NULL_STATE; // The next state will be null until set to something else.
+            this.InitializeMembers(); // Initialize the collections.    
+            this.InitializeState(); // Initialize the state.
         }
 
         /// <summary>
         /// Set the state ID.
         /// </summary>
-        public virtual void InitializeState(StateID _state)
-        {
-            this.m_stateID = _state;
-        }
+        public abstract void InitializeState();
 
         /// <summary>
         /// Initialize this class's data members.
@@ -167,7 +167,7 @@ namespace Arcana.States
         protected virtual void InitializeMembers()
         {
             this.m_entities = new List<Entity>();
-            this.m_screens = new List<ScreenID>();
+            this.m_currentScreenID = ScreenID.NULL_SCREEN;
         }
 
         #endregion
@@ -182,14 +182,35 @@ namespace Arcana.States
         {
             return this.GetChildren<Entity>();
         }
-        
+
         /// <summary>
         /// Return a screen object.
         /// </summary>
         /// <param name="id">Screen ID associated with requested screen.</param>
         /// <returns>Returns a screen object.</returns>
-        public abstract IScreen GetScreen(ScreenID id);
-        
+        public virtual IScreen GetScreen(ScreenID id)
+        {
+            return ScreenManager.GetInstance().GetScreen(id);
+        }
+
+        #endregion
+
+        #region Mutator Methods.
+
+        /// <summary>
+        /// Set the next state.
+        /// </summary>
+        /// <param name="_state">State to set next state to.</param>
+        public void SetNextState(StateID _state)
+        {
+            this.m_nextStateID = _state;
+        }
+
+        /// <summary>
+        /// Reset the state.
+        /// </summary>
+        public abstract void ResetState();
+
         #endregion
 
     }
@@ -213,7 +234,7 @@ namespace Arcana.States
         /// <summary>
         /// Initialize the State and any of its elements.
         /// </summary>    
-        void InitializeState(StateID _state);
+        void InitializeState();
 
         #endregion
 
