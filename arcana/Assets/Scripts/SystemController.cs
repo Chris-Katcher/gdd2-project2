@@ -110,7 +110,7 @@ public class SystemController : MonoBehaviour {
         m_gameManager.UpdateJumpStatus(jump_pressedP2, 2);
         //fires a projectile
         m_gameManager.fireProj(1, fire1_pressedP1, fire2_pressedP1, fire3_pressedP1);
-        m_gameManager.fireProj(2, fire1_pressedP1, fire2_pressedP1, fire3_pressedP1);
+        m_gameManager.fireProj(2, fire1_pressedP2, fire2_pressedP2, fire3_pressedP2);
         //*****//m_gameManager.UpdateDropStatus(player_drop);
         // TODO: Stub code.
 
