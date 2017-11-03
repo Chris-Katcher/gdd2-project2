@@ -23,7 +23,7 @@ namespace Arcana.Entities.Attributes
         /// <summary>
         /// Represents the player number.
         /// </summary>
-        private int m_playerNumber = -1;
+        public int m_playerNumber = -1;
 
         /// <summary>
         /// The starting position of the player.
@@ -44,6 +44,8 @@ namespace Arcana.Entities.Attributes
         /// Represents the current score value a player has.
         /// </summary>
         private int m_score;
+
+        public RectTransform healthBar;
 
         #endregion
 
@@ -118,10 +120,22 @@ namespace Arcana.Entities.Attributes
             get { return this.m_speed.Min; }
             set { this.m_speed.SetMinimum(value); }
         }
-        
+
         #endregion
 
         #endregion
+
+        public override void Update()
+        {
+            if (!this.Initialized) { this.Initialize(); }
+            else
+            {
+                // The base update is called here.
+                base.Update();
+
+                UpdateHealthBars();
+            }
+        }
 
         #region Initialization Methods
 
@@ -136,13 +150,28 @@ namespace Arcana.Entities.Attributes
                 base.Initialize();
 
                 // Set up data members.
-                this.m_playerNumber = -1; // -1 means "all players". 1 means player 1. 2 means player 2.
+                //this.m_playerNumber = -1; // -1 means "all players". 1 means player 1. 2 means player 2.
                 this.m_health = HealthComponent.Create(this); // Add health component to current object.
                 this.m_speed = new StatTracker("Player Speed", 0.0f, 0.0f, 100.0f); // Set up the speed value for the player.
                 this.m_score = 0; // Start the score at zero.
                 this.m_startPosition = this.transform.position; // The initial starting position may be started based off of where it is located in world-space.
+
+
+                GameObject HealthCanvas = Instantiate(UnityEngine.Resources.Load("Health Canvas")) as GameObject;
+                HealthCanvas.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y + 1f, gameObject.transform.position.z);
+                
+                Services.AddChild(gameObject, HealthCanvas);
+
+                foreach (RectTransform rect in HealthCanvas.GetComponentsInChildren<RectTransform>())
+                {
+                    if (rect.gameObject.name == "Foreground")
+                        this.healthBar = rect;
+                }
+
             }
         }
+
+
 
         #endregion
 
@@ -209,8 +238,16 @@ namespace Arcana.Entities.Attributes
         {
             this.m_score += _score;
         }
-                
+
+        public void UpdateHealthBars()
+        {
+            if (m_health.WasDamaged)
+            {
+                healthBar.sizeDelta = new Vector2(this.m_health.CurrentHealth, healthBar.sizeDelta.y);
+            }
+        }
+
         #endregion
-        
+
     }
 }
