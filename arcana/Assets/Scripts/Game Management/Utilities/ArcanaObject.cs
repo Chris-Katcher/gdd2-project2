@@ -38,12 +38,7 @@ namespace Arcana
         /////////////////////
         // Fields.
         /////////////////////
-
-        public bool debug_delete = false;
-        public bool debug_pause = false;
-        public bool debug_active = true;
-        public bool debug_visible = true;
-        
+                
         /// <summary>
         /// Debug mode for this component.
         /// </summary>
@@ -225,7 +220,7 @@ namespace Arcana
         #region UnityEngine Methods.
                         
         /// <summary>
-        /// <see cref="MonoBehaviour"/> function run before first update.
+        /// Initialize the <see cref="ArcanaObject"/>.
         /// </summary>
         public virtual void Start()
         {
@@ -510,6 +505,28 @@ namespace Arcana
             if (!this.Status.IsInactive())
             {
                 this.Status.Deactivate();
+            }
+        }
+
+        /// <summary>
+        /// Start the object.
+        /// </summary>
+        public virtual void Run()
+        {
+            if (!this.Status.IsRunning())
+            {
+                this.Status.Run();
+            }
+        }
+
+        /// <summary>
+        /// Stop the object.
+        /// </summary>
+        public virtual void Stop()
+        {
+            if (this.Status.IsRunning())
+            {
+                this.Status.Stop();
             }
         }
 

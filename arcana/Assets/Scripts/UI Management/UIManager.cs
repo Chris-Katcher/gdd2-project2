@@ -20,6 +20,9 @@ using UnityEngine;
 // The UI namespace contains the visual layer for all of the user-facing information.
 namespace Arcana.UI
 {
+
+    #region Class: UIManager class.
+
     /////////////////////
     // Class declaration.
     /////////////////////
@@ -512,4 +515,7 @@ namespace Arcana.UI
         #endregion
         
     }
+
+    #endregion
+
 }
