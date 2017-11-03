@@ -31,7 +31,7 @@ namespace Arcana.Physics
 
 		public ProjectileManager projectileManager;
 		
-		public float SimpleCollisionDistance = 0.05f;
+		public float SimpleCollisionDistance;
 
 		public bool isWater;
 		public bool isFire;
