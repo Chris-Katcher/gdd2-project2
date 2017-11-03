@@ -31,8 +31,8 @@ namespace Arcana
         private Rigidbody2D wizzard1_rb;
         private Rigidbody2D wizzard2_rb;
 
-        private float jumpForce = 110000f;
-        private float moveForce = 7000f;
+        private float jumpForce = 7000f;
+        private float moveForce = 3000f;
 
         public bool fly_mode = false;
 
