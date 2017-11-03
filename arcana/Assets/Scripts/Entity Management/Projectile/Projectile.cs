@@ -114,7 +114,7 @@ namespace Arcana.Entities
         {
 
             //applys a force to get acceleration
-            ApplyForce(m_direction);
+            ApplyForce(m_direction/10);
 
             //divides final acceleration by mass
             Vector3 scaleAcceleration = m_acceleration / m_mass;

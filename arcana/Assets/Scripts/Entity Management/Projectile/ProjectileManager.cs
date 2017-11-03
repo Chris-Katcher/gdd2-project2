@@ -6,30 +6,30 @@ using UnityEngine;
 
 namespace Arcana.Entities
 {
-    class ProjectileManager : MonoBehaviour
+    public class ProjectileManager : MonoBehaviour
     {
 
-		private int spellValue = 0;
-		private int inputCount = 0;
+		public List<List<GameObject>> allProj = new List<List<GameObject>>();
 
-		// public accesable version of current enumeration
-		public Spell spell;
-
-		private enum curCast
-		{
-
-			noSpell = 0,
-			oneSpell = 1,
-			twoSpell = 2,
-			fullSpell = 3
-
-		}
-		private curCast current;
-
-		public List<GameObject> projectiles = new List<GameObject>();
-        public Projectile proj;
+		public List<GameObject> f_projectiles = new List<GameObject>();
+		public List<GameObject> w_projectiles = new List<GameObject>();
+		public List<GameObject> e_projectiles = new List<GameObject>();
+		public Projectile proj;
         public GameObject projectile_go;
         public Rigidbody2D projectile_rb;
+
+		public float SimpleCollisionDistance = 1.0f;
+
+		/// <summary>
+		/// Fills All projectile list with the individual projectile lists
+		/// ORDER IS IMPORTANT. DO NOT MESS WITH ORDER.
+		/// </summary>
+		private void Start()
+		{
+			allProj.Add(f_projectiles);
+			allProj.Add(w_projectiles);
+			allProj.Add(e_projectiles);
+		}
 
 		/// <summary>
 		/// Creates a new projectile
@@ -38,14 +38,13 @@ namespace Arcana.Entities
 		/// <param name="y">y position</param>
 		/// <param name="force">the force to be exerted on the projectile||its travel direction</param>
 		/// <param name="position">the starting position of the projectile</param>
-		private void createProjectile(float x, float y, Vector3 force, int type)
+		private void createProjectile(float x, float y, Vector3 force, char type)
 		{
 
 			//Projectile proj = new Projectile();
 			init_projectile(x, y, force, type);
 
 			
-
 		}
 
 	
@@ -54,77 +53,28 @@ namespace Arcana.Entities
 		/// </summary>
 		/// <param name="fire1">Bool == Whether or no the fire button has been pressed</param>
 		/// <param name="position">Position to be created at</param>
-		public void fireProjectile(bool fire1, bool fire2, bool fire3, bool rightTrigger, Vector3 position, bool facingRight)
+		public void fireProjectile(bool fire1, bool fire2, bool fire3, Vector3 position, bool facingRight)
         {
-
-			determineCast();
-
-			//if rigth trigger has been pressed and three spells have been inputed, then create a projectile and reset variables
-			if (rightTrigger == true && current == curCast.fullSpell)
-			{
-
-				createProjectile(position.x, position.y, facingRight ? new Vector3(4.0f, 0.0f, 0.0f) : new Vector3(-4.0f, 0.0f, 0.0f), spellValue);
-				spellValue = 0;
-				inputCount = 0;
-				current = curCast.noSpell;
-
-			}
-
 			//if fire has been pressed, create a projectile
-			else if (fire1 == true && inputCount < 3)
+			if (fire1 == true)
 			{
-
 				//creates a projectile of type 'Fire'
-				inputCount += 1;
-				spellValue += 100;
+				createProjectile(position.x, position.y, facingRight ? new Vector3(4.0f, 0.0f, 0.0f) : new Vector3(-4.0f, 0.0f, 0.0f), 'F');
 
 			}
-			else if (fire2 == true && inputCount < 3)
+			else if (fire2 == true)
 			{
-
-				inputCount += 1;
-				spellValue += 10;
-
+				createProjectile(position.x, position.y, facingRight ? new Vector3(4.0f, 0.0f, 0.0f) : new Vector3(-4.0f, 0.0f, 0.0f), 'W');
 			}
-			else if (fire3 == true && inputCount < 3)
+			else if (fire3 == true)
 			{
-
-				inputCount += 1;
-				spellValue += 1;
-
+				createProjectile(position.x, position.y, facingRight ? new Vector3(4.0f, 0.0f, 0.0f) : new Vector3(-4.0f, 0.0f, 0.0f), 'E');
 			}
 
 		}
 
-		public void determineCast()
-		{
-
-			switch (inputCount)
-			{
-
-				case 1:
-					current = curCast.oneSpell;
-					break;
-				case 2:
-					current = curCast.twoSpell;
-					break;
-				case 3:
-					current = curCast.fullSpell;
-					break;
-
-			}
 
 
-		}
-
-		public void resetSpell()
-		{
-
-			inputCount = 0;
-			spellValue = 0;
-			current = curCast.noSpell;
-
-		}
 		/*public void fireProjectile(bool fire2, Vector3 position)
 		{
 			//if fire has been pressed, create a projectile
@@ -144,22 +94,6 @@ namespace Arcana.Entities
 			}
 		}*/
 
-		public enum Spell
-		{
-
-			comboS,//one of each
-			fireW,//2 FIRE AND 1 WATER
-			fireE,//2 FIRE AND 1 EARTH
-			fireP,//3 FIRE
-			waterF,//2 WATER AND 1 FIRE
-			waterE,//2 WATER AND 1 EARTH
-			waterP,//3 WATER
-			earthF,//2 EARTH AND 1 FIRE
-			earthW,//2 EARTH AND 1 WATER
-			earthP//3 EARTH
-
-		};
-
 		/// <summary>
 		/// Projectile Constructor
 		/// </summary>
@@ -167,97 +101,37 @@ namespace Arcana.Entities
 		/// <param name="y">Y position</param>
 		/// <param name="force">Force to be applied to the projectil||Direction of travel</param>
 		/// <param name="position"></param>
-		public void init_projectile(float x, float y, Vector3 force, int type)
+		public void init_projectile(float x, float y, Vector3 force, char type)
 		{
 
-			//instantiates the projectile_go and adds it to the scene
-
-			//switch statement that passes in the type and then sets the correct enumeration to use
-			switch (type)
-			{
-				case 111:
-					spell = Spell.comboS;
-					break;
-				case 300:
-					spell = Spell.fireP;
-					break;
-				case 210:
-					spell = Spell.fireW;
-					break;
-				case 201:
-					spell = Spell.fireE;
-					break;
-				case 30:
-					spell = Spell.waterP;
-					break;
-				case 120:
-					spell = Spell.waterF;
-					break;
-				case 21:
-					spell = Spell.waterE;
-					break;
-				case 3:
-					spell = Spell.earthP;
-					break;
-				case 12:
-					spell = Spell.earthW;
-					break;
-				case 102:
-					spell = Spell.earthF;
-					break;
-				default:
-					spell = Spell.fireW;
-					break;
-
-			}
-
-			//PLACEHOLDER CODE: Takes the curent enumeration and creates the apporopriate projectile. Only 3 atm
-			//combo projectile
-			if (this.spell == Spell.comboS)
+			if (type == 'F')
 			{
 				projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;
-			}
+				//adds it to list of projectiles
+				f_projectiles.Add(Instantiate(projectile_go, new Vector3(x, y, 0), Quaternion.identity));
 
-			//fire projectiles
-			else if (this.spell == Spell.fireE)
-			{
-				projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;
-			}
-			else if (this.spell == Spell.fireW)
-			{
-				projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;
-			}
-			else if (this.spell == Spell.fireP)
-			{
-				projectile_go = UnityEngine.Resources.Load("Fire") as GameObject;
+				f_projectiles[f_projectiles.Count - 1].GetComponent<Projectile>().m_direction = force;
 			}
 
 			//water projectiles
-			else if (this.spell == Spell.waterF)
+			else if (type == 'W')
 			{
 				projectile_go = UnityEngine.Resources.Load("Water") as GameObject;
+				//adds it to list of projectiles
+				w_projectiles.Add(Instantiate(projectile_go, new Vector3(x, y, 0), Quaternion.identity));
+
+				w_projectiles[w_projectiles.Count - 1].GetComponent<Projectile>().m_direction = force;
 			}
-			else if (this.spell == Spell.waterE)
-			{
-				projectile_go = UnityEngine.Resources.Load("Water") as GameObject;
-			}
-			else if (this.spell == Spell.waterP)
-			{
-				projectile_go = UnityEngine.Resources.Load("Water") as GameObject;
-			}
+			
 
 			//earth projectiles
-			else if (this.spell == Spell.earthF)
+			else if (type == 'E')
 			{
 				projectile_go = UnityEngine.Resources.Load("Grass") as GameObject;
-			}
-			else if (this.spell == Spell.earthW)
-			{
-				projectile_go = UnityEngine.Resources.Load("Grass") as GameObject;
-			}
-			else if (this.spell == Spell.earthP)
-			{
-				projectile_go = UnityEngine.Resources.Load("Grass") as GameObject;
+				//adds it to list of projectiles
+				e_projectiles.Add(Instantiate(projectile_go, new Vector3(x, y, 0), Quaternion.identity));
+
+				e_projectiles[e_projectiles.Count - 1].GetComponent<Projectile>().m_direction = force;
 			}
 			// else debug log that incorrect char was set
 			else
@@ -265,26 +139,143 @@ namespace Arcana.Entities
 				Debug.Log("Type '" + type + "' not recgonized. Please check the projectile manager script");
 				return;
 			}
-
-			//adds it to list of projectiles
-			projectiles.Add(Instantiate(projectile_go, new Vector3(x, y, 0), Quaternion.identity));
-
-			projectiles[projectiles.Count - 1].GetComponent<Projectile>().m_direction = force;
-
-
 		}
 
 
 		public void updateProjectiles()
         {
-            foreach(GameObject p in projectiles)
-            {
-                Rigidbody2D rb = p.GetComponent<Rigidbody2D>();
-                float y = (float)Math.Cos(Time.frameCount );
-                //rb.AddForce(Vector2.up * y * 150f);
+			
+			// cycle through lists and save which iteration
+			for (int i = 0; i < allProj.Count - 1; i++)
+			{
+				
+				// cycle through projectiles and save which interation
+				for (int j = 0; j < allProj[i].Count - 1; j++)
+				{
+					
+					// if in first list (fire)
+					if (i == 0)
+					{
+						checkCollisions('F', allProj[i][j]);
+					}
+					// if in second list (water)
+					else if (i == 1)
+					{
+						checkCollisions('W', allProj[i][j]);
+					}
+					// if in third list (earth)
+					else if (i == 2)
+					{
+						checkCollisions('E', allProj[i][j]);
+					}
+					else
+					{
+						Debug.Log("Trying to access projectile list out of range");
+					}
+				}
             }
-        }
-    }
+			
+		}
+
+		private void checkCollisions(char type, GameObject primiary)
+		{
+			
+			// foreach active object
+			for (int i = 0; i < allProj.Count - 1; i++)
+			{
+				for (int j = 0; j < allProj[i].Count - 1; j++)
+				{
+					Debug.Log("Primiary: " + primiary.name + "Secondary: " + allProj[i][j].name);
+					// Only runs logic if the objects are colliding, both are active, and the objects aren't the same.
+					if (IsColliding(primiary, allProj[i][j]) && allProj[i][j].activeSelf && primiary != allProj[i][j])
+					{
+						Debug.Log("Collision on active");
+						// if fire
+						if (i == 0)
+						{
+							if (type == 'F')
+							{
+								DestroyBoth(primiary, allProj[i][j]);
+							}
+							else if (type == 'W')
+							{
+								DestroySelf(primiary, allProj[i][j]);
+							}
+							else if (type == 'E')
+							{
+								DestroyOther(primiary, allProj[i][j]);
+							}
+						}
+						// if water
+						else if (i == 1)
+						{
+
+							if (type == 'F')
+							{
+								DestroyOther(primiary, allProj[i][j]);
+							}
+							else if (type == 'W')
+							{
+								DestroyBoth(primiary, allProj[i][j]);
+							}
+							else if (type == 'E')
+							{
+								DestroySelf(primiary, allProj[i][j]);
+							}
+						}
+						// if earth
+						else if (i == 2)
+						{
+
+							if (type == 'F')
+							{
+								DestroySelf(primiary, allProj[i][j]);
+							}
+							else if (type == 'W')
+							{
+								DestroyOther(primiary, allProj[i][j]);
+							}
+							else if (type == 'E')
+							{
+								DestroyBoth(primiary, allProj[i][j]);
+							}
+						}
+						else
+						{
+							Debug.Log("Trying to access projectile list out of range");
+						}
+					}
+				}
+			}
+		}
+
+		private bool IsColliding(GameObject primiary, GameObject secondary)
+		{
+			if (primiary.transform.position.x - SimpleCollisionDistance < secondary.transform.position.x + SimpleCollisionDistance && 
+				primiary.transform.position.x + SimpleCollisionDistance > secondary.transform.position.x - SimpleCollisionDistance &&
+				primiary.transform.position.y + SimpleCollisionDistance > secondary.transform.position.y - SimpleCollisionDistance &&
+				primiary.transform.position.y - SimpleCollisionDistance < secondary.transform.position.y + SimpleCollisionDistance)
+			{
+				//Debug.Log("Collision");
+				return true;
+			}
+			else return false;
+		}
+
+		private void DestroySelf(GameObject primiary, GameObject secondary)
+		{
+			primiary.SetActive(false);
+		}
+		private void DestroyOther(GameObject primiary, GameObject secondary)
+		{
+			secondary.SetActive(false);
+		}
+		private void DestroyBoth(GameObject primiary, GameObject secondary)
+		{
+			primiary.SetActive(false);
+			secondary.SetActive(false);
+		}
+	}
 
 
 }

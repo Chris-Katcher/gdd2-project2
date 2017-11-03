@@ -8,25 +8,29 @@ using Arcana.Entities;
 
 public class Player : MonoBehaviour {
 
-    private ProjectileManager m_projectile;
+    ProjectileManager m_projectile;
+	SystemController m_system;
+	GameObject m_systemGO;
 
     // Use this for initialization
-    void Start () {
-
-        gameObject.AddComponent<ProjectileManager>();
-        m_projectile = gameObject.GetComponent<ProjectileManager>();
+    void Start ()
+	{
+		m_systemGO = GameObject.Find("SystemControllerGO");
+		m_system = m_systemGO.GetComponent<SystemController>();
+        //gameObject.AddComponent<ProjectileManager>();
+        m_projectile = m_system.GetComponent<ProjectileManager>();
 
     }
 	
 	// Update is called once per frame
 	void Update () {
-       
+		//m_projectile.updateProjectiles();
 
-    }
+	}
 
     private void FixedUpdate()
     {
-        m_projectile.updateProjectiles();
+        //m_projectile.updateProjectiles();
     }
 
 
@@ -34,7 +38,7 @@ public class Player : MonoBehaviour {
     /// fires a projectile based upon a projectile
     /// </summary>
     /// <param name="fire">whether or not the fire button has been pressed</param>
-    public void fireProjPlayer(bool fire1, bool fire2, bool fire3, bool rightTrigger, Vector3 pos, bool facingRight)
+    public void fireProjPlayer(bool fire1, bool fire2, bool fire3, Vector3 pos, bool facingRight)
     {
         if (facingRight)
         {
@@ -50,23 +54,18 @@ public class Player : MonoBehaviour {
 		// if else prevents players from mashing all buttons at once  
 
 		//really janky mehtod to determine whihc button has been presed. NEEDS IMPROVEMENT
-		if (rightTrigger == true)
-		{
 
-			m_projectile.fireProjectile(fire1, fire2, fire3, rightTrigger, pos, facingRight);
-
-		}
-		else if (fire1)
+		if (fire1)
 		{
-			m_projectile.fireProjectile(fire1, fire2, fire3, rightTrigger, pos, facingRight);
+			m_projectile.fireProjectile(fire1, fire2, fire3, pos, facingRight);
 		}
 		else if (fire2)
 		{
-			m_projectile.fireProjectile(fire1, fire2, fire3, rightTrigger, pos, facingRight);
+			m_projectile.fireProjectile(fire1, fire2, fire3, pos, facingRight);
 		}
 		else if (fire3)
 		{
-			m_projectile.fireProjectile(fire1, fire2, fire3, rightTrigger, pos, facingRight);
+			m_projectile.fireProjectile(fire1, fire2, fire3, pos, facingRight);
 		}
 
 	}

@@ -124,9 +124,9 @@ namespace Arcana
             transform.localScale = theScale;
         }
 
-        public void fireProjPlayer1(bool fire1_pressed, bool fire2_pressed, bool fire3_pressed, bool rightTrigger_pressed)
+        public void fireProjPlayer1(bool fire1_pressed, bool fire2_pressed, bool fire3_pressed)
         {
-			m_player1.fireProjPlayer(fire1_pressed, fire2_pressed, fire3_pressed, rightTrigger_pressed, wizzard1.transform.position, this.isFacingRight);
+			m_player1.fireProjPlayer(fire1_pressed, fire2_pressed, fire3_pressed, wizzard1.transform.position, this.isFacingRight);
         }
 
         public void UpdateDropStatus(bool player_drop)
@@ -159,6 +159,7 @@ namespace Arcana
             m_init = true;
 
             this.m_player1 = gameObject.GetComponent<Player>();
+
         }
 
         private bool IsInitialized()
