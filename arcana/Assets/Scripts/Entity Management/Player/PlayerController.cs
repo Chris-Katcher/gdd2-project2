@@ -6,6 +6,7 @@ using Arcana;
 using Arcana.Entities;
 using Arcana.Utilities;
 using Arcana.Resources;
+using Arcana.Physics;
 using UnityEngine;
 
 namespace Arcana.Entities.Attributes
@@ -34,7 +35,9 @@ namespace Arcana.Entities.Attributes
         /// The player's rigidbody.
         /// </summary>
         private EntityRigidbody m_rigidbody;
-                
+
+        private ProjectileManager m_projectile;
+
         #endregion
 
         #region Properties.
@@ -97,6 +100,7 @@ namespace Arcana.Entities.Attributes
         {
             HandleFacing();
             HandleMovement();
+            m_projectile.updateProjectiles();
         }
 
         /// <summary>
@@ -112,6 +116,10 @@ namespace Arcana.Entities.Attributes
             {
                 // Call the base update function.
                 base.Update();
+
+                //UpdatePosWizzard(Input.GetAxis("P1_LSX"));
+
+                //UpdateJumpStatus(Input.GetKeyDown(KeyCode.Space));
 
                 if (debug_delete)
                 {
@@ -166,7 +174,20 @@ namespace Arcana.Entities.Attributes
                 this.m_renderer = this.Renderer;
                 this.m_collider = this.Collider;
                 this.m_rigidbody = this.Rigidbody;
+
+                gameObject.AddComponent<ProjectileManager>();
+                this.charMovement = gameObject.AddComponent<CharacterMovement>();
+                charMovement.wizzard1_rb = gameObject.GetComponent<Rigidbody2D>();
+                charMovement.wizzard1 = gameObject;
+                if (gameObject.GetComponent<SpriteRenderer>() != null)
+                {
+                    charMovement.wizzard_sr = gameObject.GetComponent<SpriteRenderer>();
+                }
+                m_projectile = gameObject.AddComponent<ProjectileManager>();
+
                 
+
+                gameObject.transform.localScale = new Vector3(10, 10, 10);
             }
         }
 
@@ -244,6 +265,105 @@ namespace Arcana.Entities.Attributes
 
             return rigidbody;
         }
+
+        private Player InitializePlayer()
+        {
+            Player player = this.Self.GetComponent<Player>();
+
+            if (player == null)
+            {
+                player = this.Self.AddComponent<Player>();
+
+                // Init.
+                player.Initialize();
+
+
+                
+            }
+
+            return player;
+        }
+
+
+        #region Mutator Methods
+        private SpriteRenderer wizzard_sr;
+        private CharacterMovement charMovement;
+        private bool grounded = true;
+        public bool dropping = false;
+        public void UpdateJumpStatus(bool jump)
+        {
+            //this.grounded && jump && 
+            if (charMovement.jump_enabled && jump)
+            {
+                this.grounded = !jump;
+                charMovement.grounded = !jump;
+                charMovement.jump_enabled = false;
+            }
+        }
+
+        public void UpdatePosWizzard(float translation)
+        {
+            charMovement.UpdatePosWizzard1(translation);
+        }
+
+        public void UpdateDropStatus(bool player_drop)
+        {
+            if (player_drop)
+            {
+                charMovement.dropping = true;
+                dropping = true;
+            }
+            //else if(!wizzard1.GetComponent<CharacterMovement>().dropping)
+            //{
+            //    dropping = false;
+            //}
+
+            //else
+            //wizzard1.layer = 0;
+        }
+
+        /// <summary>
+        /// fires a projectile based upon a projectile
+        /// </summary>
+        /// <param name="fire">whether or not the fire button has been pressed</param>
+        public void fireProjPlayer(bool fire1, bool fire2, bool fire3, bool rightTrigger, Vector3 pos, bool facingRight)
+        {
+            if (facingRight)
+            {
+                pos.x += .5f;
+                pos.y += .1f;
+            }
+            else
+            {
+                pos.x -= .5f;
+                pos.y += .1f;
+            }
+
+            //passes in bool and player position
+            // if else prevents players from mashing all buttons at once  
+
+            //really janky mehtod to determine whihc button has been presed. NEEDS IMPROVEMENT
+            if (rightTrigger == true)
+            {
+
+                m_projectile.fireProjectile(fire1, fire2, fire3, rightTrigger, pos, facingRight);
+
+            }
+            else if (fire1)
+            {
+                m_projectile.fireProjectile(fire1, fire2, fire3, rightTrigger, pos, facingRight);
+            }
+            else if (fire2)
+            {
+                m_projectile.fireProjectile(fire1, fire2, fire3, rightTrigger, pos, facingRight);
+            }
+            else if (fire3)
+            {
+                m_projectile.fireProjectile(fire1, fire2, fire3, rightTrigger, pos, facingRight);
+            }
+
+        }
+        #endregion
 
         #endregion
 

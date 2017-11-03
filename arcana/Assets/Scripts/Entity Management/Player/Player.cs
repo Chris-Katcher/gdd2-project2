@@ -6,6 +6,7 @@ using Arcana.Entities.Attributes;
 using Arcana.InputManagement;
 using Arcana.UI;
 using Arcana.Entities;
+using Arcana.Physics;
 
 namespace Arcana.Entities
 {
@@ -30,6 +31,8 @@ namespace Arcana.Entities
         /// </summary>
         private PlayerController m_controller = null;
 
+
+        private ProjectileManager m_projectile;
         #endregion
 
         #region Properties.
@@ -100,59 +103,121 @@ namespace Arcana.Entities
 
                 // Set the starting position.
                 this.Data.SetStartPosition(this.transform.position);
+
+                // Add a projectile manager to this player.
+
+
+
+                BuildControlScheme();
+                InitializeControls();
             }
         }
 
-        #endregion
 
-
-        #region Deprecated Functionality
-
-        /* 
-        private ProjectileManager m_projectile;
-
-        // Use this for initialization
-        void Start () {
-
-            gameObject.AddComponent<ProjectileManager>();
-            m_projectile = gameObject.GetComponent<ProjectileManager>();
-
-        }
-
-        // Update is called once per frame
-        void Update () {
-
-
-        }
-
-        private void FixedUpdate()
+        protected override void BuildControlScheme()
         {
-            m_projectile.updateProjectiles();
+            // Set director.
+            this.Director = InputManagement.Director.Camera;
+            base.BuildControlScheme();
+        }
+
+        protected override ControlScheme InitializeControls()
+        {
+            this.m_scheme = base.InitializeControls();
+
+            // Register camera background control.
+            this.RegisterControl(ControlScheme.CreateAction("Move Horizontally"),
+                ControlScheme.CreateTrigger(Control.LeftStickHorizontal(-1)));
+
+            //this.RegisterControl(ControlScheme.CreateAction("Change Background"),
+            //    ControlScheme.CreateTrigger(Control.CreateKey(KeyCode.A), ResponseMode.Pressed));
+
+            //// Register camera mode controls.
+            //this.RegisterControl(ControlScheme.CreateAction("Change Mode"),
+            //    ControlScheme.CreateTrigger(Control.StartButton(-1), ResponseMode.Pressed));
+
+            //this.RegisterControl(ControlScheme.CreateAction("Change Target B"),
+            //        ControlScheme.CreateTrigger(Control.BButton(-1), ResponseMode.Pressed));
+            //this.RegisterControl(ControlScheme.CreateAction("Change Target X"),
+            //        ControlScheme.CreateTrigger(Control.XButton(-1), ResponseMode.Pressed));
+
+            return this.m_scheme;
+        }
+
+        protected override void HandleInput()
+        {
+            
+            if (this.Controls.IsActivated(GetAction("Move Horizontally")))
+            {
+                //this.ChangeBackground(Services.GetRandomColor());
+
+                this.m_controller.UpdatePosWizzard(this.Controls.GetValue(GetAction("Move Horizontally")));
+            }
         }
 
 
-        /// <summary>
-        /// fires a projectile based upon a projectile
-        /// </summary>
-        /// <param name="fire">whether or not the fire button ahs been pressed</param>
-        public void fireProjPlayer(bool fire, Vector3 pos, bool facingRight)
+
+
+        public override void Update()
         {
-            if (facingRight)
+            if (!this.Initialized) { this.Initialize(); }
+            else
             {
-                pos.x += .5f;
-                pos.y += .1f;
-            } else
-            {
-                pos.x -= .5f;
-                pos.y += .1f;
+                // The base update is called here.
+                base.Update();
+                HandleInput();
+            }
+        }
+
+            #endregion
+
+
+
+            /* 
+            private ProjectileManager m_projectile;
+
+            // Use this for initialization
+            void Start () {
+
+                gameObject.AddComponent<ProjectileManager>();
+                m_projectile = gameObject.GetComponent<ProjectileManager>();
+
             }
 
-            //passes in bool and player position
-            m_projectile.fireProjectile(fire, pos, facingRight);
+            // Update is called once per frame
+            void Update () {
 
-        } */
 
-        #endregion
+            }
 
-    }
+            private void FixedUpdate()
+            {
+                m_projectile.updateProjectiles();
+            }
+
+
+            /// <summary>
+            /// fires a projectile based upon a projectile
+            /// </summary>
+            /// <param name="fire">whether or not the fire button ahs been pressed</param>
+            public void fireProjPlayer(bool fire, Vector3 pos, bool facingRight)
+            {
+                if (facingRight)
+                {
+                    pos.x += .5f;
+                    pos.y += .1f;
+                } else
+                {
+                    pos.x -= .5f;
+                    pos.y += .1f;
+                }
+
+                //passes in bool and player position
+                m_projectile.fireProjectile(fire, pos, facingRight);
+
+            } */
+
+
+
+        }
 }
