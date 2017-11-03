@@ -63,7 +63,10 @@ namespace Arcana.Entities
 
             //sets mass
             m_mass = 1.0f;
-            
+
+            //applys a force to get acceleration
+            ApplyForce(m_direction * 50);
+
             //ApplyForce(initalVelocity);
 
         }
@@ -113,8 +116,7 @@ namespace Arcana.Entities
         void UpdatePostition()
         {
 
-            //applys a force to get acceleration
-            ApplyForce(m_direction/10);
+           
 
             //divides final acceleration by mass
             Vector3 scaleAcceleration = m_acceleration / m_mass;
