@@ -7,6 +7,7 @@ using Arcana.InputManagement;
 using Arcana.UI;
 using Arcana.Entities;
 using Arcana.Physics;
+using Arcana.Cameras;
 
 namespace Arcana.Entities
 {
@@ -102,11 +103,12 @@ namespace Arcana.Entities
                 this.m_controller = this.Controller;
 
                 // Set the starting position.
+                
                 this.Data.SetStartPosition(this.transform.position);
+                
+                
 
                 // Add a projectile manager to this player.
-
-
 
                 BuildControlScheme();
                 InitializeControls();
@@ -127,7 +129,25 @@ namespace Arcana.Entities
 
             // Register camera background control.
             this.RegisterControl(ControlScheme.CreateAction("Move Horizontally"),
-                ControlScheme.CreateTrigger(Control.LeftStickHorizontal(-1)));
+                ControlScheme.CreateTrigger(Control.LeftStickHorizontal(this.m_data.PlayerNumber)));
+
+            this.RegisterControl(ControlScheme.CreateAction("Move Verticle"),
+                ControlScheme.CreateTrigger(Control.LeftStickHorizontal(this.m_data.PlayerNumber)));
+
+            this.RegisterControl(ControlScheme.CreateAction("Jump"),
+                ControlScheme.CreateTrigger(Control.AButton(this.m_data.PlayerNumber), ResponseMode.Pressed));
+
+            this.RegisterControl(ControlScheme.CreateAction("X Button"),
+                ControlScheme.CreateTrigger(Control.XButton(this.m_data.PlayerNumber), ResponseMode.Pressed));
+
+            this.RegisterControl(ControlScheme.CreateAction("Y Button"),
+                ControlScheme.CreateTrigger(Control.YButton(this.m_data.PlayerNumber), ResponseMode.Pressed));
+
+            this.RegisterControl(ControlScheme.CreateAction("B Button"),
+                ControlScheme.CreateTrigger(Control.BButton(this.m_data.PlayerNumber), ResponseMode.Pressed));
+
+            this.RegisterControl(ControlScheme.CreateAction("RB Button"),
+                ControlScheme.CreateTrigger(Control.RightBumper(this.m_data.PlayerNumber), ResponseMode.Pressed));
 
             //this.RegisterControl(ControlScheme.CreateAction("Change Background"),
             //    ControlScheme.CreateTrigger(Control.CreateKey(KeyCode.A), ResponseMode.Pressed));
@@ -152,7 +172,59 @@ namespace Arcana.Entities
                 //this.ChangeBackground(Services.GetRandomColor());
 
                 this.m_controller.UpdatePosWizzard(this.Controls.GetValue(GetAction("Move Horizontally")));
+            } else
+            {
+                this.m_controller.UpdatePosWizzard(0.0f);
             }
+
+            if (this.Controls.IsActivated(GetAction("Move Verticle")))
+            {
+                //this.ChangeBackground(Services.GetRandomColor());
+
+                this.m_controller.UpdateDropStatus(this.Controls.GetValue(GetAction("Move Verticle")) < 0.0f);
+            }
+
+            if (this.Controls.IsActivated(GetAction("Jump")))
+            {
+                //this.ChangeBackground(Services.GetRandomColor());
+
+                this.m_controller.UpdateJumpStatus(true);
+            } else
+            {
+                this.m_controller.UpdateJumpStatus(false);
+            }
+
+            bool fire1_pressed= false, fire2_pressed= false, fire3_pressed = false, rightTrigger = false;
+
+            if (this.Controls.IsActivated(GetAction("X Button")))
+            {
+                //this.ChangeBackground(Services.GetRandomColor());
+
+                fire1_pressed = true;
+            }
+
+            if (this.Controls.IsActivated(GetAction("Y Button")))
+            {
+                //this.ChangeBackground(Services.GetRandomColor());
+
+                fire2_pressed = true;
+            }
+
+            if (this.Controls.IsActivated(GetAction("B Button")))
+            {
+                //this.ChangeBackground(Services.GetRandomColor());
+
+                fire3_pressed = true;
+            }
+
+            if (this.Controls.IsActivated(GetAction("RB Button")))
+            {
+                //this.ChangeBackground(Services.GetRandomColor());
+
+                rightTrigger = true;
+            }
+
+            this.m_controller.fireProjPlayer(fire1_pressed, fire2_pressed, fire3_pressed, rightTrigger, this.transform.position);
         }
 
 

@@ -187,7 +187,7 @@ namespace Arcana.Entities.Attributes
 
                 
 
-                gameObject.transform.localScale = new Vector3(10, 10, 10);
+                gameObject.transform.localScale = new Vector3(4, 4, 4);
             }
         }
 
@@ -258,7 +258,7 @@ namespace Arcana.Entities.Attributes
                 rigidbody.InitializeRigidbody();
 
                 // Set gravity to zero.
-                rigidbody.Gravity = 0.0f;
+                //rigidbody.Gravity = 0.0f;
 
             }
 
@@ -325,8 +325,9 @@ namespace Arcana.Entities.Attributes
         /// fires a projectile based upon a projectile
         /// </summary>
         /// <param name="fire">whether or not the fire button has been pressed</param>
-        public void fireProjPlayer(bool fire1, bool fire2, bool fire3, bool rightTrigger, Vector3 pos, bool facingRight)
+        public void fireProjPlayer(bool fire1, bool fire2, bool fire3, bool rightTrigger, Vector3 pos)
         {
+            bool facingRight = charMovement.isFacingRight;
             if (facingRight)
             {
                 pos.x += .5f;

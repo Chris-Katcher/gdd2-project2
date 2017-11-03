@@ -43,7 +43,7 @@ namespace Arcana.Physics
 
         //public Player m_player1;
 
-        private bool isFacingRight = true;
+        public bool isFacingRight = true;
 
         public SpriteRenderer wizzard_sr;
 
