@@ -13,6 +13,7 @@ using Arcana;
 using Arcana.InputManagement;
 using Arcana.UI;
 using Arcana.Entities;
+using UnityEngine.SceneManagement;
 
 /////////////////////
 // Class declaration.
@@ -97,8 +98,12 @@ public class SystemController : MonoBehaviour {
         //fires a projectile
         m_gameManager.fireProjPlayer1(fire1_pressed, fire2_pressed, fire3_pressed);
         m_gameManager.UpdateDropStatus(player_drop);
-		// TODO: Stub code.
+        // TODO: Stub code.
 
+        if(m_inputManager.getEscPressed())
+        {
+            SceneManager.LoadScene(0);
+        }
 		//m_projectile.updateProjectiles();
 		
 
@@ -113,6 +118,7 @@ public class SystemController : MonoBehaviour {
     /// </summary>
     private void Initialize()
     {
+
 		// Create and initialize managers.
 		gameObject.AddComponent<InputManager>();
 		gameObject.AddComponent<Player>();
@@ -131,6 +137,11 @@ public class SystemController : MonoBehaviour {
         // Set initialized.
         m_init = true;
 
+    }
+
+    public void LoadByIndex(int sceneIndex)
+    {
+        SceneManager.LoadScene(sceneIndex);
     }
 
     #endregion

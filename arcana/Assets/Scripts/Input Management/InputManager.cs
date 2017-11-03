@@ -93,6 +93,11 @@ namespace Arcana.InputManagement
         {
             return (bool)Input.GetButtonDown("Drop");
         }
+
+        public bool getEscPressed()
+        {
+            return (bool)Input.GetKeyDown(KeyCode.Escape);
+        }
     }
 
     
