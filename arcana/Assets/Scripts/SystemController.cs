@@ -82,26 +82,39 @@ public class SystemController : MonoBehaviour {
     {
 
         //gets translation of player one
-        float translation = m_inputManager.getPlayer1Translation();
+        float translationP1 = m_inputManager.getPlayer1Translation();
         //gets bool of whether plyaer1 has jumped
-        bool jump_pressed = m_inputManager.getPlayer1Jump();
-        //gets bool of whether fire button has been pressed
-        bool fire1_pressed = m_inputManager.getProjectileFire();
-		bool fire2_pressed = m_inputManager.getProjectileFire2();
-		bool fire3_pressed = m_inputManager.getProjectileFire3();
+        bool jump_pressedP1 = m_inputManager.getPlayer1Jump();
 
-		bool player_drop = m_inputManager.getPlayerDrop();
+        //gets translation of player one
+        float translationP2 = m_inputManager.getPlayer2Translation();
+        //gets bool of whether plyaer1 has jumped
+        bool jump_pressedP2 = m_inputManager.getPlayer2Jump();
+
+        //gets bool of whether fire button has been pressed
+        bool fire1_pressedP1 = m_inputManager.getProjectileFireP1();
+		bool fire2_pressedP1 = m_inputManager.getProjectileFire2P1();
+		bool fire3_pressedP1 = m_inputManager.getProjectileFire3P1();
+
+        bool fire1_pressedP2 = m_inputManager.getProjectileFireP2();
+        bool fire2_pressedP2 = m_inputManager.getProjectileFire2P2();
+        bool fire3_pressedP2 = m_inputManager.getProjectileFire3P2();
+
+        bool player_drop = m_inputManager.getPlayerDrop();
         
         //updates the wizard position and jump
-        m_gameManager.UpdatePosWizzard1(translation);
-        m_gameManager.UpdateJumpStatus(jump_pressed);
-        
+        m_gameManager.UpdatePosWizzard(translationP1, 1);
+        m_gameManager.UpdatePosWizzard(translationP2, 2);
+
+        m_gameManager.UpdateJumpStatus(jump_pressedP1, 1);
+        m_gameManager.UpdateJumpStatus(jump_pressedP2, 2);
         //fires a projectile
-        m_gameManager.fireProjPlayer1(fire1_pressed, fire2_pressed, fire3_pressed);
-        m_gameManager.UpdateDropStatus(player_drop);
+        m_gameManager.fireProj(1, fire1_pressedP1, fire2_pressedP1, fire3_pressedP1);
+        m_gameManager.fireProj(2, fire1_pressedP1, fire2_pressedP1, fire3_pressedP1);
+        //*****//m_gameManager.UpdateDropStatus(player_drop);
         // TODO: Stub code.
 
-        if(m_inputManager.getEscPressed())
+        if (m_inputManager.getEscPressed())
         {
             SceneManager.LoadScene(0);
         }
