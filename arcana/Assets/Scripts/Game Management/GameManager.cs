@@ -220,7 +220,7 @@ namespace Arcana
                 m_player1.fireProjPlayer(fire1_pressed, fire2_pressed, fire3_pressed, wizzard1.transform.position, this.isFacingRightP1);
             } else
             {
-                m_player2.fireProjPlayer(fire1_pressed, fire2_pressed, fire3_pressed, wizzard1.transform.position, this.isFacingRightP2);
+                m_player2.fireProjPlayer(fire1_pressed, fire2_pressed, fire3_pressed, wizzard2.transform.position, this.isFacingRightP2);
             }
 			
         }
