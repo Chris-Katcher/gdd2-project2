@@ -168,6 +168,7 @@ namespace Arcana
             m_init = true;
 
             this.m_player1 = gameObject.GetComponent<Player>();
+            this.m_player2 = gameObject.GetComponent<Player>();
 
         }
 
