@@ -21,7 +21,7 @@ namespace Arcana.UI.Screens
     /// <summary>
     /// IScreen displayed during the main game, with the stage, obstacles, and player entities.
     /// </summary>
-    public class GameplayScreen : ScreenBase
+    public class GameplayScreen : ScreenBackground
     {
 
         #region Update Methods.
@@ -39,38 +39,42 @@ namespace Arcana.UI.Screens
             {
                 // Call the base function.
                 base.Update();
-
-                GUIImage image = UIManager.GetInstance().GetElement<GUIImage>("BG_ARENA");
+                
                 GUILabel instructions = UIManager.GetInstance().GetElement<GUILabel>("INSTRUCTIONS");
 
+                this.Position = CameraManager.GetInstance().Camera.Camera.ScreenToWorldPoint(ScreenManager.Center);
+                this.Position += new Vector3(0.0f, 0.0f, 55.0f);
+                this.transform.localScale = new Vector3(5.0f, 5.0f, 1.0f);
+
+                
                 // Update the renderer.
                 if (this.Status.IsVisible())
                 {
                     instructions.SetVisible(true);
-                    image.SetVisible(true);
+                    this.Renderer.Show();
                 }
                 else
                 {
                     instructions.SetVisible(false);
-                    image.SetVisible(false);
+                    this.Renderer.Hide();
                 }
 
                 if (!this.Status.IsActive())
                 {
                     instructions.Enable(false);
-                    image.Enable(false);
+                    this.Renderer.Deactivate();
                 }
 
                 // While alive, display the renderer.
                 if (this.Status.IsAlive())
                 {
                     instructions.Enable(true);
-                    image.Enable(true);
+                    this.Renderer.Activate();
                 }
                 else
                 {
                     instructions.Enable(false);
-                    image.Enable(false);
+                    this.Renderer.Deactivate();
                 }
 
                 if (instructions != null)
@@ -79,13 +83,7 @@ namespace Arcana.UI.Screens
                     instructions.UpdatePosition();
                     instructions.FontSize = (int)(50 * ScreenManager.SafetyScale);
                 }
-
-                if (image != null)
-                {
-                    image.SetPosition(ScreenManager.Center);
-                    image.SetSize(ScreenManager.WindowBounds.max);
-                }
-
+                
             }
         }
         
@@ -101,9 +99,9 @@ namespace Arcana.UI.Screens
             base.Initialize();
 
             this.DeactivateTimer();
-
-            GUIImage image = UIManager.GetInstance().CreateImage("BG_ARENA", "BG_ARENA", "Images/Backgrounds/bg_arena", ScreenManager.Center, ScreenManager.WindowBounds.max);
-            image.transform.SetAsFirstSibling();
+            
+            this.ScreenWidth = ScreenManager.WindowBounds.max.x;
+            this.ScreenHeight = ScreenManager.WindowBounds.max.y;
 
             // Create a label.
             GUILabel logo = UIManager.GetInstance().CreateLabel("INSTRUCTIONS", "Defeat your opponent!", new Vector2(ScreenManager.Center.x, 10.0f));
@@ -127,6 +125,19 @@ namespace Arcana.UI.Screens
             CameraManager.GetInstance().SetCameraTargetOne();
             CameraManager.GetInstance().Camera.CurrentConfiguration.InitialOffset = new Vector3(0, 0, -50.0f);
 
+        }
+
+        /// <summary>
+        /// Set up the resources for the renderer.
+        /// </summary>
+        public override void InitializeRendererResources()
+        {
+            this.DeactivateTimer(); // Get rid of the timer.
+
+            this.BackgroundID = "BG_ARENA";
+            this.BackgroundPath = "Images/Backgrounds/bg_arena";
+            this.MaterialID = "MAT_MENU";
+            this.MaterialPath = "Materials/Screens/mat_menu";
         }
 
         /// <summary>
@@ -160,7 +171,7 @@ namespace Arcana.UI.Screens
         public override void UpdatePosition()
         {
             // Maintain the screen as the center of the window.
-            this.Position = CameraManager.GetInstance().Camera.Camera.ScreenToWorldPoint(ScreenManager.Center);
+            // this.Position = CameraManager.GetInstance().Camera.Camera.ScreenToWorldPoint(ScreenManager.Center);
         }
 
         #endregion

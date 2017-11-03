@@ -125,7 +125,7 @@ namespace Arcana.UI.Screens
         /// </summary>
         public override void InitializeRendererResources()
         {
-            this.SetTimer(1.0f); // Give it a time limit of 10 seconds.
+            this.SetTimer(15.0f); // Give it a time limit of 10 seconds.
 
             this.BackgroundID = "BG_SPLASH";
             this.BackgroundPath = "Images/Backgrounds/bg_splash_logo";
