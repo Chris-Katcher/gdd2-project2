@@ -25,13 +25,13 @@ namespace Arcana.UI.Elements
         #region Static Members.
 
         /// <summary>
-        /// Create new GUILabel.
+        /// Create new GUILabel and initialize it.
         /// </summary>
         /// <returns>Returns a GUILabel component reference.</returns>
         public static GUILabel CreateLabel()
         {
             // Get reference to the prefab and instantiate it.
-            GameObject prefab = Instantiate(UIManager.GetInstance().Label) as GameObject;
+            GameObject prefab = UIManager.GetInstance().Label.Clone;
 
             // Make the label a child of the UIManager's canvas.
             prefab = Services.AddChild(UIManager.GetInstance().Canvas, prefab);
@@ -257,7 +257,6 @@ namespace Arcana.UI.Elements
         }
 
         #endregion
-
-
+        
     }
 }

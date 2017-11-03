@@ -101,40 +101,30 @@ namespace Arcana.UI
         #region Fields.
 
         /// <summary>
-        /// UI System ID.
+        /// Reference to the UISystem prefab.
         /// </summary>
-        private string m_uiSystemID = "PREFAB_UISYSTEM";
+        private UIPrefab<GameObject> m_uiSystem;
 
         /// <summary>
-        /// UI System Path
+        /// Reference to the GUILabel prefab.
         /// </summary>
-        private string m_uiSystemPath = "UISystem";
+        private UIPrefab<GUILabel> m_label;
 
         /// <summary>
-        /// Reference to the ui system prefab for building UI systems.
+        /// Reference to the GUIPanel prefab.
         /// </summary>
-        private GameObject m_uiSystem;
-
+        private UIPrefab<GUIPanel> m_panel;
+        
         /// <summary>
         /// Reference to the canvas object for building UI systems.
         /// </summary>
         private GameObject m_canvas;
 
         /// <summary>
-        /// Label resource ID.
+        /// Map of all the elements currently active.
         /// </summary>
-        private string m_labelID = "PREFAB_LABEL";
-
-        /// <summary>
-        /// Label resource Path.
-        /// </summary>
-        private string m_labelPath = "GUILabel";
-
-        /// <summary>
-        /// Reference to the label prefab for building the GUI labels.
-        /// </summary>
-        private GameObject m_label;
-
+        private Dictionary<string, IGUIElement> m_elements;
+                        
         #endregion
 
         #region Properties.
@@ -142,9 +132,25 @@ namespace Arcana.UI
         /// <summary>
         /// Reference to UISystem.
         /// </summary>
-        public GameObject UISystem
+        public UIPrefab<GameObject> UISystem
         {
-            get { return GetUISystem(); }
+            get { return this.m_uiSystem; }
+        }
+
+        /// <summary>
+        /// Reference to the label prefab.
+        /// </summary>
+        public UIPrefab<GUILabel> Label
+        {
+            get { return this.m_label; }
+        }
+
+        /// <summary>
+        /// Reference to the panel prefab.
+        /// </summary>
+        public UIPrefab<GUIPanel> Panel
+        {
+            get { return this.m_panel; }
         }
 
         /// <summary>
@@ -156,11 +162,18 @@ namespace Arcana.UI
         }
 
         /// <summary>
-        /// Reference to the label prefab.
+        /// Map of all elements.
         /// </summary>
-        public GameObject Label
+        public Dictionary<string, IGUIElement> Elements
         {
-            get { return GetLabel(); }
+            get
+            {
+                if (this.m_elements == null)
+                {
+                    this.m_elements = new Dictionary<string, IGUIElement>();
+                }
+                return this.m_elements;
+            }
         }
 
         #endregion
@@ -179,32 +192,45 @@ namespace Arcana.UI
 
             // Update the UI Manager.
 
+            GUILabel debugLabel = this.GetElement<GUILabel>("Test Label");
+            GUIPanel debugPanel = this.GetElement<GUIPanel>("Test Panel");
+
             // Debug mode.
             if (this.Debug)
             {
-                // We want to create a label.
-                GUILabel label = GetCanvas().gameObject.GetComponentInChildren<GUILabel>();
-
-                if (label == null)
+                if (debugLabel == null)
                 {
-                    label = GUILabel.CreateLabel("Test text", ScreenManager.Center + new Vector2(100, 100));
-                    label.FontSize = 120;
+                    debugLabel = CreateLabel("Test Label", "Test Text!", ScreenManager.Center + new Vector2(0, -50));
+                    debugLabel.FontSize = 80;
                 }
 
-                label.Enable(this.debug_active);
-                label.SetVisible(this.debug_visible);
+                if (debugPanel == null)
+                {
+                    debugPanel = CreatePanel("Test Panel", ScreenManager.Center, new Vector2(120, 120));
+                }
+            }
+            
+            if (debugLabel != null)
+            {
+                debugLabel.Enable(this.debug_active);
+                debugLabel.SetVisible(this.debug_visible);
+            }
+
+            if (debugPanel != null)
+            {
+                debugPanel.Enable(this.debug_active);
+                debugPanel.SetVisible(this.debug_visible);
+            }
+
+            if (this.debug_pause)
+            {
+                debugLabel.Message = "This is paused.";
             }
             else
             {
-                // We want to create a label.
-                GUILabel label = GetCanvas().gameObject.GetComponentInChildren<GUILabel>();
-
-                if (label != null)
-                {
-                    label.Enable(this.debug_active);
-                    label.SetVisible(this.debug_visible);
-                }
+                debugLabel.Message = "This is not paused.";
             }
+
         }
 
         #endregion
@@ -240,9 +266,150 @@ namespace Arcana.UI
         /// </summary>
         private void InitializeResources()
         {
-            // Add resources.
-            ResourceManager.GetInstance().AddResource(this.m_uiSystemID, this.m_uiSystemPath, ResourceType.Prefab);
-            ResourceManager.GetInstance().AddResource(this.m_labelID, this.m_labelPath, ResourceType.Prefab);
+            // Creates and initializes the prefabs using the struct.
+            this.m_uiSystem = new UIPrefab<GameObject>("PREFAB_UISYSTEM", "UISystem");
+            this.m_label = new UIPrefab<GUILabel>("PREFAB_LABEL", "GUILabel");
+            this.m_panel = new UIPrefab<GUIPanel>("PREFAB_PANEL", "GUIPanel");
+        }
+
+        #endregion
+
+        #region Mutator Methods.
+
+        /// <summary>
+        /// Format a key from the input.
+        /// </summary>
+        /// <param name="_input">Input string to convert.</param>
+        /// <returns>Returns formatted string.</returns>
+        public string MakeKey(string _input)
+        {
+            return _input.Trim().ToUpper();
+        }
+
+        /// <summary>
+        /// Add the element to the map.
+        /// </summary>
+        /// <typeparam name="T">Type of element to use.</typeparam>
+        /// <param name="key">Key of the element.</param>
+        /// <param name="_element">Element itself.</param>
+        public T AddElement<T>(string key, T _element) where T : Arcana.UI.Elements.GUIElement
+        {
+            if (!HasElement(MakeKey(key)))
+            {
+                this.Elements.Add(key, _element);
+            }
+
+            return this.Elements[key] as T;
+        }
+
+        /// <summary>
+        /// Create a label and return it.
+        /// </summary>
+        /// <param name="_message">Message to give label.</param>
+        /// <param name="_position">Position of the label.</param>
+        /// <returns>Returns new label object.</returns>
+        public GUILabel CreateLabel(string _message = "", Vector2? _position = null)
+        {
+            // Create the label.
+            GUILabel label = GUILabel.CreateLabel(_message, _position);
+
+            // Set up default properties.
+            label.FontSize = 120;
+
+            // Return the label.
+            return label;
+        }
+
+        /// <summary>
+        /// Create the panel and return a reference to it.
+        /// </summary>
+        /// <param name="_position">Position of the element.</param>
+        /// <param name="_dimensions">Dimensions of the panel.</param>
+        /// <param name="_rotation">Panel rotation.</param>
+        /// <returns>Returns a GUIPanel.</returns>
+        public GUIPanel CreatePanel(Vector2? _position = null, Vector2? _dimensions = null, Vector3? _rotation = null)
+        {
+            // Create the panel.
+            GUIPanel panel = GUIPanel.CreatePanel();
+
+            // Set up properties.
+            if (_position.HasValue)
+            {
+                panel.SetPosition(_position.Value);
+            }
+            else
+            {
+                // Defaults.
+                panel.SetPosition(ScreenManager.Center);
+            }
+
+            if (_dimensions.HasValue)
+            {
+                panel.Width = _dimensions.Value.x;
+                panel.Height = _dimensions.Value.y;
+            }
+            else
+            {
+                // Defaults.
+                panel.Width = 10.0f;
+                panel.Height = 10.0f;
+            }
+
+            if (_rotation.HasValue)
+            {
+                panel.Rotation = _rotation.Value;
+            }
+            else
+            {
+                // Defaults.
+                panel.Rotation = Vector3.zero;
+            }
+
+            // Return the panel.
+            return panel;
+        }
+
+        /// <summary>
+        /// Add new label to the map, and return a reference to it.
+        /// </summary>
+        /// <param name="_key">Key associated with the new label.</param>
+        /// <param name="_message">Message to give label.</param>
+        /// <param name="_position">Position of the label.</param>
+        /// <returns>Returns a GUILabel.</returns>
+        public GUILabel CreateLabel(string _key, string _message = "", Vector2? _position = null)
+        {
+            // Check if element exists.
+            string key = MakeKey(_key);
+            if (HasElement(key))
+            {
+                // Return existing reference.
+                return this.GetElement<GUILabel>(key);
+            }
+
+            // If label doesn't exist, create a new label and add it.
+            return AddElement<GUILabel>(key, CreateLabel(_message, _position));
+        }
+
+        /// <summary>
+        /// Create a new panel and add it to the map.
+        /// </summary>
+        /// <param name="_key">Key associated with the new element.</param>
+        /// <param name="_position">Position of the element.</param>
+        /// <param name="_dimensions">Dimensions of the panel.</param>
+        /// <param name="_rotation">Rotation in Euler angle (degrees) for the panel.</param>
+        /// <returns>Returns a GUIPanel.</returns>
+        public GUIPanel CreatePanel(string _key, Vector2? _position = null, Vector2? _dimensions = null, Vector3? _rotation = null)
+        {
+            // Check if element exists.
+            string key = MakeKey(_key);
+            if (HasElement(key))
+            {
+                // Return existing reference.
+                return this.GetElement<GUIPanel>(key);
+            }
+
+            // If label doesn't exist, create a new label and add it.
+            return AddElement<GUIPanel>(key, CreatePanel(_position, _dimensions, _rotation));
         }
 
         #endregion
@@ -250,19 +417,29 @@ namespace Arcana.UI
         #region Accessor Methods.
 
         /// <summary>
-        /// Returns the UI system.
+        /// Determines if element is contained within the map.
         /// </summary>
-        /// <returns></returns>
-        public GameObject GetUISystem()
+        /// <param name="key">Key associated with the element.</param>
+        /// <returns>Returns true if key is found in map.</returns>
+        public bool HasElement(string key)
         {
-            if(this.m_uiSystem == null)
-            {
-                // Load the UISystem resource (and instantiate it).
-                this.m_uiSystem = GetPrefab(this.m_uiSystemID);
-            }
+            return (this.Elements.ContainsKey(MakeKey(key)));
+        }
 
-            // Returns reference to the UI System.
-            return this.m_uiSystem;
+        /// <summary>
+        /// Return reference to an element.
+        /// </summary>
+        /// <typeparam name="T">Type of GUIElement.</typeparam>
+        /// <param name="_key">Key to check for.</param>
+        /// <returns>Returns GUIElement descendant.</returns>
+        public T GetElement<T>(string _key) where T : Arcana.UI.Elements.GUIElement
+        {
+            string key = MakeKey(_key);
+            if (HasElement(key))
+            {
+                return this.Elements[key] as T;
+            }
+            return null;
         }
 
         /// <summary>
@@ -274,31 +451,15 @@ namespace Arcana.UI
             if (this.m_canvas == null)
             {
                 // Returns a reference to the game object with the Canvas.
-                this.m_canvas = this.GetUISystem().GetComponentInChildren<Canvas>().gameObject;
+                this.m_canvas = this.UISystem.Instance.GetComponentInChildren<Canvas>().gameObject;
             }
 
             // Returns reference to the canvas.
             return this.m_canvas;
         }
-
-        /// <summary>
-        /// Returns the GUILabel prefab reference (without instantiating it).
-        /// </summary>
-        /// <returns></returns>
-        public GameObject GetLabel()
-        {
-            if (this.m_label == null)
-            {
-                // Load the label resource (and instantiate it).
-                this.m_label = GetPrefab(this.m_labelID);
-            }
-
-            // Returns reference to the label prefab.
-            return this.m_label;
-        }
         
         /// <summary>
-        /// Returns object as a reference and instantiate it..
+        /// (Deprecated) Returns object as a reference and instantiate it..
         /// </summary>
         /// <param name="_resource">Resource to get reference to.</param>
         /// <returns>Returns GameObject reference.</returns>
@@ -307,7 +468,6 @@ namespace Arcana.UI
             return Instantiate(ResourceManager.GetInstance().GetResource(_resourceID).Load()) as GameObject;
         }
         
-
         #endregion
 
 
